@@ -1,0 +1,1 @@
+This project contains common source code between Desktop and Android version of Yapbam. 
