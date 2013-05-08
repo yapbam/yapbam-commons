@@ -11,6 +11,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import net.yapbam.data.event.*;
 import net.yapbam.date.helpers.DateStepper;
@@ -224,9 +225,10 @@ public class GlobalData extends DefaultListenable {
 	 * @param transactions The transactions to add
 	 */
 	public void add(Transaction[] transactions) {
+		Logger.getLogger("GlobalData").finest("start adding transactions to global data");
 		if (transactions.length==0) return;
 		// In order to optimize the number of events fired, we will group transactions by account before
-		// removing them from their accounts (so, we will generate a maximum of one event per account).
+		// adding them to their accounts (so, we will generate a maximum of one event per account).
 		// Initialize the lists of transactions per account.
 		List<Collection<Transaction>> accountTransactions = new ArrayList<Collection<Transaction>>(this.getAccountsNumber());
 		for (int i = 0; i < this.getAccountsNumber(); i++) accountTransactions.add(new ArrayList<Transaction>());
@@ -235,14 +237,18 @@ public class GlobalData extends DefaultListenable {
 			this.transactions.add(index, transaction);
 			accountTransactions.get(indexOf(transaction.getAccount())).add(transaction);
 		}
+		Logger.getLogger("GlobalData").finest("start adding transactions to accounts");
 		for (Collection<Transaction> collection : accountTransactions) { // For each account (there's one collection per account)
-			if (collection.size()>0) { // If this account has some transactions removed
+			if (collection.size()>0) { // If this account has some transactions added
 				Transaction[] addedAccountTransactions = collection.toArray(new Transaction[collection.size()]);
 				addedAccountTransactions[0].getAccount().add(addedAccountTransactions);
 			}
 		}
 		fireEvent(new TransactionsAddedEvent(this, transactions));
 		this.setChanged();
+		
+		Logger.getLogger("GlobalData").finest("Start looking for checkbooks updates");
+		
 		for (Transaction transaction : transactions) {
 			// Let's examine if this new transaction is a check and has a number behind next check available
 			// If so, detach the checks between current "next check" and this one (included).
@@ -265,6 +271,7 @@ public class GlobalData extends DefaultListenable {
 					}
 			}
 		}
+		Logger.getLogger("GlobalData").finest("End adding transactions");
 	}
 
 	/** Adds a transaction.
