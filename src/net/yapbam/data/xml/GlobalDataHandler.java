@@ -182,6 +182,11 @@ class GlobalDataHandler extends DefaultHandler {
 			throw new SAXException(PARSING_WAS_CANCELLED);
 		}
 		if (qName.equals(Serializer.GLOBAL_DATA_TAG)) {
+			//TODO
+			// WARNING: The following line takes a very long time.
+			// On some devices it could take half of the total parsing time.
+			// This is a problem because this extra time occurs at parsing end and is not reported to the ProgressReport
+			// So, on slow devices, the parsing seems to pause some seconds after the end of parsing :-(
 			this.data.add(this.transactions.toArray(new Transaction[this.transactions.size()]));
 		} else if (qName.equals(Serializer.ACCOUNT_TAG)) {
 			Account account = (Account) this.tempData.pop(); // remove the tag we added in the stack
