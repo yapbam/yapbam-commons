@@ -79,7 +79,7 @@ class GlobalDataHandler extends DefaultHandler {
 			// Verify that the version is ok
 			String dummy = attributes.getValue(Serializer.VERSION_ATTRIBUTE);
 			int version = dummy==null?0:Integer.parseInt(dummy);
-			if (version>Serializer.CURRENT_VERSION) throw new SaxUnsupportedFileVersion(locator, version);
+			if (version>Serializer.CURRENT_VERSION) throw new SaxUnsupportedFileVersionException(locator, version);
 			if (report!=null) {
 				String attr = attributes.getValue(Serializer.NB_TRANSACTIONS_ATTRIBUTE);
 				if (attr!=null) {

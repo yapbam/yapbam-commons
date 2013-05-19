@@ -91,7 +91,7 @@ public class SerializerTest {
 		testInvalidXMLFile(new String[]{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "<DATA/><DATA/>"}, UnsupportedFormatException.class); // More than one data tag
 		testInvalidXMLFile(new String[]{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "<DATA><ACCOUNT/></DATA>"}, UnsupportedFormatException.class); // Tag do not have mandatory field
 		testInvalidXMLFile(new String[]{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "<DATA><ACCOUNT id=\"toto\" initialBalance=\"0\" alertThresholdLess=\"Not a number\" alertThresholdMore=\"Not a number\"/></DATA>"}, UnsupportedFormatException.class); // Tag do not have mandatory field
-		testInvalidXMLFile(new String[]{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "<DATA version=\"12345487\"/>"}, UnsupportedFileVersion.class); // A not supported version of Yapbam format
+		testInvalidXMLFile(new String[]{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "<DATA version=\"12345487\"/>"}, UnsupportedFileVersionException.class); // A not supported version of Yapbam format
 	}
 	
 	private void testInvalidXMLFile(String[] content, Class<? extends UnsupportedFormatException> expectedException) {

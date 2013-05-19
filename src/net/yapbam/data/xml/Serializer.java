@@ -248,8 +248,8 @@ public class Serializer {
 			SAXParserFactory saxFactory = SAXParserFactory.newInstance();
 			saxFactory.setSchema(schema);
 			saxFactory.newSAXParser().parse(in, dh);
-		} catch (SaxUnsupportedFileVersion e) {
-			throw new UnsupportedFileVersion(e.getVersion());
+		} catch (SaxUnsupportedFileVersionException e) {
+			throw new UnsupportedFileVersionException(e.getVersion());
 		} catch (SAXParseException e) {
 			// The format is invalid
 			throw new UnsupportedFormatException(e);
