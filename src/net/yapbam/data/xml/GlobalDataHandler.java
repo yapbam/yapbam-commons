@@ -15,7 +15,9 @@ import net.yapbam.date.helpers.DeferredValueDateComputer;
 import net.yapbam.date.helpers.MonthDateStepper;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 class GlobalDataHandler extends DefaultHandler {
@@ -31,6 +33,19 @@ class GlobalDataHandler extends DefaultHandler {
 	private Collection<Transaction> transactions;
 	private HashMap<String,String> tagToCData;
 	private String currentTag;
+	private Locator locator;
+	
+	//this will be called when XML-parser starts reading
+	// XML-data; here we save reference to current position in XML:
+	@Override
+	public void setDocumentLocator(Locator locator) {
+  	this.locator = locator;
+	}
+  
+	@Override
+	public void error(SAXParseException e) throws SAXException {
+		throw e;
+	}
 
 	GlobalDataHandler(ProgressReport report) {
 		super();
@@ -61,6 +76,10 @@ class GlobalDataHandler extends DefaultHandler {
 				if (SLOW_READING) Thread.sleep(1000);
 			} catch (InterruptedException e) {
 			}
+			// Verify that the version is ok
+			String dummy = attributes.getValue(Serializer.VERSION_ATTRIBUTE);
+			int version = dummy==null?0:Integer.parseInt(dummy);
+			if (version>Serializer.CURRENT_VERSION) throw new SaxUnsupportedFileVersion(locator, version);
 			if (report!=null) {
 				String attr = attributes.getValue(Serializer.NB_TRANSACTIONS_ATTRIBUTE);
 				if (attr!=null) {
@@ -86,8 +105,16 @@ class GlobalDataHandler extends DefaultHandler {
 			if (lessAttribute==null) {
 				alertThreshold = AlertThreshold.DEFAULT;
 			} else {
-				alertThreshold = new AlertThreshold(Double.parseDouble(lessAttribute),
-						Double.parseDouble(attributes.getValue(Serializer.ALERT_THRESHOLD_MORE)));
+				try {
+					// WARNING: xml schema allows string attributes (instead of double), because INFINITY is a valid
+					// value and schema verification fails on such values in double attributes.
+					// So, we have to verify here that attribute really contains a double.
+					String value = attributes.getValue(Serializer.ALERT_THRESHOLD_MORE);
+					double max = value==null?Double.POSITIVE_INFINITY:Double.parseDouble(value);
+					alertThreshold = new AlertThreshold(Double.parseDouble(lessAttribute), max);
+				} catch (NumberFormatException e) {
+					throw new SAXParseException("Expecting double here", locator);
+				}
 			}
 			this.data.setAlertThreshold(account, alertThreshold);
 			this.tempData.push(account);

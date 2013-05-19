@@ -25,10 +25,14 @@ import net.yapbam.util.TextMatcher;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
 import javax.xml.transform.sax.*;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 /** The class implements xml yapbam data serialization and deserialization to (or from) an URL.
  * Currently supported URL type are :<UL>
@@ -60,6 +64,12 @@ public class Serializer {
 		}
 		PASSWORD_ENCODED_FILE_HEADER = bytes;
 	}
+
+	/** The current Yapbam file format definition version.
+	 * <br>This version should be increment each time a change is made to the input format definition. 
+	 */
+	static final int CURRENT_VERSION = 1;
+	static final String VERSION_ATTRIBUTE = "version"; //$NON-NLS-1$
 
 	static final String SUBCATEGORY_SEPARATOR_ATTRIBUTE = "subCategorySeparator"; //$NON-NLS-1$
 	static final String NB_TRANSACTIONS_ATTRIBUTE = "nbTransactions"; //$NON-NLS-1$
@@ -231,7 +241,24 @@ public class Serializer {
 	 */
 	public static GlobalData read(String password, InputStream in, ProgressReport report) throws IOException, AccessControlException {
 		in = getDecryptedStream(password, in);
-		GlobalData data = read(in, report);
+		GlobalDataHandler dh = new GlobalDataHandler(report);
+		try {
+			SchemaFactory schemaFactory = SchemaFactory .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			Schema schema = schemaFactory.newSchema(Serializer.class.getResource("yapbam.xsd"));
+			SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+			saxFactory.setSchema(schema);
+			saxFactory.newSAXParser().parse(in, dh);
+		} catch (SaxUnsupportedFileVersion e) {
+			throw new UnsupportedFileVersion(e.getVersion());
+		} catch (SAXParseException e) {
+			// The format is invalid
+			throw new UnsupportedFormatException(e);
+		} catch (ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		} catch (SAXException e) {
+			throw new RuntimeException(e);
+		}
+		GlobalData data = dh.getData();
 		data.setPassword(password);
 		return data;
 	}
@@ -298,19 +325,10 @@ public class Serializer {
 		}
 	}
 
-	private static GlobalData read(InputStream is, ProgressReport report) throws IOException {
-		try {
-			GlobalDataHandler dh = new GlobalDataHandler(report);
-			SAXParserFactory.newInstance().newSAXParser().parse(is, dh);
-			return dh.getData();
-		} catch (Exception e) {
-			throw new IOException(e);
-		}
-	}
-
 	void serialize (GlobalData data, ProgressReport report) throws IOException {
 		try {
 			atts.clear();
+			atts.addAttribute(EMPTY, EMPTY, VERSION_ATTRIBUTE, CDATA, Integer.toString(CURRENT_VERSION)); //$NON-NLS-1$
 			atts.addAttribute(EMPTY, EMPTY, "nbAccounts", CDATA, Integer.toString(data.getAccountsNumber())); //$NON-NLS-1$
 			atts.addAttribute(EMPTY, EMPTY, "nbCategories", CDATA, Integer.toString(data.getCategoriesNumber())); //$NON-NLS-1$
 			atts.addAttribute(EMPTY, EMPTY, SUBCATEGORY_SEPARATOR_ATTRIBUTE, CDATA, Character.toString(data.getSubCategorySeparator())); //$NON-NLS-1$
