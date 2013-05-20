@@ -165,6 +165,7 @@ public class Serializer {
 		serializer.closeDocument(data.getPassword());
 		if (out instanceof ZipOutputStream) {
 			((ZipOutputStream) out).closeEntry();
+			out.close();
 		}
 	}
 
