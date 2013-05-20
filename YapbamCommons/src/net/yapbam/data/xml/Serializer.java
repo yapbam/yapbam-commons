@@ -40,6 +40,10 @@ import javax.xml.validation.SchemaFactory;
  * </UL>
  */
 public class Serializer {
+	//TODO Not sure the xml schema validation allows to read all the previously saved file: Disable it by default
+	// This should be investigate by testing with real life data: A interesting way is to randomly test every
+	// Successfully read data and try it with validation. If it fails, silently post a message to a web server. 
+	private static final boolean SCHEMA_VALIDATION = Boolean.getBoolean("xml.schema.validation"); //$NON-NLS-1$
 	private static final boolean SLOW_WRITING = Boolean.getBoolean("slowDataWriting"); //$NON-NLS-1$
 
 	private static final byte[] PASSWORD_ENCODED_FILE_HEADER;
@@ -242,13 +246,23 @@ public class Serializer {
 	 */
 	public static GlobalData read(String password, InputStream in, ProgressReport report) throws IOException, AccessControlException {
 		in = getDecryptedStream(password, in);
-		GlobalDataHandler dh = new GlobalDataHandler(report);
+		GlobalDataHandler dh = new GlobalDataHandler(SCHEMA_VALIDATION, report);
 		try {
-			SchemaFactory schemaFactory = SchemaFactory .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-			Schema schema = schemaFactory.newSchema(Serializer.class.getResource("yapbam.xsd"));
 			SAXParserFactory saxFactory = SAXParserFactory.newInstance();
-			saxFactory.setSchema(schema);
-			saxFactory.newSAXParser().parse(in, dh);
+			if (SCHEMA_VALIDATION) {
+				SchemaFactory schemaFactory = SchemaFactory .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+				Schema schema = schemaFactory.newSchema(Serializer.class.getResource("yapbam.xsd"));
+				saxFactory.setSchema(schema);
+			}
+			try {
+				saxFactory.newSAXParser().parse(in, dh);
+			} catch (RuntimeException e) {
+				if (SCHEMA_VALIDATION) {
+					throw e;
+				} else {
+					throw new UnsupportedFormatException(e);
+				}
+			}
 		} catch (SaxUnsupportedFileVersionException e) {
 			throw new UnsupportedFileVersionException(e.getVersion());
 		} catch (SAXParseException e) {

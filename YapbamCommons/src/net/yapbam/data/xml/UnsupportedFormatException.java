@@ -17,4 +17,8 @@ public class UnsupportedFormatException extends IOException {
 	UnsupportedFormatException(SAXException e) {
 		super(e);
 	}
+
+	public UnsupportedFormatException(Throwable e) {
+		super(e);
+	}
 }
