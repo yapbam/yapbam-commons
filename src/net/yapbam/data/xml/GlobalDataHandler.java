@@ -34,6 +34,7 @@ class GlobalDataHandler extends DefaultHandler {
 	private HashMap<String,String> tagToCData;
 	private String currentTag;
 	private Locator locator;
+	private boolean schemaValidation;
 	
 	//this will be called when XML-parser starts reading
 	// XML-data; here we save reference to current position in XML:
@@ -47,8 +48,9 @@ class GlobalDataHandler extends DefaultHandler {
 		throw e;
 	}
 
-	GlobalDataHandler(ProgressReport report) {
+	GlobalDataHandler(boolean schemaValidation, ProgressReport report) {
 		super();
+		this.schemaValidation = schemaValidation;
 		this.report = report;
 		this.data = new GlobalData();
 		this.tempData = new Stack<Object>();
@@ -69,6 +71,13 @@ class GlobalDataHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if ((report!=null) && report.isCancelled()) {
 			throw new SAXException(PARSING_WAS_CANCELLED);
+		}
+		if (!this.schemaValidation) {
+			// A very basic alternative to schema validation. We just verify root tag is GLOBAL_DATA_TAG and is not duplicated
+			// If root tag is not GLOBAL_DATA_TAG, the file is not a Yapbam file
+			if ((currentTag==null) && !qName.equals(Serializer.GLOBAL_DATA_TAG)) throw new SAXParseException(Serializer.GLOBAL_DATA_TAG+" expected as root tag", locator);
+			// If there's more than one GLOBAL_DATA_TAG there's a problem 
+			if ((currentTag!=null) && qName.equals(Serializer.GLOBAL_DATA_TAG)) throw new SAXParseException(Serializer.GLOBAL_DATA_TAG+" expected as root tag", locator);
 		}
 		this.currentTag = qName;
 		if (qName.equals(Serializer.GLOBAL_DATA_TAG)) {
