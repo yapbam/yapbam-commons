@@ -10,12 +10,11 @@ import net.yapbam.data.AlertThreshold;
  * This class represents an alert.
  */
 public class Alert {
-	public static final int IS_LESS = 1;
-	public static final int IS_MORE = 2;
+	public enum Kind {IS_LESS, IS_MORE};
 
 	private Date date;
 	private Account account;
-	private int kind;
+	private Kind kind;
 	private double balance;
 	private double threshold;
 	
@@ -31,10 +30,10 @@ public class Alert {
 		this.balance = balance;
 		AlertThreshold t = this.account.getAlertThreshold();
 		if (t.getTrigger(balance)>0) {
-			this.kind = IS_MORE;
+			this.kind = Kind.IS_MORE;
 			this.threshold = t.getMoreThreshold();
 		} else {
-			this.kind = IS_LESS;
+			this.kind = Kind.IS_LESS;
 			this.threshold = t.getLessThreshold();
 		}
 	}
@@ -47,7 +46,7 @@ public class Alert {
 		return account;
 	}
 
-	public int getKind() {
+	public Kind getKind() {
 		return kind;
 	}
 
