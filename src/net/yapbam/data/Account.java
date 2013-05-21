@@ -2,6 +2,7 @@ package net.yapbam.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /** A bank account */
@@ -217,6 +218,18 @@ public class Account implements Serializable {
 		if (this.comment!=null) {
 			this.comment = this.comment.trim();
 			if (this.comment.length()==0) this.comment = null;
+		}
+	}
+
+	public Alert getFirstAlert(Date from, Date to) {
+		BalanceHistory balanceHistory = getBalanceData().getBalanceHistory();
+		long firstAlertDate = balanceHistory.getFirstAlertDate(from, to, getAlertThreshold());
+		if (firstAlertDate>=0) {
+			Date date = new Date();
+			if (firstAlertDate>0) date.setTime(firstAlertDate);
+			return new Alert(date, this, balanceHistory.getBalance(date));
+		} else {
+			return null;
 		}
 	}
 }

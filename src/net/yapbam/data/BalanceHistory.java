@@ -68,8 +68,9 @@ public class BalanceHistory implements Serializable {
 	 * @param from first date or null if the time interval starts at the beginning of times
 	 * @param to first date or null if the time interval ends at the end of times
 	 * @param alert the alert threshold
-	 * @return a long representing the first date under amount. A negative long if the balance is never under the amount between from and to,
-	 * the date.getTime() of the searched date in other cases. 0 represents the beginning of times.
+	 * @return a long representing the first date under amount.
+	 * <br>A negative long if the balance never triggers the alert between from and to,
+	 * the date.getTime() of the searched date in other cases.
 	 */
 	public long getFirstAlertDate(Date from, Date to, AlertThreshold alert) {
 		if (alert.isLifeless()) return -1;
