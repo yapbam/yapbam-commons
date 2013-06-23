@@ -36,6 +36,14 @@ public final class DateUtils {
 		day = day - 100*month;
 		return new GregorianCalendar(year, month-1, day).getTime();
 	}
+	
+	/** Gets the year corresponding to an integer that represents a date.
+	 * @param date A integer that represents a date (typically returned by dateToInteger).
+	 * @return The year. Please note that this is the usual year and not, as in Date.getYear(), the year minus 1900.
+	 */
+	public static int getYear(int date) {
+		return date/10000;
+	}
 
 	/** Converts a date into an integer.
 	 * @param date the date to be converted or null
