@@ -20,6 +20,7 @@ import net.yapbam.date.helpers.DeferredValueDateComputer;
 import net.yapbam.date.helpers.MonthDateStepper;
 import net.yapbam.util.ArrayUtils;
 import net.yapbam.util.Crypto;
+import net.yapbam.util.DateUtils;
 import net.yapbam.util.TextMatcher;
 
 import org.xml.sax.*;
@@ -642,13 +643,12 @@ public class Serializer {
 		return year + DATE_DELIM + month + DATE_DELIM + date.getDate();
 	}
 	
-	@SuppressWarnings("deprecation")
-	static Date toDate(String value) {
-		if (value==null) return null;
+	static int toDate(String value) {
+		if (value==null) return -1;
 		StringTokenizer tokens = new StringTokenizer(value,DATE_DELIM);
-		int year = Integer.parseInt(tokens.nextToken())-1900;
-		int month = Integer.parseInt(tokens.nextToken())-1;
+		int year = Integer.parseInt(tokens.nextToken());
+		int month = Integer.parseInt(tokens.nextToken());
 		int day = Integer.parseInt(tokens.nextToken());
-		return new Date(year, month, day);
+		return DateUtils.dateToInteger(year, month, day);
 	}
 }

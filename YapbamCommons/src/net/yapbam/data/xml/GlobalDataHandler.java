@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -13,6 +14,7 @@ import net.yapbam.date.helpers.DateStepper;
 import net.yapbam.date.helpers.DayDateStepper;
 import net.yapbam.date.helpers.DeferredValueDateComputer;
 import net.yapbam.date.helpers.MonthDateStepper;
+import net.yapbam.util.DateUtils;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -169,7 +171,7 @@ class GlobalDataHandler extends DefaultHandler {
 		} else if (qName.equals(Serializer.TRANSACTION_TAG)) {
 			//We can't directly push the attributes because SAX may reuse the same instance to store next element's attributes.
 			this.tempData.push(buildMap(attributes));
-			this.tempData.push(new ArrayList<SubTransaction>());
+			this.tempData.push(null); // This place in the stack will contains a list of subtransactions, if any exists, or null.
 		} else if (qName.equals(Serializer.SUBTRANSACTION_TAG)) {
 			double amount = Double.parseDouble(attributes.getValue(Serializer.AMOUNT_ATTRIBUTE));
 			String description = attributes.getValue(Serializer.DESCRIPTION_ATTRIBUTE);
@@ -177,7 +179,13 @@ class GlobalDataHandler extends DefaultHandler {
 			if (categoryId!=null) categoryId = categoryId.trim();
 			Category category = this.data.getCategory(categoryId);
 			SubTransaction sub = new SubTransaction(amount, description, category);
-			ArrayList<SubTransaction> lst = (ArrayList<SubTransaction>) this.tempData.peek();
+			List<SubTransaction> lst = (ArrayList<SubTransaction>) this.tempData.peek();
+			if (lst==null) {
+				// If no subtransactions were already found, create the subtransactions list
+				lst = new ArrayList<SubTransaction>();
+				this.tempData.pop();
+				this.tempData.push(lst);
+			}
 			lst.add(sub);
 		} else if (qName.equals(Serializer.PERIODICAL_TAG)) {
 			//We can't directly push the attributes because SAX may reuse the same instance to store next element's attributes.
@@ -192,12 +200,12 @@ class GlobalDataHandler extends DefaultHandler {
 				if (period<=0) throw new IllegalArgumentException();
 				int day = Integer.parseInt(attributes.getValue(Serializer.DAY_ATTRIBUTE));
 				String dummy =  attributes.getValue(Serializer.LAST_DATE_ATTRIBUTE);
-				Date lastDate = dummy==null?null:Serializer.toDate(dummy);
+				Date lastDate = dummy==null?null:DateUtils.integerToDate(Serializer.toDate(dummy));
 				stepper = new MonthDateStepper(period, day, lastDate);
 			} else if (kind.equals(Serializer.RELATIVE_DATE_STEPPER_KIND)) {
 				int period = Integer.parseInt(attributes.getValue(Serializer.PERIOD_ATTRIBUTE));
 				String dummy =  attributes.getValue(Serializer.LAST_DATE_ATTRIBUTE);
-				Date lastDate = dummy==null?null:Serializer.toDate(dummy);
+				Date lastDate = dummy==null?null:DateUtils.integerToDate(Serializer.toDate(dummy));
 				stepper = new DayDateStepper(period, lastDate);
 			} else {
 				throw new IllegalArgumentException("Unknown date stepper : "+kind); //$NON-NLS-1$
@@ -218,11 +226,10 @@ class GlobalDataHandler extends DefaultHandler {
 			throw new SAXException(PARSING_WAS_CANCELLED);
 		}
 		if (qName.equals(Serializer.GLOBAL_DATA_TAG)) {
-			//TODO
-			// WARNING: The following line takes a very long time.
-			// On some devices it could take half of the total parsing time.
-			// This is a problem because this extra time occurs at parsing end and is not reported to the ProgressReport
-			// So, on slow devices, the parsing seems to pause some seconds after the end of parsing :-(
+			// NOTE: The following line took a very long time before being greatly optimized.
+			// This was a problem because this extra time occurred at parsing end and was not reported to the ProgressReport
+			// So, on slow devices, the parsing seemed to pause some seconds after the end of parsing :-(
+			// Be aware that further modifications in the following method wause make the prblem to occur again.
 			this.data.add(this.transactions.toArray(new Transaction[this.transactions.size()]));
 		} else if (qName.equals(Serializer.ACCOUNT_TAG)) {
 			Account account = (Account) this.tempData.pop(); // remove the tag we added in the stack
@@ -252,12 +259,12 @@ class GlobalDataHandler extends DefaultHandler {
 		} else if (qName.equals(Serializer.EXPENSE_VDC_TAG)) {
 		} else if (qName.equals(Serializer.RECEIPT_VDC_TAG)) {
 		} else if (qName.equals(Serializer.TRANSACTION_TAG)) {
-			ArrayList<SubTransaction> lst = (ArrayList<SubTransaction>) this.tempData.pop();
+			List<SubTransaction> lst = (ArrayList<SubTransaction>) this.tempData.pop();
 			Map<String, String> attributes = (Map<String, String>) this.tempData.pop();
 			PartialTransaction p = new PartialTransaction(this.data, attributes);		
-			Date date = Serializer.toDate(attributes.get(Serializer.DATE_ATTRIBUTE));
+			int date = Serializer.toDate(attributes.get(Serializer.DATE_ATTRIBUTE));
 			String number = attributes.get(Serializer.NUMBER_ATTRIBUTE);
-			Date valueDate = Serializer.toDate(attributes.get(Serializer.VALUE_DATE_ATTRIBUTE));
+			int valueDate = Serializer.toDate(attributes.get(Serializer.VALUE_DATE_ATTRIBUTE));
 			String statement = attributes.get(Serializer.STATEMENT_ATTRIBUTE);
 			this.transactions.add(new Transaction(date, number, p.description, p.comment, p.amount, p.account, p.mode, p.category, valueDate, statement, lst));
 			if (report!=null) {
@@ -277,7 +284,7 @@ class GlobalDataHandler extends DefaultHandler {
 			Map<String, String> attributes = (Map<String, String>) this.tempData.pop();
 			PartialTransaction p = new PartialTransaction(this.data, attributes);
 			String attribute = attributes.get(Serializer.NEXT_DATE_ATTRIBUTE);
-			Date nextDate = attribute==null?null:Serializer.toDate(attribute);
+			Date nextDate = attribute==null?null:DateUtils.integerToDate(Serializer.toDate(attribute));
 			boolean enabled = Boolean.parseBoolean(attributes.get(Serializer.ENABLED_ATTRIBUTE));
 			// In previous Yapbam versions, next date could be after end date. Now, it would launch an IllegalArgumentException
 			if (nextDate!=null) {

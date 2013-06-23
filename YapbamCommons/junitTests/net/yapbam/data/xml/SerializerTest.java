@@ -11,12 +11,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AccessControlException;
+import java.util.Collections;
 import java.util.Currency;
+import java.util.Date;
 import java.util.Locale;
 
 import net.yapbam.data.Account;
 import net.yapbam.data.Category;
 import net.yapbam.data.GlobalData;
+import net.yapbam.data.Mode;
+import net.yapbam.data.Transaction;
 
 import org.junit.Test;
 
@@ -31,6 +35,10 @@ public class SerializerTest {
 		account = new Account("titi", -10.0);
 		data.add(account);
 		data.setComment(account, "Un commentaire avec plusieurs lignes\nEt des caractères accentués.");
+		Date today = new Date();
+		Transaction transaction = new Transaction(today, null, "description", "commentaire", -5.32, account, Mode.UNDEFINED, Category.UNDEFINED,
+				today, null, Collections.EMPTY_LIST);
+		data.add(transaction);
 		
 		testInstance(data);
 		
@@ -63,7 +71,14 @@ public class SerializerTest {
 		assertEquals(data.getPassword(), other.getPassword());
 		
 		assertEquals(data.getTransactionsNumber(), other.getTransactionsNumber());
-		//TODO Test if transactions are the same
+		for (int i = 0; i < data.getTransactionsNumber(); i++) {
+			//TODO Test if other transaction's fields are the same
+			Transaction newOne = other.getTransaction(i);
+			Transaction original = data.getTransaction(i);
+			assertEquals(original.getDateAsInteger(), newOne.getDateAsInteger());
+			assertEquals(original.getValueDateAsInteger(), newOne.getValueDateAsInteger());
+			assertEquals(original.getSubTransactionSize(), newOne.getSubTransactionSize());
+		}
 		assertEquals(data.getPeriodicalTransactionsNumber(), other.getPeriodicalTransactionsNumber());
 		//TODO Test if periodical transactions are the same
 	}
