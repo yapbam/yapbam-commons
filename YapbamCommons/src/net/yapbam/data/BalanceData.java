@@ -51,7 +51,7 @@ public class BalanceData extends DefaultListenable {
 				if (!add) amount = -amount;
 				this.finalBalance += amount;
 				if (transaction.isChecked()) this.checkedBalance += amount;
-				if (DateUtils.dateToInteger(transaction.getValueDate())<=this.currentBalanceDate) this.currentBalance += amount;
+				if (transaction.getValueDateAsInteger()<=this.currentBalanceDate) this.currentBalance += amount;
 			}
 		}
 		this.fireEvent(new EverythingChangedEvent(this));
