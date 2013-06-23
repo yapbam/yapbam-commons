@@ -8,6 +8,7 @@ import java.util.Set;
 
 import net.yapbam.data.*;
 import net.yapbam.util.ArrayUtils;
+import net.yapbam.util.DateUtils;
 import net.yapbam.util.TextMatcher;
 import net.yapbam.util.TextMatcher.Kind;
 
@@ -34,11 +35,11 @@ public class FilterHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (qName.equals(Serializer.FILTER_TAG)) {
 			filter = new Filter();
-			Date dateFrom = Serializer.toDate(attributes.getValue(Serializer.FILTER_DATE_FROM_ATTRIBUTE));
-			Date dateTo = Serializer.toDate(attributes.getValue(Serializer.FILTER_DATE_TO_ATTRIBUTE));
+			Date dateFrom = DateUtils.integerToDate(Serializer.toDate(attributes.getValue(Serializer.FILTER_DATE_FROM_ATTRIBUTE)));
+			Date dateTo = DateUtils.integerToDate(Serializer.toDate(attributes.getValue(Serializer.FILTER_DATE_TO_ATTRIBUTE)));
 			filter.setDateFilter(dateFrom, dateTo);
-			Date valueDateFrom = Serializer.toDate(attributes.getValue(Serializer.FILTER_VALUE_DATE_FROM_ATTRIBUTE));
-			Date valueDateTo = Serializer.toDate(attributes.getValue(Serializer.FILTER_VALUE_DATE_TO_ATTRIBUTE));
+			Date valueDateFrom = DateUtils.integerToDate(Serializer.toDate(attributes.getValue(Serializer.FILTER_VALUE_DATE_FROM_ATTRIBUTE)));
+			Date valueDateTo = DateUtils.integerToDate(Serializer.toDate(attributes.getValue(Serializer.FILTER_VALUE_DATE_TO_ATTRIBUTE)));
 			filter.setValueDateFilter(valueDateFrom, valueDateTo);
 			String amountFrom = attributes.getValue(Serializer.FILTER_AMOUNT_FROM_ATTRIBUTE);
 			String amountTo = attributes.getValue(Serializer.FILTER_AMOUNT_TO_ATTRIBUTE);

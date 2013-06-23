@@ -1,6 +1,7 @@
 package net.yapbam.data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /** An abstract transaction.
@@ -31,11 +32,11 @@ public abstract class AbstractTransaction implements Cloneable {
 	 * @param account The account
 	 * @param mode the payment mode
 	 * @param category the category
-	 * @param subTransactions a subtransaction list
+	 * @param subTransactions a subtransactions list or null
 	 */
 	public AbstractTransaction(String description, String comment, double amount, Account account, Mode mode, Category category, List<SubTransaction> subTransactions) {
 		super();
-		if ((mode==null) || (category==null) || (description==null) || (subTransactions==null)) throw new IllegalArgumentException();
+		if ((mode==null) || (category==null) || (description==null)) throw new IllegalArgumentException();
 		this.description = getCachedDescription(description);
 		if ((comment!=null) && (comment.isEmpty())) comment = null;
 		this.comment = comment;
@@ -43,7 +44,7 @@ public abstract class AbstractTransaction implements Cloneable {
 		this.account = account;
 		this.mode = mode;
 		this.category = category;
-		this.subTransactions = subTransactions;
+		this.subTransactions = subTransactions!=null?subTransactions:Collections.EMPTY_LIST;
 		setId(this);
 	}
 	

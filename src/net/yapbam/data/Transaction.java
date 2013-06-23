@@ -17,6 +17,31 @@ public class Transaction extends AbstractTransaction implements Serializable {
 	private String statementId;
 	
 	/** Constructor.
+	 * @param date The transaction's date in its integer representation.
+	 * @param number The transaction's number (null if the description has not any number)
+	 * @param description The transaction's description
+	 * @param comment The transaction's comment (null if the transaction has no comment)
+	 * @param amount The transaction's amount (negative for an expense)
+	 * @param account  The transaction's account
+	 * @param mode The transaction's payment mode 
+	 * @param category The transaction's category
+	 * @param valueDate The transaction's value date in its integer representation.
+	 * @param statementId The transaction's the statement id (null if the transaction doesn't blong to a statement)
+	 * @param subTransactions the subtransactions of the transaction (an empty List or null if the transaction has no subtransaction)
+	 * @see DateUtils#dateToInteger(Date)
+	 */
+	public Transaction(int date, String number, String description, String comment, double amount,
+			Account account, Mode mode, Category category, int valueDate, String statementId, List<SubTransaction> subTransactions) {
+		super(description, comment, amount, account, mode, category, subTransactions);
+		this.date = date;
+		this.number = number;
+		if ((number!=null) && number.trim().isEmpty()) this.number = null;
+		this.valueDate = valueDate;
+		this.statementId = statementId;
+		if ((statementId!=null) && statementId.trim().isEmpty()) this.statementId=null;
+	}
+
+	/** Constructor.
 	 * @param date The transaction's date
 	 * @param number The transaction's number (null if the description has not any number)
 	 * @param description The transaction's description
@@ -27,18 +52,12 @@ public class Transaction extends AbstractTransaction implements Serializable {
 	 * @param category The transaction's category
 	 * @param valueDate The transaction's value date
 	 * @param statementId The transaction's the statement id (null if the transaction doesn't blong to a statement)
-	 * @param subTransactions the subtransactions of the transaction (an empty List if the transaction has no subtransaction)
+	 * @param subTransactions the subtransactions of the transaction (an empty List or null if the transaction has no subtransaction)
 	 */
 	public Transaction(Date date, String number, String description, String comment, double amount,
-			Account account, Mode mode, Category category, Date valueDate,
-			String statementId, List<SubTransaction> subTransactions) {
-		super(description, comment, amount, account, mode, category, subTransactions);
-		this.date = DateUtils.dateToInteger(date);
-		this.number = number;
-		if ((number!=null) && number.trim().isEmpty()) this.number = null;
-		this.valueDate = DateUtils.dateToInteger(valueDate);
-		this.statementId = statementId;
-		if ((statementId!=null) && statementId.trim().isEmpty()) this.statementId=null;
+			Account account, Mode mode, Category category, Date valueDate, String statementId, List<SubTransaction> subTransactions) {
+		this(DateUtils.dateToInteger(date), number, description, comment, amount, account, mode, category, DateUtils.dateToInteger(valueDate),
+				statementId, subTransactions);
 	}
 
 	public String getNumber() {

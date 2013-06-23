@@ -45,7 +45,7 @@ public final class DateUtils {
 		return date/10000;
 	}
 
-	/** Converts a date into an integer.
+	/** Converts a date to an integer.
 	 * @param date the date to be converted or null
 	 * @return the date in its integer format (null is coded by a negative number).
 	 * It is guaranteed that if two dates are separated by x days the difference between their integer representation is x.
@@ -57,6 +57,16 @@ public final class DateUtils {
 		return (date.getYear()+1900)*10000+(date.getMonth()+1)*100+date.getDate();
 	}
 	
+	/** Converts a date to an integer.
+	 * @param year the year.
+	 * @param month the month between 1 and 12
+	 * @param day the day between 1 and 31
+	 * @return the date in its integer format.
+	 */
+	public static int dateToInteger(int year, int month, int day) {
+		return year*10000+month*100+day;
+	}
+
 	/** Gets the date with the hour, minutes and seconds fields set to zero.
 	 * @param date a Date
 	 * @return a new Date
