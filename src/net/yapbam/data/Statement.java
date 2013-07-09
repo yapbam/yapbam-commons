@@ -1,7 +1,12 @@
 package net.yapbam.data;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+
 import net.yapbam.data.Transaction;
 import net.yapbam.util.DateUtils;
+import net.yapbam.util.NullUtils;
 
 /** A statement.
  */
@@ -13,10 +18,47 @@ public class Statement  {
 	private long dateSum;
 	private double startBalance;
 	
+	public static Statement[] getStatements(Account account) {
+		HashMap<String, Statement> map = new HashMap<String, Statement>();
+		BalanceHistory balanceHistory = account.getBalanceData().getBalanceHistory();
+		for (int i = 0; i < balanceHistory.getTransactionsNumber(); i++) {
+			Transaction transaction = balanceHistory.getTransaction(i);
+			if (transaction.getAccount().getName().equals(account.getName())) {
+				String statementId = transaction.getStatement();
+				Statement statement = map.get(statementId);
+				if (statement==null) {
+					statement = new Statement(statementId);
+					map.put(statementId, statement);
+				}
+				statement.add(transaction);
+			}
+		}
+		Statement[] statements = map.values().toArray(new Statement[map.size()]);
+		Arrays.sort(statements, new Comparator<Statement>() {
+			@Override
+			public int compare(Statement o2, Statement o1) {
+				if ((o2.getId()==null) || (o1.getId()==null)) return NullUtils.compareTo(o2.getId(),o1.getId(),false);
+				int result = o2.getMediumDate()-o1.getMediumDate();
+				if (result==0) result = NullUtils.compareTo(o2.getId(),o1.getId(),false);
+				return result;
+			}
+		});
+		if (statements.length>0) statements[0].setStartBalance(account.getInitialBalance());
+		for (int i = 1; i < statements.length; i++) {
+			statements[i].setStartBalance(statements[i-1].getEndBalance());
+		}
+		return statements;
+	}
+	
+	public Statement(String id, double startBalance) {
+		this(id);
+		setStartBalance(startBalance);
+	}
+	
 	/** Constructor.
 	 * @param id the statement id of the statement.
 	 */
-	public Statement(String id) {
+	private Statement(String id) {
 		super();
 		this.id = id;
 		this.positiveBalance = 0;
@@ -25,7 +67,7 @@ public class Statement  {
 		this.dateSum = 0;
 	}
 
-	public void add(Transaction transaction) {
+	private void add(Transaction transaction) {
 		this.nbTransactions++;
 		double amount = transaction.getAmount();
 		if (amount>0) this.positiveBalance += amount;
@@ -49,7 +91,6 @@ public class Statement  {
 		return this.positiveBalance - this.negativeBalance;
 	}
 
-	
 	/** Gets the number of transactions in the statement.
 	 * @return an integer
 	 */
@@ -62,7 +103,7 @@ public class Statement  {
 		return this.getId();
 	}
 
-	public void setStartBalance(double startBalance) {
+	private void setStartBalance(double startBalance) {
 		this.startBalance = startBalance;
 	}
 
