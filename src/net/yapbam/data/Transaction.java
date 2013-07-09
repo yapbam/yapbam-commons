@@ -77,7 +77,7 @@ public class Transaction extends AbstractTransaction implements Serializable {
 	}
 
 	public int getValueDateAsInteger() {
-		return this.date;
+		return this.valueDate;
 	}
 
 	public String getStatement() {
