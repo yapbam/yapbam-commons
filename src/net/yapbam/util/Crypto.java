@@ -117,26 +117,16 @@ public final class Crypto {
 	 * @return a new InputStream, data read from this stream is decrypted.
 	 * @see #getPasswordProtectedOutputStream(String, OutputStream)
 	 * @throws IOException
-	 * @throws AccessControlException
+	 * @throws GeneralSecurityException
 	 */
-	public static InputStream getPasswordProtectedInputStream (String password, InputStream stream) throws IOException, AccessControlException, NoSuchAlgorithmException {
+	public static InputStream getPasswordProtectedInputStream (String password, InputStream stream) throws IOException, AccessControlException, GeneralSecurityException {
 		verifyPassword(stream, password);
-		try {
-			SecretKey pbeKey = new BinaryPBEKey(password.getBytes("UTF-8"));
-			Cipher cipher = Cipher.getInstance("PBEWithMD5AndDES");
-			cipher.init(Cipher.DECRYPT_MODE, pbeKey, pbeParamSpec);
-			stream = new CipherInputStream(stream, cipher);
-			stream = new InflaterInputStream(stream);
-			return stream;
-		} catch (InvalidKeySpecException e) {
-			throw new RuntimeException(e);
-		} catch (NoSuchPaddingException e) {
-			throw new RuntimeException(e);
-		} catch (InvalidKeyException e) {
-			throw new RuntimeException(e);
-		} catch (InvalidAlgorithmParameterException e) {
-			throw new RuntimeException(e);
-		}
+		SecretKey pbeKey = new BinaryPBEKey(password.getBytes("UTF-8"));
+		Cipher cipher = Cipher.getInstance("PBEWithMD5AndDES");
+		cipher.init(Cipher.DECRYPT_MODE, pbeKey, pbeParamSpec);
+		stream = new CipherInputStream(stream, cipher);
+		stream = new InflaterInputStream(stream);
+		return stream;
 	}
 	
 	private static void verifyPassword(InputStream stream, String password) throws IOException, AccessControlException {

@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.AccessControlException;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -280,7 +280,7 @@ public class Serializer {
 			GlobalData data = dh.getData();
 			data.setPassword(password);
 			return data;
-		} catch (NoSuchAlgorithmException e) {
+		} catch (GeneralSecurityException e) {
 			throw new UnsupportedFormatException(e);
 		}
 	}
@@ -291,9 +291,9 @@ public class Serializer {
 	 * @return A new stream that automatically decodes the original stream.
 	 * @throws IOException
 	 * @throws AccessControlException if the password not matches with the stream
-	 * @throws NoSuchAlgorithmException if the encryption algorithm is not supported
+	 * @throws GeneralSecurityException if the encryption algorithm is not supported
 	 */
-	public static InputStream getDecryptedStream(String password, InputStream stream) throws IOException, AccessControlException, NoSuchAlgorithmException {
+	public static InputStream getDecryptedStream(String password, InputStream stream) throws IOException, AccessControlException, GeneralSecurityException {
 		// Verify if the stream is encrypted or not
 		if (!stream.markSupported()) {
 			// Ensure that we will be able to reset the stream after verifying that the stream is not encrypted
