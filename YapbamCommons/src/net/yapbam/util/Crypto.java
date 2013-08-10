@@ -119,7 +119,7 @@ public final class Crypto {
 	 * @throws IOException
 	 * @throws AccessControlException
 	 */
-	public static InputStream getPasswordProtectedInputStream (String password, InputStream stream) throws IOException, AccessControlException {
+	public static InputStream getPasswordProtectedInputStream (String password, InputStream stream) throws IOException, AccessControlException, NoSuchAlgorithmException {
 		verifyPassword(stream, password);
 		try {
 			SecretKey pbeKey = new BinaryPBEKey(password.getBytes("UTF-8"));
@@ -128,8 +128,6 @@ public final class Crypto {
 			stream = new CipherInputStream(stream, cipher);
 			stream = new InflaterInputStream(stream);
 			return stream;
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
 		} catch (InvalidKeySpecException e) {
 			throw new RuntimeException(e);
 		} catch (NoSuchPaddingException e) {

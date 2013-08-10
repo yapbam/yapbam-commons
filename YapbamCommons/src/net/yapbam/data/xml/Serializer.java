@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.AccessControlException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -244,39 +245,44 @@ public class Serializer {
 	 * @return The data red.
 	 * @throws IOException If something goes wrong while reading
 	 * @throws AccessControlException If the password is wrong
+	 * @throws UnsupportedFormatException If the format of data in the input stream is not supported
 	 */
 	public static GlobalData read(String password, InputStream in, ProgressReport report) throws IOException, AccessControlException {
-		in = getDecryptedStream(password, in);
-		GlobalDataHandler dh = new GlobalDataHandler(SCHEMA_VALIDATION, report);
 		try {
-			SAXParserFactory saxFactory = SAXParserFactory.newInstance();
-			if (SCHEMA_VALIDATION) {
-				SchemaFactory schemaFactory = SchemaFactory .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-				Schema schema = schemaFactory.newSchema(Serializer.class.getResource("yapbam.xsd"));
-				saxFactory.setSchema(schema);
-			}
+			in = getDecryptedStream(password, in);
+			GlobalDataHandler dh = new GlobalDataHandler(SCHEMA_VALIDATION, report);
 			try {
-				saxFactory.newSAXParser().parse(in, dh);
-			} catch (RuntimeException e) {
+				SAXParserFactory saxFactory = SAXParserFactory.newInstance();
 				if (SCHEMA_VALIDATION) {
-					throw e;
-				} else {
-					throw new UnsupportedFormatException(e);
+					SchemaFactory schemaFactory = SchemaFactory .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+					Schema schema = schemaFactory.newSchema(Serializer.class.getResource("yapbam.xsd"));
+					saxFactory.setSchema(schema);
 				}
+				try {
+					saxFactory.newSAXParser().parse(in, dh);
+				} catch (RuntimeException e) {
+					if (SCHEMA_VALIDATION) {
+						throw e;
+					} else {
+						throw new UnsupportedFormatException(e);
+					}
+				}
+			} catch (SaxUnsupportedFileVersionException e) {
+				throw new UnsupportedFileVersionException(e.getVersion());
+			} catch (SAXParseException e) {
+				// The format is invalid
+				throw new UnsupportedFormatException(e);
+			} catch (ParserConfigurationException e) {
+				throw new RuntimeException(e);
+			} catch (SAXException e) {
+				throw new RuntimeException(e);
 			}
-		} catch (SaxUnsupportedFileVersionException e) {
-			throw new UnsupportedFileVersionException(e.getVersion());
-		} catch (SAXParseException e) {
-			// The format is invalid
+			GlobalData data = dh.getData();
+			data.setPassword(password);
+			return data;
+		} catch (NoSuchAlgorithmException e) {
 			throw new UnsupportedFormatException(e);
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		} catch (SAXException e) {
-			throw new RuntimeException(e);
 		}
-		GlobalData data = dh.getData();
-		data.setPassword(password);
-		return data;
 	}
 
 	/** Gets a stream to read in an encrypted stream.
@@ -285,8 +291,9 @@ public class Serializer {
 	 * @return A new stream that automatically decodes the original stream.
 	 * @throws IOException
 	 * @throws AccessControlException if the password not matches with the stream
+	 * @throws NoSuchAlgorithmException if the encryption algorithm is not supported
 	 */
-	public static InputStream getDecryptedStream(String password, InputStream stream) throws IOException, AccessControlException {
+	public static InputStream getDecryptedStream(String password, InputStream stream) throws IOException, AccessControlException, NoSuchAlgorithmException {
 		// Verify if the stream is encrypted or not
 		if (!stream.markSupported()) {
 			// Ensure that we will be able to reset the stream after verifying that the stream is not encrypted
