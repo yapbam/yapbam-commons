@@ -26,6 +26,9 @@ import javax.crypto.spec.SecretKeySpec;
  * <BR>License : GPL v3
  */
 public final class Crypto {
+//	private static final String ALGORITHM = "PBEWithMD5AndDES";
+	private static final String ALGORITHM = "PBEWITHMD5ANDDES";
+
 	// An interesting article to implement file encryption : http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html
 	private Crypto(){}
 	
@@ -51,7 +54,7 @@ public final class Crypto {
 
 	/** Encrypt a text.
 	 * <BR>It uses a symmetric AES algorithm.
-	 * @param key The secret key used for the encryption (oups secret key has to have some properties (128 bits long ?) ... but I don't remember)
+	 * @param key The secret key used for the encryption (secret key is the hexadecimal representation of a (128 bits long key = 8 bytes => 16 characters between 0 and F))
 	 * @param message The message we want to encrypt
 	 * @return the encrypted message
 	 * @see #decrypt(String, String)
@@ -83,7 +86,7 @@ public final class Crypto {
 		stream.write(getDigest(password));
 		try {
 			SecretKey pbeKey = new BinaryPBEKey(password.getBytes("UTF-8"));
-			Cipher cipher = Cipher.getInstance("PBEWithMD5AndDES");
+			Cipher cipher = Cipher.getInstance(ALGORITHM);
 			cipher.init(Cipher.ENCRYPT_MODE, pbeKey, pbeParamSpec);
 			CipherOutputStream cstream = new CipherOutputStream(stream, cipher);
 			stream = new DeflaterOutputStream(cstream) {
@@ -122,7 +125,7 @@ public final class Crypto {
 	public static InputStream getPasswordProtectedInputStream (String password, InputStream stream) throws IOException, AccessControlException, GeneralSecurityException {
 		verifyPassword(stream, password);
 		SecretKey pbeKey = new BinaryPBEKey(password.getBytes("UTF-8"));
-		Cipher cipher = Cipher.getInstance("PBEWithMD5AndDES");
+		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(Cipher.DECRYPT_MODE, pbeKey, pbeParamSpec);
 		stream = new CipherInputStream(stream, cipher);
 		stream = new InflaterInputStream(stream);
