@@ -18,6 +18,8 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -26,8 +28,7 @@ import javax.crypto.spec.SecretKeySpec;
  * <BR>License : GPL v3
  */
 public final class Crypto {
-//	private static final String ALGORITHM = "PBEWithMD5AndDES";
-	private static final String ALGORITHM = "PBEWITHMD5ANDDES";
+	static final String ALGORITHM = "PBEWITHMD5ANDDES";
 
 	// An interesting article to implement file encryption : http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html
 	private Crypto(){}
@@ -124,7 +125,10 @@ public final class Crypto {
 	 */
 	public static InputStream getPasswordProtectedInputStream (String password, InputStream stream) throws IOException, AccessControlException, GeneralSecurityException {
 		verifyPassword(stream, password);
+		// This doesn't work on Android platform
 		SecretKey pbeKey = new BinaryPBEKey(password.getBytes("UTF-8"));
+		// This doesn't work work with non ASCII password
+//		SecretKey pbeKey = SecretKeyFactory.getInstance(ALGORITHM).generateSecret(new PBEKeySpec(password.toCharArray()));
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(Cipher.DECRYPT_MODE, pbeKey, pbeParamSpec);
 		stream = new CipherInputStream(stream, cipher);

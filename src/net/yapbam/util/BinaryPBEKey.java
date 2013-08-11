@@ -31,7 +31,7 @@ public class BinaryPBEKey implements SecretKey {
 	}
 
 	public String getAlgorithm() {
-		return "PBEWithMD5AndDES";
+		return Crypto.ALGORITHM;
 	}
 
 	public String getFormat() {
@@ -48,7 +48,7 @@ public class BinaryPBEKey implements SecretKey {
 		for (int xa = 1; xa < this.key.length; xa++) {
 			ret += (this.key[xa] * xa);
 		}
-		return (ret ^= getAlgorithm().toLowerCase().hashCode());
+		return (ret ^= getAlgorithm().toUpperCase().hashCode());
 	}
 
 	public boolean equals(Object obj) {
