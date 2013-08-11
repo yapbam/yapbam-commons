@@ -18,6 +18,12 @@ public class Statement  {
 	private long dateSum;
 	private double startBalance;
 	
+	/** Gets the statements of an account.
+	 * @param account The account
+	 * @return An array of statements ordered from the oldest to the newest.
+	 * This sort is made according to medium value date of the transactions in statements.
+	 * Note that an empty account always have a statement with the null id.
+	 */
 	public static Statement[] getStatements(Account account) {
 		HashMap<String, Statement> map = new HashMap<String, Statement>();
 		BalanceHistory balanceHistory = account.getBalanceData().getBalanceHistory();
@@ -43,7 +49,8 @@ public class Statement  {
 				return result;
 			}
 		});
-		if (statements.length>0) statements[0].setStartBalance(account.getInitialBalance());
+		if (statements.length==0) statements = new Statement[]{new Statement(null)}; 
+		statements[0].setStartBalance(account.getInitialBalance());
 		for (int i = 1; i < statements.length; i++) {
 			statements[i].setStartBalance(statements[i-1].getEndBalance());
 		}
