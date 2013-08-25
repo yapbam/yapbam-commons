@@ -34,7 +34,7 @@ public final class Crypto {
 	// An interesting article to implement file encryption : http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html
 	private Crypto(){}
 	
-	/** Decrypt a text previous crypted by the encrypt method.
+	/** Decrypt a text previously crypted by the encrypt method.
 	 * @param key The secret key used for the encryption
 	 * @param message The encrypted message we want to decrypt
 	 * @return the decrypted message

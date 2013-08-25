@@ -70,8 +70,12 @@ public class Serializer {
 		for (byte c : PASSWORD_ENCODED_FILE_HEADER) {
 			if (c=='*') nb++;
 		}
-		if ((V1.length()!=nb) || (V2.length()!=nb) || (nb==0)) {
-			throw new IllegalArgumentException("Encoded file headers versions have invalid lengths !"); //$NON-NLS-1$
+		try {
+			if ((V1.getBytes(Crypto.UTF8).length!=nb) || (V2.getBytes(Crypto.UTF8).length!=nb) || (nb==0)) {
+				throw new IllegalArgumentException("Encoded file headers versions have invalid lengths !"); //$NON-NLS-1$
+			}
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -203,7 +207,7 @@ public class Serializer {
 			if (password!=null) {
 				// If the file has to be protected by a password
 				// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
-				this.os.write(PASSWORD_ENCODED_FILE_HEADER);
+				this.os.write(getHeader(V2));
 				// replace the output stream by a new encoded stream
 				this.os = Crypto.getPasswordProtectedOutputStream(password, os);
 			}
@@ -221,6 +225,20 @@ public class Serializer {
 		} catch (SAXException e) {
 			throw new IOException(e);
 		}
+	}
+	
+	private byte[] getHeader(String version) {
+		int index = 0;
+		byte[] result = new byte[PASSWORD_ENCODED_FILE_HEADER.length];
+		for (int i = 0; i < result.length; i++) {
+			if (PASSWORD_ENCODED_FILE_HEADER[i]!='*') {
+				result[i] = PASSWORD_ENCODED_FILE_HEADER[i];
+			} else {
+				result[i] = (byte) version.charAt(index);
+				index++;
+			}
+		}
+		return result;
 	}
 	
 	public void closeDocument(String password) throws IOException {
