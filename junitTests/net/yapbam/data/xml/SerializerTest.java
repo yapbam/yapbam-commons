@@ -44,6 +44,8 @@ public class SerializerTest {
 		
 		data.setPassword("this is the big password");
 		testInstance(data);
+		data.setPassword("été is a non ascii password");
+		testInstance(data);
 	}
 
 	private void testInstance(GlobalData data) throws IOException {

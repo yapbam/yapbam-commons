@@ -6,7 +6,7 @@ package net.yapbam.data.xml;
 public class UnsupportedFileVersionException extends UnsupportedFormatException {
 	private static final long serialVersionUID = 1L;
 
-	UnsupportedFileVersionException(int version) {
+	UnsupportedFileVersionException(String version) {
 		super ("File is of version "+version+". Expected "+Serializer.CURRENT_VERSION+" or less");
 	}
 }
