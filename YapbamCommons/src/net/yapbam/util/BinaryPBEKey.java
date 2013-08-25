@@ -5,7 +5,9 @@ import java.util.*;
 import javax.crypto.*;
 
 /** A PBEWithMD5AndDES key that allows non ascii char in password.
- * <br>This class is copied from a <a href="http://stackoverflow.com/questions/809590/how-can-i-decode-a-pkcs5-encrypted-pkcs8-private-key-in-java">stackoverflow question</a> 
+ * <br>This class is copied from a <a href="http://stackoverflow.com/questions/809590/how-can-i-decode-a-pkcs5-encrypted-pkcs8-private-key-in-java">stackoverflow question</a>
+ * <br><b>This class is now deprecated because it hangs with Android systems. The preferred solution is to use a Base64 encoding of the password before creating the key.
+ * @deprecated 
  */
 @SuppressWarnings("serial")
 public class BinaryPBEKey implements SecretKey {

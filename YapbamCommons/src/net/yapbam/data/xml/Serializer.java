@@ -48,27 +48,41 @@ public class Serializer {
 	private static final boolean SCHEMA_VALIDATION = Boolean.getBoolean("xml.schema.validation"); //$NON-NLS-1$
 	private static final boolean SLOW_WRITING = Boolean.getBoolean("slowDataWriting"); //$NON-NLS-1$
 
-	private static final byte[] PASSWORD_ENCODED_FILE_HEADER;
+//	private static final byte[] V1_PASSWORD_ENCODED_FILE_HEADER = toBytes("<Yapbam password encoded file 1.0>"); //$NON-NLS-1$
+	/** The password encoded file header scheme.
+	 * the * characters means "the ending version is coded there".
+	 */
+	private static final byte[] PASSWORD_ENCODED_FILE_HEADER = toBytes("<Yapbam password encoded file ***>"); //$NON-NLS-1$
+	private static final String V1 = "1.0"; //$NON-NLS-1$
+	private static final String V2 = "2.0"; //$NON-NLS-1$
 	private static final byte[] MAGIC_ZIP_BYTES = new byte[]{0x50, 0x4B, 0x03, 0x04};
 
 	private static final String EMPTY = ""; //$NON-NLS-1$
 	private static final String CDATA = "CDATA"; //$NON-NLS-1$
 	private static final String DATE_DELIM = "/"; //$NON-NLS-1$
 	private static final String TRUE = "true"; //$NON-NLS-1$
-	private static final String UTF8 = "UTF-8"; //$NON-NLS-1$
-
+	
 	static {
-		// An ugly implementation due to problem with the compiler and the final
-		// status and the fact the UnsupportedEncodingException may be thrown when
-		// an encoding is specified
-		String magicString = "<Yapbam password encoded file 1.0>"; //$NON-NLS-1$
+		// A lot of code relies on the fact that V1 and V2 have the same length and that this length is the same as the number
+		// of * in PASSWORD_ENCODED_FILE_HEADER
+		// This code verifies it is always true
+		int nb = 0;
+		for (byte c : PASSWORD_ENCODED_FILE_HEADER) {
+			if (c=='*') nb++;
+		}
+		if ((V1.length()!=nb) || (V2.length()!=nb) || (nb==0)) {
+			throw new IllegalArgumentException("Encoded file headers versions have invalid lengths !"); //$NON-NLS-1$
+		}
+	}
+
+	private static byte[] toBytes(String magicString) {
 		byte[] bytes;
 		try {
-			bytes = magicString.getBytes(UTF8);
+			bytes = magicString.getBytes(Crypto.UTF8);
 		} catch (UnsupportedEncodingException e) {
-			bytes = magicString.getBytes();
+			bytes = null;
 		}
-		PASSWORD_ENCODED_FILE_HEADER = bytes;
+		return bytes;
 	}
 
 	/** The current Yapbam file format definition version.
@@ -197,7 +211,7 @@ public class Serializer {
 			SAXTransformerFactory tf = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 			hd = tf.newTransformerHandler();
 			Transformer serializer = hd.getTransformer();
-			serializer.setOutputProperty(OutputKeys.ENCODING, UTF8);
+			serializer.setOutputProperty(OutputKeys.ENCODING, Crypto.UTF8);
 			serializer.setOutputProperty(OutputKeys.INDENT,"yes"); //$NON-NLS-1$
 			hd.setResult(streamResult);
 			this.atts = new AttributesImpl();
@@ -255,7 +269,7 @@ public class Serializer {
 				SAXParserFactory saxFactory = SAXParserFactory.newInstance();
 				if (SCHEMA_VALIDATION) {
 					SchemaFactory schemaFactory = SchemaFactory .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-					Schema schema = schemaFactory.newSchema(Serializer.class.getResource("yapbam.xsd"));
+					Schema schema = schemaFactory.newSchema(Serializer.class.getResource("yapbam.xsd")); //$NON-NLS-1$
 					saxFactory.setSchema(schema);
 				}
 				try {
@@ -268,7 +282,7 @@ public class Serializer {
 					}
 				}
 			} catch (SaxUnsupportedFileVersionException e) {
-				throw new UnsupportedFileVersionException(e.getVersion());
+				throw new UnsupportedFileVersionException(Integer.toString(e.getVersion()));
 			} catch (SAXParseException e) {
 				// The format is invalid
 				throw new UnsupportedFormatException(e);
@@ -292,6 +306,7 @@ public class Serializer {
 	 * @throws IOException
 	 * @throws AccessControlException if the password not matches with the stream
 	 * @throws GeneralSecurityException if the encryption algorithm is not supported
+	 * @throws UnsupportedFileVersionException if the encryption version is not supported
 	 */
 	public static InputStream getDecryptedStream(String password, InputStream stream) throws IOException, AccessControlException, GeneralSecurityException {
 		// Verify if the stream is encrypted or not
@@ -299,7 +314,8 @@ public class Serializer {
 			// Ensure that we will be able to reset the stream after verifying that the stream is not encrypted
 			stream = new BufferedInputStream(stream);
 		}
-		boolean encoded = getSerializationData(stream).isPasswordRequired;
+		SerializationData serializationData = getSerializationData(stream);
+		boolean encoded = serializationData.isPasswordRequired;
 		if (password!=null) {
 			// A password is provided
 			if (!encoded) {
@@ -309,7 +325,13 @@ public class Serializer {
 			// Pass the header
 			for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) stream.read();
 			// Create the decoded input stream
-			stream = Crypto.getPasswordProtectedInputStream(password, stream);
+			if (serializationData.version.equals(V1)) {
+				stream = Crypto.getOldPasswordProtectedInputStream(password, stream);
+			} else if (serializationData.version.equals(V2)) {
+				stream = Crypto.getPasswordProtectedInputStream(password, stream);
+			} else {
+				throw new UnsupportedFileVersionException("encoded "+serializationData.version);
+			}
 		} else {
 			// Stream should be not encoded
 			if (encoded) throw new AccessControlException("Stream is encoded but password is null"); //$NON-NLS-1$
@@ -328,20 +350,28 @@ public class Serializer {
 	public static SerializationData getSerializationData(InputStream in) throws IOException {
 		if (in.markSupported()) in.mark(PASSWORD_ENCODED_FILE_HEADER.length);
 		boolean isEncoded = true;
+		StringBuilder encodingVersion = new StringBuilder();
 		for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) {
-			if (in.read()!=PASSWORD_ENCODED_FILE_HEADER[i]) {
-				isEncoded = false;
-				break;
+			int c = in.read();
+			if (PASSWORD_ENCODED_FILE_HEADER[i]=='*') {
+				encodingVersion.append((char)c);
+			} else {
+				if (c!=PASSWORD_ENCODED_FILE_HEADER[i]) {
+					isEncoded = false;
+					break;
+				}
 			}
 		}
 		if (in.markSupported()) in.reset(); // Reset the stream (getSerializationData doesn't guarantee the position of the stream)
-		return new SerializationData(isEncoded);
+		return new SerializationData(isEncoded, encodingVersion.toString());
 	}
 	
 	public static class SerializationData {
 		private boolean isPasswordRequired;
-		private SerializationData(boolean isEncoded) {
+		private String version;
+		private SerializationData(boolean isEncoded, String version) {
 			this.isPasswordRequired = isEncoded;
+			this.version = version;
 		}
 		public boolean isPasswordRequired() {
 			return isPasswordRequired;
@@ -456,7 +486,7 @@ public class Serializer {
 	static String encode(String string) {
 		if (string==null) return string;
 		try {
-			return URLEncoder.encode(string, UTF8);
+			return URLEncoder.encode(string, Crypto.UTF8);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
@@ -465,7 +495,7 @@ public class Serializer {
 	static String decode(String string) {
 		if (string==null) return string;
 		try {
-			return URLDecoder.decode(string, UTF8);
+			return URLDecoder.decode(string, Crypto.UTF8);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
