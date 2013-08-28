@@ -48,8 +48,8 @@ public final class DateUtils {
 	/** Converts a date to an integer.
 	 * @param date the date to be converted or null
 	 * @return the date in its integer format (null is coded by a negative number).
-	 * It is guaranteed that if two dates are separated by x days the difference between their integer representation is x.
-	 * Please note that hour, minutes, second and milliseconds are ignored. 
+	 * <br>Be aware that <b>if two dates are separated by x days the difference between their integer representation is NOT x</b>.
+	 * <br>Please note that hour, minutes, second and milliseconds are ignored. 
 	 */
 	@SuppressWarnings("deprecation")
 	public static int dateToInteger(Date date) {
