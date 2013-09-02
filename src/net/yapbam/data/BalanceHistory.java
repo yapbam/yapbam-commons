@@ -132,7 +132,11 @@ public class BalanceHistory implements Serializable {
 		return this.elements.get(index);
 	}
 
-	private int find(Date date) {
+	/** Gets the index of the element that includes a date.
+	 * @param date The date to search
+	 * @return the index of the element that contains the date
+	 */
+	public int find(Date date) {
 		return Collections.binarySearch(this.elements, date, COMPARATOR);
 	}
 
