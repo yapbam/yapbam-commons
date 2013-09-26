@@ -23,6 +23,7 @@ import net.yapbam.util.ArrayUtils;
 import net.yapbam.util.Crypto;
 import net.yapbam.util.DateUtils;
 import net.yapbam.util.TextMatcher;
+import net.yapbam.utils.Crypto2;
 
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
@@ -42,6 +43,7 @@ import javax.xml.validation.SchemaFactory;
  * </UL>
  */
 public class Serializer {
+	private static final boolean NEW_ENCODER_ON = false;
 	//TODO Not sure the xml schema validation allows to read all the previously saved file: Disable it by default
 	// This should be investigate by testing with real life data: A interesting way is to randomly test every
 	// Successfully read data and try it with validation. If it fails, silently post a message to a web server. 
@@ -206,10 +208,17 @@ public class Serializer {
 			this.os = os;
 			if (password!=null) {
 				// If the file has to be protected by a password
-				// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
-				this.os.write(getHeader(V2));
-				// replace the output stream by a new encoded stream
-				this.os = Crypto.getPasswordProtectedOutputStream(password, os);
+				if (NEW_ENCODER_ON) {
+					// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
+					this.os.write(getHeader(V2));
+					// replace the output stream by a new encoded stream
+					this.os = new Crypto2(true).getPasswordProtectedOutputStream(password, os);
+				} else {
+					// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
+					this.os.write(getHeader(V1));
+					// replace the output stream by a new encoded stream
+					this.os = Crypto.getPasswordProtectedOutputStream(password, os);					
+				}
 			}
 			StreamResult streamResult = new StreamResult(this.os);
 			SAXTransformerFactory tf = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
@@ -223,6 +232,8 @@ public class Serializer {
 		} catch (TransformerConfigurationException e) {
 			throw new IOException(e);
 		} catch (SAXException e) {
+			throw new IOException(e);
+		} catch (GeneralSecurityException e) {
 			throw new IOException(e);
 		}
 	}
@@ -346,7 +357,7 @@ public class Serializer {
 			if (serializationData.version.equals(V1)) {
 				stream = Crypto.getOldPasswordProtectedInputStream(password, stream);
 			} else if (serializationData.version.equals(V2)) {
-				stream = Crypto.getPasswordProtectedInputStream(password, stream);
+				stream = new Crypto2(true).getPasswordProtectedInputStream(password, stream);
 			} else {
 				throw new UnsupportedFileVersionException("encoded "+serializationData.version);
 			}

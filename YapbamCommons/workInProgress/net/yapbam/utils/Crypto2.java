@@ -83,7 +83,7 @@ public class Crypto2 {
 	public String doCycle(String message, String password) {
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			OutputStream encoder = getPasswordProtectedOutputStream(password, out);
+			OutputStream encoder = getPasswordProtectedOutputStream(password, new VerboseOutputStream(out));
 			encoder.write(message.getBytes("UTF8"));
 			encoder.close();
 			out.flush();
@@ -114,7 +114,7 @@ public class Crypto2 {
 	 * @param bytes The array of bytes
 	 * @return a String
 	 */
-	private static String toString(byte[] bytes) {
+	public static String toString(byte[] bytes) {
 		StringBuilder builder = new StringBuilder();
 		for (byte b : bytes) {
 			if (builder.length()>0) builder.append(' ');
