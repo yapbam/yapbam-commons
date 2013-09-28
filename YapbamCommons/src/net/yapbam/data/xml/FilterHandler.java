@@ -33,21 +33,21 @@ public class FilterHandler extends DefaultHandler {
 	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		if (qName.equals(Serializer.FILTER_TAG)) {
+		if (qName.equals(XMLSerializer.FILTER_TAG)) {
 			filter = new Filter();
-			Date dateFrom = DateUtils.integerToDate(Serializer.toDate(attributes.getValue(Serializer.FILTER_DATE_FROM_ATTRIBUTE)));
-			Date dateTo = DateUtils.integerToDate(Serializer.toDate(attributes.getValue(Serializer.FILTER_DATE_TO_ATTRIBUTE)));
+			Date dateFrom = DateUtils.integerToDate(XMLSerializer.toDate(attributes.getValue(XMLSerializer.FILTER_DATE_FROM_ATTRIBUTE)));
+			Date dateTo = DateUtils.integerToDate(XMLSerializer.toDate(attributes.getValue(XMLSerializer.FILTER_DATE_TO_ATTRIBUTE)));
 			filter.setDateFilter(dateFrom, dateTo);
-			Date valueDateFrom = DateUtils.integerToDate(Serializer.toDate(attributes.getValue(Serializer.FILTER_VALUE_DATE_FROM_ATTRIBUTE)));
-			Date valueDateTo = DateUtils.integerToDate(Serializer.toDate(attributes.getValue(Serializer.FILTER_VALUE_DATE_TO_ATTRIBUTE)));
+			Date valueDateFrom = DateUtils.integerToDate(XMLSerializer.toDate(attributes.getValue(XMLSerializer.FILTER_VALUE_DATE_FROM_ATTRIBUTE)));
+			Date valueDateTo = DateUtils.integerToDate(XMLSerializer.toDate(attributes.getValue(XMLSerializer.FILTER_VALUE_DATE_TO_ATTRIBUTE)));
 			filter.setValueDateFilter(valueDateFrom, valueDateTo);
-			String amountFrom = attributes.getValue(Serializer.FILTER_AMOUNT_FROM_ATTRIBUTE);
-			String amountTo = attributes.getValue(Serializer.FILTER_AMOUNT_TO_ATTRIBUTE);
-			String filterString = attributes.getValue(Serializer.FILTER_ATTRIBUTE);
+			String amountFrom = attributes.getValue(XMLSerializer.FILTER_AMOUNT_FROM_ATTRIBUTE);
+			String amountTo = attributes.getValue(XMLSerializer.FILTER_AMOUNT_TO_ATTRIBUTE);
+			String filterString = attributes.getValue(XMLSerializer.FILTER_ATTRIBUTE);
 			property = filterString==null?Filter.ALL:Integer.parseInt(filterString);
 			filter.setAmountFilter(property, amountFrom==null?0.0:Double.parseDouble(amountFrom), amountFrom==null?Double.POSITIVE_INFINITY:Double.parseDouble(amountTo));
 			{
-				String accountsString = attributes.getValue(Serializer.ACCOUNT_ATTRIBUTE);
+				String accountsString = attributes.getValue(XMLSerializer.ACCOUNT_ATTRIBUTE);
 				if (accountsString!= null) {
 					String[] names = ArrayUtils.parseStringArray(accountsString);
 					ArrayList<Account> accounts = new ArrayList<Account>();
@@ -58,7 +58,7 @@ public class FilterHandler extends DefaultHandler {
 					if (accounts.size()!=0) filter.setValidAccounts(accounts);
 				}
 			} {
-				String categoriesString = attributes.getValue(Serializer.CATEGORY_ATTRIBUTE);
+				String categoriesString = attributes.getValue(XMLSerializer.CATEGORY_ATTRIBUTE);
 				if (categoriesString!= null) {
 					String[] names = ArrayUtils.parseStringArray(categoriesString);
 					ArrayList<Category> categories = new ArrayList<Category>();
@@ -70,7 +70,7 @@ public class FilterHandler extends DefaultHandler {
 					if ((categories.size()!=0) && (categories.size()!=data.getCategoriesNumber())) filter.setValidCategories(categories);
 				}
 			} {
-				String modesString = attributes.getValue(Serializer.MODE_ATTRIBUTE);
+				String modesString = attributes.getValue(XMLSerializer.MODE_ATTRIBUTE);
 				if (modesString!= null) {
 					String[] names = ArrayUtils.parseStringArray(modesString);
 					Set<String> dataNames = getAllValidAccountsModeNames();
@@ -82,30 +82,30 @@ public class FilterHandler extends DefaultHandler {
 					if ((modes.size()!=0) && (modes.size()!=dataNames.size())) filter.setValidModes(modes);
 				}
 			}
-		} else if (qName.equals(Serializer.TEXT_MATCHER_TAG)) {
-			String id = attributes.getValue(Serializer.ID_ATTRIBUTE);
-			String kindString = attributes.getValue(Serializer.KIND_ATTRIBUTE);
+		} else if (qName.equals(XMLSerializer.TEXT_MATCHER_TAG)) {
+			String id = attributes.getValue(XMLSerializer.ID_ATTRIBUTE);
+			String kindString = attributes.getValue(XMLSerializer.KIND_ATTRIBUTE);
 			Kind kind = null;
-			if (kindString.equals(Serializer.CONTAINS)) {
+			if (kindString.equals(XMLSerializer.CONTAINS)) {
 				kind = TextMatcher.Kind.CONTAINS;
-			} else if (kindString.equals(Serializer.EQUALS)) {
+			} else if (kindString.equals(XMLSerializer.EQUALS)) {
 				kind = TextMatcher.Kind.EQUALS;
-			} else if (kindString.equals(Serializer.REGULAR)) {
+			} else if (kindString.equals(XMLSerializer.REGULAR)) {
 				kind = TextMatcher.Kind.REGULAR;
 			}
-			String filter = Serializer.decode(attributes.getValue(Serializer.FILTER_ATTRIBUTE));
-			String bString = attributes.getValue(Serializer.CASE_SENSITIVE_ATTRIBUTE);
+			String filter = XMLSerializer.decode(attributes.getValue(XMLSerializer.FILTER_ATTRIBUTE));
+			String bString = attributes.getValue(XMLSerializer.CASE_SENSITIVE_ATTRIBUTE);
 			boolean caseSensitive = bString==null?false:Boolean.parseBoolean(bString);
-			bString = attributes.getValue(Serializer.DIACRITICAL_SENSITIVE_ATTRIBUTE);
+			bString = attributes.getValue(XMLSerializer.DIACRITICAL_SENSITIVE_ATTRIBUTE);
 			boolean diacriticalSensitive = bString==null?false:Boolean.parseBoolean(bString);
 			TextMatcher textMatcher = new TextMatcher(kind, filter, caseSensitive, diacriticalSensitive);
-			if (id.equals(Serializer.FILTER_DESCRIPTION_ID)) {
+			if (id.equals(XMLSerializer.FILTER_DESCRIPTION_ID)) {
 				this.descriptionMatcher = textMatcher;
-			} else if (id.equals(Serializer.FILTER_COMMENT_ID)) {
+			} else if (id.equals(XMLSerializer.FILTER_COMMENT_ID)) {
 				this.commentMatcher = textMatcher;
-			} else if (id.equals(Serializer.FILTER_NUMBER_ID)) {
+			} else if (id.equals(XMLSerializer.FILTER_NUMBER_ID)) {
 				this.numberMatcher = textMatcher;
-			} else if (id.equals(Serializer.FILTER_STATEMENT_ID)) {
+			} else if (id.equals(XMLSerializer.FILTER_STATEMENT_ID)) {
 				this.statementMatcher = textMatcher;
 			}
 		} else {
@@ -133,12 +133,12 @@ public class FilterHandler extends DefaultHandler {
 
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
-		if (qName.equals(Serializer.FILTER_TAG)) {
+		if (qName.equals(XMLSerializer.FILTER_TAG)) {
 			filter.setDescriptionMatcher(this.descriptionMatcher);
 			filter.setCommentMatcher(this.commentMatcher);
 			filter.setNumberMatcher(this.numberMatcher);
 			filter.setStatementFilter(property, this.statementMatcher);
-		} else if (qName.equals(Serializer.TEXT_MATCHER_TAG)) {
+		} else if (qName.equals(XMLSerializer.TEXT_MATCHER_TAG)) {
 		} else {
 			System.err.println ("Unknown tag "+qName); //$NON-NLS-1$
 		}

@@ -7,6 +7,6 @@ public class UnsupportedFileVersionException extends UnsupportedFormatException 
 	private static final long serialVersionUID = 1L;
 
 	UnsupportedFileVersionException(String version) {
-		super ("File is of version "+version+". Expected "+Serializer.CURRENT_VERSION+" or less");
+		super ("File is of version "+version+". Expected "+XMLSerializer.CURRENT_VERSION+" or less");
 	}
 }

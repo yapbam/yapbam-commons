@@ -1,55 +1,37 @@
 
 
 import java.io.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import net.yapbam.data.GlobalData;
 
 public class PipeTest {
 
 	public static void main(String[] args) {
 		try {
-			PipedInputStream writeIn = new PipedInputStream();
-			PipedOutputStream readOut = new PipedOutputStream(writeIn);
-
-			Thread rt = new CompressorThread(new FileInputStream("in.txt"), readOut);
-			Thread wt = new EncoderThread(writeIn, new FileOutputStream("out.txt"), "gti");
-
-			rt.start();
-			wt.start();
+			GlobalData data  = new GlobalData();
 			
-			rt.join();
-			wt.join();
+			PipedOutputStream xmlOutput = new PipedOutputStream();
+			PipedInputStream compressorInput = new PipedInputStream(xmlOutput);
+			
+			PipedOutputStream compressorOutput = new PipedOutputStream();
+			PipedInputStream encoderInput = new PipedInputStream(compressorOutput);
+			
+			ExecutorService service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,0, TimeUnit.SECONDS,
+          new SynchronousQueue<Runnable>());;
+			
+      service.submit(new WriterCallable(data, xmlOutput));
+			service.submit(new CompressorCallable(compressorInput, compressorOutput));
+			Future<Void> encoder = service.submit(new EncoderCallable(encoderInput, new FileOutputStream("out.txt"), "gti"));
+
+			encoder.get(); // Wait encoding is ended
 			System.out.println ("Ended");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-}
-
-class ReadThread extends Thread implements Runnable {
-
-	InputStream pi;
-	OutputStream po;
-
-	ReadThread(String process, InputStream pi, OutputStream po) {
-		this.pi = pi;
-		this.po = po;
-	}
-
-	public void run() {
-		byte[] buffer = new byte[512];
-		int bytes_read;
-		try {
-			for (;;) {
-				bytes_read = pi.read(buffer);
-				if (bytes_read == -1) break;
-				po.write(buffer, 0, bytes_read);
-			}
-			pi.close();
-			po.flush();
-			po.close();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-		}
-	}
-
 }

@@ -8,7 +8,7 @@ class SaxUnsupportedFileVersionException extends SAXParseException {
 	private int version;
 
 	SaxUnsupportedFileVersionException(Locator locator, int version) {
-		super ("File is of version "+version+". Expected "+Serializer.CURRENT_VERSION+" or less", locator);
+		super ("File is of version "+version+". Expected "+XMLSerializer.CURRENT_VERSION+" or less", locator);
 		this.version = version;
 	}
 
