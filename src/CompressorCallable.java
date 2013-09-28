@@ -1,25 +1,28 @@
 
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.Callable;
 import java.util.zip.DeflaterOutputStream;
 
-public class CompressorThread  extends Thread implements Runnable {
+public class CompressorCallable implements Callable<Void> {
+	private static boolean TRACE = false;
 
-	InputStream in;
-	DeflaterOutputStream po;
+	private InputStream in;
+	private DeflaterOutputStream po;
 
 	/** Compress input stream and output it to an output stream.
 	 * @param in An input stream
 	 * @param out An output stream
 	 */
-	CompressorThread(InputStream in, OutputStream out) {
+	CompressorCallable(InputStream in, OutputStream out) {
 		this.in = in;
 		this.po = new DeflaterOutputStream(out);
 	}
 
-	public void run() {
+	@Override
+	public Void call() throws Exception {
+		if (TRACE) System.out.println ("Start "+getClass().getName());
 		byte[] buffer = new byte[512];
 		int bytes_read;
 		try {
@@ -28,15 +31,14 @@ public class CompressorThread  extends Thread implements Runnable {
 				if (bytes_read == -1) break;
 				po.write(buffer, 0, bytes_read);
 			}
+		} finally {
 			in.close();
 			po.flush();
 			po.finish();
 			po.close();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			System.out.println ("CompressorThread ends");
+			if (TRACE) System.out.println ("Stop "+getClass().getName());
 		}
+		return null;
 	}
 
 }

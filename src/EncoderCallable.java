@@ -8,6 +8,7 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.concurrent.Callable;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -18,21 +19,22 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import net.yapbam.util.Base64Encoder;
 
-public class EncoderThread extends Thread implements Runnable {
+public class EncoderCallable implements Callable<Void> {
+	private static boolean TRACE = false;
 	public static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 	static final String ALGORITHM = "PBEWITHMD5ANDDES"; //$NON-NLS-1$
 	private static final byte[] SALT = new byte[]{ (byte)0xc7, (byte)0x23, (byte)0xa5, (byte)0xfc, (byte)0x7e, (byte)0x38, (byte)0xee, (byte)0x09};
 	private static final PBEParameterSpec pbeParamSpec = new PBEParameterSpec(SALT, 16);
 
-	InputStream in;
-	CipherOutputStream po;
-	Cipher cipher;
+	private InputStream in;
+	private CipherOutputStream po;
+	private Cipher cipher;
 
 	/** Compress input stream and output it to an output stream.
 	 * @param in An input stream
 	 * @param out An output stream
 	 */
-	EncoderThread(InputStream in, OutputStream out, String password) throws GeneralSecurityException, IOException {
+	EncoderCallable(InputStream in, OutputStream out, String password) throws GeneralSecurityException, IOException {
 		this.in = in;
 		out.write(getDigest(password));
 		SecretKey pbeKey = getSecretKey(password);
@@ -66,7 +68,9 @@ public class EncoderThread extends Thread implements Runnable {
 		}
 	}
 
-	public void run() {
+	@Override
+	public Void call() throws Exception {
+		if (TRACE) System.out.println ("Start "+getClass().getName());
 		byte[] buffer = new byte[512];
 		int bytes_read;
 		try {
@@ -75,13 +79,12 @@ public class EncoderThread extends Thread implements Runnable {
 				if (bytes_read == -1) break;
 				po.write(buffer, 0, bytes_read);
 			}
+		} finally {
 			in.close();
 			po.close();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		} finally {
-			System.out.println ("EncoderThread ends");
+			if (TRACE) System.out.println ("Stop "+getClass().getName());
 		}
+		return null;
 	}
 
 }
