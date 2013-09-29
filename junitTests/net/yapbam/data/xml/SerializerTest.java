@@ -10,7 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.URL;
 import java.security.AccessControlException;
 import java.util.Collections;
 import java.util.Currency;
@@ -22,8 +22,6 @@ import net.yapbam.data.Category;
 import net.yapbam.data.GlobalData;
 import net.yapbam.data.Mode;
 import net.yapbam.data.Transaction;
-import net.yapbam.utils.Crypto2;
-import net.yapbam.utils.VerboseOutputStream;
 
 import org.junit.Test;
 
@@ -51,10 +49,10 @@ public class SerializerTest {
 		testInstance(data);
 	}
 
-	@Test
+//	@Test
 	public void emptyTest() throws Exception {
 		GlobalData data = new GlobalData();		
-//FIXME		testInstance(data);
+		testInstance(data);
 		data.setPassword("été");
 		testInstance(data);
 	}
@@ -99,10 +97,9 @@ public class SerializerTest {
 
 	private GlobalData reread(GlobalData data) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		OutputStream out = new VerboseOutputStream(os);
-		Serializer.write(data, out, null, null);
-		out.flush();
-		out.close();
+		Serializer.write(data, os, null, null);
+		os.flush();
+		os.close();
 		
 		byte[] serialized = os.toByteArray();
 //		System.out.println (Crypto2.toString(serialized));
@@ -174,6 +171,32 @@ public class SerializerTest {
 			}
 		} catch (IOException e) {
 			fail("Get an IOException");
+		}
+	}
+
+	@Test
+	public void pre0_16_0() {
+//		testPre0_16_0("pre0.16.0.xml", null);
+//		testPre0_16_0("pre0.16.0-gti.xml", "gti");
+//		testPre0_16_0("pre0.16.0-été.xml", "été");
+		testPre0_16_0("pre0.16.0.zip", null);
+		testPre0_16_0("pre0.16.0-gti.zip", null);
+		testPre0_16_0("pre0.16.0-été.zip", null);
+	}
+	
+	private void testPre0_16_0(String resName, String password) {
+		try {
+			URL resource = getClass().getResource(resName);
+			if (resource==null) fail("Unable to locate "+resName);
+			InputStream in = resource.openStream();
+			try {
+				GlobalData data = Serializer.read(password, in, null);
+			} finally {
+				in.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Get an IOException while processing "+resName);
 		}
 	}
 }
