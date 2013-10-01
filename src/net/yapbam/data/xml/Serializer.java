@@ -161,6 +161,7 @@ public class Serializer {
 		if (isZipped) {
 			in = new ZipInputStream(in);
 	    ((ZipInputStream)in).getNextEntry();
+	    if (!in.markSupported()) in = new BufferedInputStream(in);
 		}
 
 		SerializationData serializationData = getSerializationData(in);
@@ -189,7 +190,6 @@ public class Serializer {
 			try {
 	      Future<Void> decrypter = service.submit(new DecrypterTask(in, decoderOutput, password, serializationData.version.equals(V1)));
 	      Future<Void> inflater = service.submit(new InflaterTask(deflaterInput, deflaterOutput));
-	//      Future<Void> inflater = service.submit(new InflaterTask(deflaterInput, new FileOutputStream("text.xml")));
 				Future<GlobalData> reader = service.submit(new ReaderTask(readerInput, password));
 	
 				decrypter.get(); // Wait encoding is ended
@@ -210,51 +210,18 @@ public class Serializer {
 			return XMLSerializer.read(password, in, report);
 		}
 	}
-
-	/** Gets a stream to read in an encrypted stream.
-	 * @param password The password used for the encryption, or null if stream is not encrypted.
-	 * @param stream The encrypted (or not) stream.
-	 * @return A new stream that automatically decodes the original stream.
-	 * @throws IOException
-	 * @throws AccessControlException if the password not matches with the stream
-	 * @throws GeneralSecurityException if the encryption algorithm is not supported
-	 * @throws UnsupportedFileVersionException if the encryption version is not supported
-	 */
-	private static InputStream getDecryptedStream(String password, InputStream stream) throws IOException, AccessControlException, GeneralSecurityException {
-		// Verify if the stream is encrypted or not
-		if (!stream.markSupported()) {
-			// Ensure that we will be able to reset the stream after verifying that the stream is not encrypted
-			stream = new BufferedInputStream(stream);
-		}
-		boolean isZipped = isZippedInputStream(stream);
-		if (isZipped) {
-			stream = new ZipInputStream(stream);
-	    ((ZipInputStream)stream).getNextEntry();
-		}
-
-		SerializationData serializationData = getSerializationData(stream);
-		boolean encoded = serializationData.isPasswordRequired;
-		if (password!=null) {
-			// A password is provided
-			if (!encoded) {
-				// password is provided but stream is not encoded
-				throw new AccessControlException("Stream is not encoded"); //$NON-NLS-1$
+	
+	
+	private static void showContent(InputStream in) throws IOException {
+		BufferedReader buf = new BufferedReader(new InputStreamReader(in));
+		try {
+			for (String line=buf.readLine();line!=null;line=buf.readLine()) {
+				System.out.println (line);
 			}
-			// Pass the header
-			for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) stream.read();
-			// Create the decoded input stream
-			if (serializationData.version.equals(V1)) {
-				stream = Crypto.getOldPasswordProtectedInputStream(password, stream);
-			} else if (serializationData.version.equals(V2)) {
-				stream = new Crypto2(true).getPasswordProtectedInputStream(password, stream);
-			} else {
-				throw new UnsupportedFileVersionException("encoded "+serializationData.version);
-			}
-		} else {
-			// Stream should be not encoded
-			if (encoded) throw new AccessControlException("Stream is encoded but password is null"); //$NON-NLS-1$
+			System.out.println ("End of stream");
+		} finally {
+			buf.close();
 		}
-		return stream;
 	}
 	
 	/** Gets the data about a stream (what is its version, is it encoded or not, etc...).
