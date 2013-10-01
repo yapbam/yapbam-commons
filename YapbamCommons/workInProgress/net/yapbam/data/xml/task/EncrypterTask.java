@@ -38,18 +38,19 @@ public class EncrypterTask implements Callable<Void> {
 	 * @param in The input stream to encode
 	 * @param out An output stream where to output the encoded stream
 	 */
-	public EncrypterTask(InputStream in, OutputStream out, String password) throws GeneralSecurityException, IOException {
+	public EncrypterTask(InputStream in, OutputStream out, String password, boolean compatibilityMode) throws GeneralSecurityException, IOException {
 		this.in = in;
 		out.write(getDigest(password));
-		cipher = getCipher(Cipher.ENCRYPT_MODE, password);
+		cipher = getCipher(Cipher.ENCRYPT_MODE, password, compatibilityMode);
 		this.po = new CipherOutputStream(out, cipher);
 	}
 	
 	/** Creates a new cipher based on a password.
 	 * @param mode The cipher mode (could be Cipher.ENCRYPT_MODE or Cipher.DECRYPT_MODE)
+	 * @param compatibilityMode 
 	 */
-	static Cipher getCipher(int mode, String password) throws GeneralSecurityException {
-		SecretKey pbeKey = getSecretKey(password);
+	static Cipher getCipher(int mode, String password, boolean compatibilityMode) throws GeneralSecurityException {
+		SecretKey pbeKey = getSecretKey(password, compatibilityMode);
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(mode, pbeKey, pbeParamSpec);
 		return cipher;
@@ -61,10 +62,15 @@ public class EncrypterTask implements Callable<Void> {
 	 * @throws InvalidKeySpecException
 	 * @throws NoSuchAlgorithmException
 	 */
-	static SecretKey getSecretKey(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+	@SuppressWarnings("deprecation")
+	static SecretKey getSecretKey(String password, boolean compatibilityMode) throws InvalidKeySpecException, NoSuchAlgorithmException {
 		try {
-			password = Base64Encoder.encode(password.getBytes(UTF8));
-			return SecretKeyFactory.getInstance(ALGORITHM).generateSecret(new PBEKeySpec(password.toCharArray()));
+			if (compatibilityMode) {
+				return new net.yapbam.util.BinaryPBEKey(password.getBytes(UTF8));
+			} else {
+				password = Base64Encoder.encode(password.getBytes(UTF8));
+				return SecretKeyFactory.getInstance(ALGORITHM).generateSecret(new PBEKeySpec(password.toCharArray()));
+			}
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		} 

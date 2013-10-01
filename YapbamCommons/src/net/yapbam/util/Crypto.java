@@ -162,7 +162,13 @@ public final class Crypto {
 		return stream;
 	}
 
-	private static void verifyPassword(InputStream stream, String password) throws IOException, AccessControlException {
+	/** Checks if the input stream contains a password digest.
+	 * @param stream
+	 * @param password
+	 * @throws IOException
+	 * @throws AccessControlException
+	 */
+	public static void verifyPassword(InputStream stream, String password) throws IOException, AccessControlException {
 		byte[] digest = getDigest(password);
 		byte[] fileDigest = new byte[digest.length];
 		for (int missing=fileDigest.length; missing>0; ) {

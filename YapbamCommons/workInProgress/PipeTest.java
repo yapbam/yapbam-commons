@@ -39,7 +39,7 @@ public class PipeTest {
 	      List<Future<? extends Object>> futures = new ArrayList<Future<? extends Object>>(3);
 	      futures.add(service.submit(new WriterTask(data, xmlOutput)));
 	      futures.add(service.submit(new DeflaterTask(compressorInput, compressorOutput)));
-	      futures.add(service.submit(new EncrypterTask(encoderInput, new FileOutputStream(fileName), password)));
+	      futures.add(service.submit(new EncrypterTask(encoderInput, new FileOutputStream(fileName), password, false)));
 	
 	      // Wait encoding is ended and gets the errors
 				for (Future<? extends Object> future : futures) {
@@ -57,7 +57,7 @@ public class PipeTest {
 			ExecutorService service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,0, TimeUnit.SECONDS,
           new SynchronousQueue<Runnable>());;
 			
-      Future<Void> decrypter = service.submit(new DecrypterTask(new FileInputStream(fileName), decoderOutput, password));
+      Future<Void> decrypter = service.submit(new DecrypterTask(new FileInputStream(fileName), decoderOutput, password, false));
       Future<Void> inflater = service.submit(new InflaterTask(deflaterInput, deflaterOutput));
 //      Future<Void> inflater = service.submit(new InflaterTask(deflaterInput, new FileOutputStream("text.xml")));
 			Future<GlobalData> reader = service.submit(new ReaderTask(readerInput, password));

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.AccessControlException;
-import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.util.concurrent.Callable;
 
@@ -18,20 +17,23 @@ public class DecrypterTask implements Callable<Void> {
 	private static boolean TRACE = false;
 
 	private InputStream in;
-	private CipherOutputStream po;
+	private OutputStream out;
 	private Cipher cipher;
+	private boolean compatibilityMode;
 
 	private String password;
+
 
 	/** Compress input stream and output it to an output stream.
 	 * @param in An input stream
 	 * @param out An output stream
+	 * @param compatibilityMode 
 	 */
-	public DecrypterTask(InputStream in, OutputStream out, String password) throws GeneralSecurityException, IOException {
+	public DecrypterTask(InputStream in, OutputStream out, String password, boolean compatibilityMode) {
 		this.in = in;
+		this.out = out;
 		this.password = password;
-		cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password);
-		this.po = new CipherOutputStream(out, cipher);
+		this.compatibilityMode = compatibilityMode;
 	}
 
 	private static void verifyPassword(InputStream stream, String password) throws IOException, AccessControlException {
@@ -47,18 +49,20 @@ public class DecrypterTask implements Callable<Void> {
 	public Void call() throws Exception {
 		try {
 			if (TRACE) System.out.println ("Start "+getClass().getName());
+			cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password, compatibilityMode);
+			this.out = new CipherOutputStream(out, cipher);
 			verifyPassword(in, password);
 			byte[] buffer = new byte[512];
 			int bytes_read;
 			for (;;) {
 				bytes_read = in.read(buffer);
 				if (bytes_read == -1) break;
-				po.write(buffer, 0, bytes_read);
+				out.write(buffer, 0, bytes_read);
 			}
 			return null;
 		} finally {
 			in.close();
-			po.close();
+			out.close();
 			if (TRACE) System.out.println ("Stop "+getClass().getName());
 		}
 	}

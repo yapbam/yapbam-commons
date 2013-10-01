@@ -176,9 +176,9 @@ public class SerializerTest {
 
 	@Test
 	public void pre0_16_0() {
-//		testPre0_16_0("pre0.16.0.xml", null);
-//		testPre0_16_0("pre0.16.0-gti.xml", "gti");
-//		testPre0_16_0("pre0.16.0-été.xml", "été");
+		testPre0_16_0("pre0.16.0.xml", null);
+		testPre0_16_0("pre0.16.0-gti.xml", "gti");
+		testPre0_16_0("pre0.16.0-été.xml", "été");
 		testPre0_16_0("pre0.16.0.zip", null);
 		testPre0_16_0("pre0.16.0-gti.zip", null);
 		testPre0_16_0("pre0.16.0-été.zip", null);
