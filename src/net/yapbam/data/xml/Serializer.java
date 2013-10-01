@@ -3,12 +3,21 @@ package net.yapbam.data.xml;
 import java.io.*;
 import java.security.AccessControlException;
 import java.security.GeneralSecurityException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import net.yapbam.data.*;
+import net.yapbam.data.xml.task.DecrypterTask;
+import net.yapbam.data.xml.task.InflaterTask;
+import net.yapbam.data.xml.task.ReaderTask;
 import net.yapbam.util.Crypto;
 import net.yapbam.utils.Crypto2;
 
@@ -20,7 +29,6 @@ import net.yapbam.utils.Crypto2;
 public class Serializer {
 	private static final boolean NEW_ENCODER_ON = false;
 
-//	private static final byte[] V1_PASSWORD_ENCODED_FILE_HEADER = toBytes("<Yapbam password encoded file 1.0>"); //$NON-NLS-1$
 	/** The password encoded file header scheme.
 	 * the * characters means "the ending version is coded there".
 	 */
@@ -144,11 +152,62 @@ public class Serializer {
 	 * @throws UnsupportedFormatException If the format of data in the input stream is not supported
 	 */
 	public static GlobalData read(String password, InputStream in, ProgressReport report) throws IOException, AccessControlException {
-		try {
-			in = getDecryptedStream(password, in);
+		// Verify if the stream is encrypted or not
+		if (!in.markSupported()) {
+			// Ensure that we will be able to reset the stream after verifying that the stream is not encrypted
+			in = new BufferedInputStream(in);
+		}
+		boolean isZipped = isZippedInputStream(in);
+		if (isZipped) {
+			in = new ZipInputStream(in);
+	    ((ZipInputStream)in).getNextEntry();
+		}
+
+		SerializationData serializationData = getSerializationData(in);
+		boolean encoded = serializationData.isPasswordRequired;
+		if (password!=null) {
+			// A password is provided
+			if (!encoded) {
+				// password is provided but stream is not encoded
+				throw new AccessControlException("Stream is not encoded"); //$NON-NLS-1$
+			}
+			// Pass the header
+			for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) in.read();
+			
+			// Read the file content
+			if (! (serializationData.version.equals(V1) || serializationData.version.equals(V2))) {
+				throw new UnsupportedFileVersionException("encoded "+serializationData.version);
+			}
+			
+			PipedOutputStream decoderOutput = new PipedOutputStream();
+			PipedInputStream deflaterInput = new PipedInputStream(decoderOutput);
+			PipedOutputStream deflaterOutput = new PipedOutputStream();
+			PipedInputStream readerInput = new PipedInputStream(deflaterOutput);
+			
+			ExecutorService service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,0, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
+			
+			try {
+	      Future<Void> decrypter = service.submit(new DecrypterTask(in, decoderOutput, password, serializationData.version.equals(V1)));
+	      Future<Void> inflater = service.submit(new InflaterTask(deflaterInput, deflaterOutput));
+	//      Future<Void> inflater = service.submit(new InflaterTask(deflaterInput, new FileOutputStream("text.xml")));
+				Future<GlobalData> reader = service.submit(new ReaderTask(readerInput, password));
+	
+				decrypter.get(); // Wait encoding is ended
+				inflater.get(); // Wait encoding is ended
+				
+				return reader.get();
+			} catch (ExecutionException e) {
+				Throwable cause = e.getCause();
+				if (cause instanceof IOException) throw (IOException)cause;
+				if (cause instanceof AccessControlException) throw (AccessControlException)cause;
+				throw new RuntimeException(cause);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			// Stream should be not encoded
+			if (encoded) throw new AccessControlException("Stream is encoded but password is null"); //$NON-NLS-1$
 			return XMLSerializer.read(password, in, report);
-		} catch (GeneralSecurityException e) {
-			throw new UnsupportedFormatException(e);
 		}
 	}
 
