@@ -1,6 +1,5 @@
 package net.yapbam.data.xml.task;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -31,18 +30,19 @@ public class EncrypterTask implements Callable<Void> {
 	static final PBEParameterSpec pbeParamSpec = new PBEParameterSpec(SALT, 16);
 
 	private InputStream in;
-	private CipherOutputStream po;
-	private Cipher cipher;
+	private OutputStream out;
+	private boolean compatibilityMode;
+	private String password;
 
 	/** Constructor.
 	 * @param in The input stream to encode
 	 * @param out An output stream where to output the encoded stream
 	 */
-	public EncrypterTask(InputStream in, OutputStream out, String password, boolean compatibilityMode) throws GeneralSecurityException, IOException {
+	public EncrypterTask(InputStream in, OutputStream out, String password, boolean compatibilityMode) {
 		this.in = in;
-		out.write(getDigest(password));
-		cipher = getCipher(Cipher.ENCRYPT_MODE, password, compatibilityMode);
-		this.po = new CipherOutputStream(out, cipher);
+		this.out = out;
+		this.password = password;
+		this.compatibilityMode = compatibilityMode;
 	}
 	
 	/** Creates a new cipher based on a password.
@@ -56,8 +56,9 @@ public class EncrypterTask implements Callable<Void> {
 		return cipher;
 	}
 	
-	/** Gets the secret key cooresponding to a password.
+	/** Gets the secret key corresponding to a password.
 	 * @param password A password
+	 * @param compatibilityMode true to use an old yapbam style key (which was not compatible with Android)
 	 * @return a Secret key
 	 * @throws InvalidKeySpecException
 	 * @throws NoSuchAlgorithmException
@@ -96,10 +97,12 @@ public class EncrypterTask implements Callable<Void> {
 	public Void call() throws Exception {
 		if (TRACE) System.out.println ("Start "+getClass().getName());
 		byte[] buffer = new byte[512];
-		int bytes_read;
+		out.write(getDigest(password));
+		Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, password, compatibilityMode);
+		CipherOutputStream po = new CipherOutputStream(out, cipher);
 		try {
 			for (;;) {
-				bytes_read = in.read(buffer);
+				int bytes_read = in.read(buffer);
 				if (bytes_read == -1) break;
 				po.write(buffer, 0, bytes_read);
 			}
@@ -107,6 +110,7 @@ public class EncrypterTask implements Callable<Void> {
 		} finally {
 			in.close();
 			po.close();
+			out.close();
 			if (TRACE) System.out.println ("Stop "+getClass().getName());
 		}
 	}

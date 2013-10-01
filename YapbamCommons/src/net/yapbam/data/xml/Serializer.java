@@ -2,24 +2,26 @@ package net.yapbam.data.xml;
 
 import java.io.*;
 import java.security.AccessControlException;
-import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import net.yapbam.data.*;
 import net.yapbam.data.xml.task.DecrypterTask;
+import net.yapbam.data.xml.task.DeflaterTask;
+import net.yapbam.data.xml.task.EncrypterTask;
 import net.yapbam.data.xml.task.InflaterTask;
 import net.yapbam.data.xml.task.ReaderTask;
+import net.yapbam.data.xml.task.WriterTask;
 import net.yapbam.util.Crypto;
-import net.yapbam.utils.Crypto2;
 
 /** The class implements xml yapbam data serialization and deserialization to (or from) an URL.
  * Currently supported URL type are :<UL>
@@ -27,7 +29,7 @@ import net.yapbam.utils.Crypto2;
  * </UL>
  */
 public class Serializer {
-	private static final boolean NEW_ENCODER_ON = false;
+	private static final boolean NEW_ENCODER_ON = true;
 
 	/** The password encoded file header scheme.
 	 * the * characters means "the ending version is coded there".
@@ -79,29 +81,45 @@ public class Serializer {
 			((ZipOutputStream)out).putNextEntry(entry);
 		}
 		String password = data.getPassword();
-		try {
-			if (password!=null) {
-				// If the file has to be protected by a password
-				if (NEW_ENCODER_ON) {
-					// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
-					out.write(getHeader(V2));
-					// replace the output stream by a new encoded stream
-					out = new Crypto2(true).getPasswordProtectedOutputStream(password, out);
-				} else {
-					// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
-					out.write(getHeader(V1));
-					// replace the output stream by a new encoded stream
-					out = Crypto.getPasswordProtectedOutputStream(password, out);					
-				}
+		if (password!=null) {
+			// If the file has to be protected by a password
+			if (NEW_ENCODER_ON) {
+				// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
+				out.write(getHeader(V2));
+			} else {
+				// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
+				out.write(getHeader(V1));
 			}
+			PipedOutputStream xmlOutput = new PipedOutputStream();
+			PipedInputStream compressorInput = new PipedInputStream(xmlOutput);
+			
+			PipedOutputStream compressorOutput = new PipedOutputStream();
+			PipedInputStream encoderInput = new PipedInputStream(compressorOutput);
+			
+			ExecutorService service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,0, TimeUnit.SECONDS,
+          new SynchronousQueue<Runnable>());;
+
+      List<Future<? extends Object>> futures = new ArrayList<Future<? extends Object>>(3);
+      futures.add(service.submit(new WriterTask(data, xmlOutput)));
+      futures.add(service.submit(new DeflaterTask(compressorInput, compressorOutput)));
+      futures.add(service.submit(new EncrypterTask(encoderInput, out, password, !NEW_ENCODER_ON)));
+
+      try {
+	      // Wait encoding is ended and gets the errors
+				for (Future<? extends Object> future : futures) {
+					future.get();
+				}
+      } catch (ExecutionException e) {
+      	Throwable cause = e.getCause();
+				if (cause instanceof IOException) throw (IOException)cause;
+      	throw new RuntimeException(cause);
+      } catch (InterruptedException e) {
+      	throw new RuntimeException(e);
+			}
+		} else {
 			XMLSerializer xmlSerializer = new XMLSerializer(out);
 			xmlSerializer.serialize(data, report);
 			xmlSerializer.closeDocument();
-			if (password!=null) {
-				((DeflaterOutputStream)out).finish();
-			}
-		} catch (GeneralSecurityException e) {
-			throw new IOException(e);
 		}
 
 		if (out instanceof ZipOutputStream) {
@@ -211,18 +229,17 @@ public class Serializer {
 		}
 	}
 	
-	
-	private static void showContent(InputStream in) throws IOException {
-		BufferedReader buf = new BufferedReader(new InputStreamReader(in));
-		try {
-			for (String line=buf.readLine();line!=null;line=buf.readLine()) {
-				System.out.println (line);
-			}
-			System.out.println ("End of stream");
-		} finally {
-			buf.close();
-		}
-	}
+//	private static void showContent(InputStream in) throws IOException {
+//		BufferedReader buf = new BufferedReader(new InputStreamReader(in));
+//		try {
+//			for (String line=buf.readLine();line!=null;line=buf.readLine()) {
+//				System.out.println (line);
+//			}
+//			System.out.println ("End of stream");
+//		} finally {
+//			buf.close();
+//		}
+//	}
 	
 	/** Gets the data about a stream (what is its version, is it encoded or not, etc...).
 	 * <br><b>WARNING:</b> This method leaves the stream with a non determinate number of red bytes if it
