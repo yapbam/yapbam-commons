@@ -28,7 +28,7 @@ import org.junit.Test;
 public class SerializerTest {
 	private static final double doubleAccuracy = Math.pow(10, -Currency.getInstance(Locale.getDefault()).getDefaultFractionDigits())/2;
 
-	//@Test
+	@Test
 	public void test() throws Exception {
 		GlobalData data = new GlobalData();
 		Account account = new Account("toto", 50.24);
@@ -49,7 +49,7 @@ public class SerializerTest {
 		testInstance(data);
 	}
 
-//	@Test
+	@Test
 	public void emptyTest() throws Exception {
 		GlobalData data = new GlobalData();		
 		testInstance(data);
@@ -102,8 +102,7 @@ public class SerializerTest {
 		os.close();
 		
 		byte[] serialized = os.toByteArray();
-//		System.out.println (Crypto2.toString(serialized));
-		System.out.println (new String(serialized));
+//		System.out.println (new String(serialized));
 		
 		ByteArrayInputStream is = new ByteArrayInputStream(serialized);
 		GlobalData other = new GlobalData();
@@ -111,7 +110,7 @@ public class SerializerTest {
 		return other;
 	}
 
-	//@Test //FIXME
+	@Test
 	public void testInvalidXMLFile() {
 		testInvalidXMLFile(new String[]{}, UnsupportedFormatException.class); // An empty file
 		testInvalidXMLFile(new String[]{"This is not an XML file"}, UnsupportedFormatException.class); // Not an xml file
