@@ -158,7 +158,7 @@ public class SerializerTest {
 		}
 	}
 
-	//@Test //FIXME
+	@Test
 	public void pbPre0_12_0() {
 		try {
 			InputStream in = getClass().getResource("bugpre0.13.3.xml").openStream();
@@ -180,8 +180,8 @@ public class SerializerTest {
 		testPre0_16_0("pre0.16.0-gti.xml", "gti");
 		testPre0_16_0("pre0.16.0-été.xml", "été");
 		testPre0_16_0("pre0.16.0.zip", null);
-		testPre0_16_0("pre0.16.0-gti.zip", null);
-		testPre0_16_0("pre0.16.0-été.zip", null);
+		testPre0_16_0("pre0.16.0-gti.zip", "gti");
+		testPre0_16_0("pre0.16.0-été.zip", "été");
 	}
 	
 	private void testPre0_16_0(String resName, String password) {
@@ -191,6 +191,7 @@ public class SerializerTest {
 			InputStream in = resource.openStream();
 			try {
 				GlobalData data = Serializer.read(password, in, null);
+				assertEquals(1, data.getAccountsNumber());
 			} finally {
 				in.close();
 			}
@@ -199,4 +200,30 @@ public class SerializerTest {
 			fail("Get an IOException while processing "+resName);
 		}
 	}
+	
+	@Test(expected = AccessControlException.class)
+	public void pre0_16_0WrongPwd_1() {
+		testPre0_16_0("pre0.16.0.xml", "xxx");
+	}
+	@Test(expected = AccessControlException.class)
+	public void pre0_16_0WrongPwd_2() {
+		testPre0_16_0("pre0.16.0-gti.xml", null);
+	}
+	@Test(expected = AccessControlException.class)
+	public void pre0_16_0WrongPwd_3() {
+		testPre0_16_0("pre0.16.0-été.xml", "ete");
+	}
+	@Test(expected = AccessControlException.class)
+	public void pre0_16_0WrongPwd_4() {
+		testPre0_16_0("pre0.16.0.zip", "xxx");
+	}
+	@Test(expected = AccessControlException.class)
+	public void pre0_16_0WrongPwd_5() {
+		testPre0_16_0("pre0.16.0-gti.zip", "xxx");
+	}
+	@Test(expected = AccessControlException.class)
+	public void pre0_16_0WrongPwd_6() {
+		testPre0_16_0("pre0.16.0-été.zip", null);
+	}
+
 }
