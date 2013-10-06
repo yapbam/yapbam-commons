@@ -160,14 +160,13 @@ public class XMLSerializer {
 	}
 	
 	/** Reads global data.
-	 * @param password The password of the data (null if the data is not password protected)
 	 * @param in The input stream containing the data
 	 * @param report A progress report to observe the progress, or null
 	 * @return The data red.
 	 * @throws IOException If something goes wrong while reading
 	 * @throws UnsupportedFormatException If the format of data in the input stream is not supported
 	 */
-	public static GlobalData read(String password, InputStream in, ProgressReport report) throws IOException {
+	public static GlobalData read(InputStream in, ProgressReport report) throws IOException {
 		GlobalDataHandler dh = new GlobalDataHandler(SCHEMA_VALIDATION, report);
 		try {
 			SAXParserFactory saxFactory = SAXParserFactory.newInstance();
@@ -196,7 +195,6 @@ public class XMLSerializer {
 			throw new RuntimeException(e);
 		}
 		GlobalData data = dh.getData();
-		data.setPassword(password);
 		return data;
 	}
 

@@ -19,7 +19,9 @@ public class ReaderTask implements Callable<GlobalData> {
 	public GlobalData call() throws Exception {
 		try {
 			if (TRACE) System.out.println ("Start "+getClass().getName());
-			return XMLSerializer.read(password, in, null);
+			GlobalData data = XMLSerializer.read(in, null);
+			data.setPassword(password);
+			return data;
 		} finally {
 			in.close();
 			if (TRACE) System.out.println ("Stop "+getClass().getName());
