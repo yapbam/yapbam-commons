@@ -19,6 +19,7 @@ import net.yapbam.data.xml.task.DecrypterTask;
 import net.yapbam.data.xml.task.DeflaterTask;
 import net.yapbam.data.xml.task.EncrypterTask;
 import net.yapbam.data.xml.task.InflaterTask;
+import net.yapbam.data.xml.task.PipeTask;
 import net.yapbam.data.xml.task.ReaderTask;
 import net.yapbam.data.xml.task.WriterTask;
 import net.yapbam.util.Crypto;
@@ -102,7 +103,18 @@ public class Serializer {
       List<Future<? extends Object>> futures = new ArrayList<Future<? extends Object>>(3);
       futures.add(service.submit(new WriterTask(data, xmlOutput)));
       futures.add(service.submit(new DeflaterTask(compressorInput, compressorOutput)));
-      futures.add(service.submit(new EncrypterTask(encoderInput, out, password, !NEW_ENCODER_ON)));
+      
+      // As encryterTask closes its output stream (required to process the doFinal of the encryption cipher),
+      // We can't pass it directly the out stream if we write in a zip entry (closeEntry fails if the underlying stream is closed).
+      // In such a case, we will add an intermediate stream
+      if (out instanceof ZipOutputStream) {
+      	PipedOutputStream encrypterOutput = new PipedOutputStream();
+      	PipedInputStream entryWriterInput = new PipedInputStream(encrypterOutput);
+      	futures.add(service.submit(new EncrypterTask(encoderInput, encrypterOutput, password, !NEW_ENCODER_ON)));
+      	futures.add(service.submit(new PipeTask(entryWriterInput, out)));
+      } else {
+      	futures.add(service.submit(new EncrypterTask(encoderInput, out, password, !NEW_ENCODER_ON)));
+      }
 
       try {
 	      // Wait encoding is ended and gets the errors
@@ -220,14 +232,44 @@ public class Serializer {
 			}
 		} else {
 			// Stream is not encoded
-//		// A password is provided
-//		if (password!=null) {
-//			// password is provided but stream is not encoded
-//			throw new AccessControlException("Stream is not encoded"); //$NON-NLS-1$
-//		}
 			return XMLSerializer.read(in, report);
 		}
 	}
+	
+	/** Tests whether a password is the right one for an input stream.
+	 * @param in The stream containing Yapbam data
+	 * @param password A password (null for no password)
+	 * @return true if password is ok, false if not.<br>
+	 * Please note that passing a non null password for an non protected stream returns false.<br>
+	 * In order to test if a stream is protected or not, you may call this method with null password. If it returns true,
+	 * the stream is not protected.<br>
+	 * <b>WARNING</b>: This method leaves input stream in an undetermined state (you should close it and reopen it before passing it to read, for instance).
+	 * @throws IOException If an I/O error occurred
+	 */
+	public static boolean isPasswordOk(InputStream in, String password) throws IOException {
+		boolean isZipped = isZippedInputStream(in);
+		if (isZipped) {
+			in = new ZipInputStream(in);
+	    ((ZipInputStream)in).getNextEntry();
+	    if (!in.markSupported()) in = new BufferedInputStream(in);
+		}
+
+		SerializationData serializationData = getSerializationData(in);
+		if (!serializationData.isPasswordRequired) {
+			return password==null;
+		} else {
+			try {
+				if (password==null) return false;
+				// Pass the header
+				for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) in.read();
+				DecrypterTask.verifyPassword(in, password);
+				return true;
+			} catch (AccessControlException e) {
+				return false;
+			}
+		}
+	}
+
 	
 //	private static void showContent(InputStream in) throws IOException {
 //		BufferedReader buf = new BufferedReader(new InputStreamReader(in));
@@ -249,7 +291,7 @@ public class Serializer {
 	 * @return A SerializationData instance
 	 * @throws IOException
 	 */
-	public static SerializationData getSerializationData(InputStream in) throws IOException {
+	private static SerializationData getSerializationData(InputStream in) throws IOException {
 		if (in.markSupported()) in.mark(PASSWORD_ENCODED_FILE_HEADER.length);
 		boolean isEncoded = true;
 		StringBuilder encodingVersion = new StringBuilder();
