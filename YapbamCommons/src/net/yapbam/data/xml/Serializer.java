@@ -69,7 +69,7 @@ public class Serializer {
 
 	/** Saves the data to a stream.
 	 * @param data The data to save
-	 * @param out The outputStream
+	 * @param out The outputStream (Note that this stream is not closed by this method).
 	 * @param entryName If you want the data to be wrapped in a zip: the name of the zip entry. Pass null to output the raw uncompressed data.
 	 * @param report a progress report
 	 * @throws IOException if something goes wrong while writing
@@ -105,16 +105,11 @@ public class Serializer {
       futures.add(service.submit(new DeflaterTask(compressorInput, compressorOutput)));
       
       // As encryterTask closes its output stream (required to process the doFinal of the encryption cipher),
-      // We can't pass it directly the out stream if we write in a zip entry (closeEntry fails if the underlying stream is closed).
-      // In such a case, we will add an intermediate stream
-      if (out instanceof ZipOutputStream) {
-      	PipedOutputStream encrypterOutput = new PipedOutputStream();
-      	PipedInputStream entryWriterInput = new PipedInputStream(encrypterOutput);
-      	futures.add(service.submit(new EncrypterTask(encoderInput, encrypterOutput, password, !NEW_ENCODER_ON)));
-      	futures.add(service.submit(new PipeTask(entryWriterInput, out)));
-      } else {
-      	futures.add(service.submit(new EncrypterTask(encoderInput, out, password, !NEW_ENCODER_ON)));
-      }
+      // We can't pass it directly the out stream. So we will add an intermediate stream
+    	PipedOutputStream encrypterOutput = new PipedOutputStream();
+    	PipedInputStream entryWriterInput = new PipedInputStream(encrypterOutput);
+    	futures.add(service.submit(new EncrypterTask(encoderInput, encrypterOutput, password, !NEW_ENCODER_ON)));
+    	futures.add(service.submit(new PipeTask(entryWriterInput, out)));
 
       try {
 	      // Wait encoding is ended and gets the errors
@@ -136,7 +131,6 @@ public class Serializer {
 
 		if (out instanceof ZipOutputStream) {
 			((ZipOutputStream) out).closeEntry();
-			out.close();
 		}
 	}
 

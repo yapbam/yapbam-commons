@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.security.AccessControlException;
+import java.security.Security;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
@@ -27,8 +28,34 @@ import net.yapbam.data.Transaction;
 
 import org.junit.Test;
 
+//import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 public class SerializerTest {
+	/** A fake output stream, that ouputs nothing but keep tracks of its closing. */
+	private static final class FakeOutputStream extends OutputStream {
+		private boolean closed = false;
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+			closed = true;
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			if (closed) throw new IOException("stream is closed");
+		}
+		
+		public boolean isClosed() {
+			return closed;
+		}
+	}
+
 	private static final double doubleAccuracy = Math.pow(10, -Currency.getInstance(Locale.getDefault()).getDefaultFractionDigits())/2;
+	
+//	static {
+//    Security.insertProviderAt(new BouncyCastleProvider(), 1);
+//	}
 
 	@Test
 	public void test() throws Exception {
@@ -98,17 +125,23 @@ public class SerializerTest {
 
 	private GlobalData reread(GlobalData data) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		Serializer.write(data, os, null, null);
-		os.flush();
-		os.close();
+		try {
+			Serializer.write(data, os, null, null);
+		} finally {
+			os.flush();
+			os.close();
+		}
 		
 		byte[] serialized = os.toByteArray();
 //		System.out.println (new String(serialized));
 		
 		ByteArrayInputStream is = new ByteArrayInputStream(serialized);
-		GlobalData other = new GlobalData();
-		other = Serializer.read(data.getPassword(), is, null);
-		return other;
+		try {
+			GlobalData other = Serializer.read(data.getPassword(), is, null);
+			return other;
+		} finally {
+			is.close();
+		}
 	}
 
 	@Test
@@ -276,6 +309,7 @@ public class SerializerTest {
 		try {
 			Serializer.write(data, out, "the entry name", null);
 		} finally {
+			out.flush();
 			out.close();
 		}
 		
@@ -285,5 +319,26 @@ public class SerializerTest {
 		} finally {
 			in.close();
 		}
+	}
+
+	@Test
+	public void testWriteDontCloseStream() throws IOException {
+		GlobalData data = new GlobalData();
+		FakeOutputStream out = new FakeOutputStream();
+		try {
+			Serializer.write(data, out, null, null);
+			assertFalse(out.isClosed());
+			Serializer.write(data, out, "entry", null);
+			assertFalse(out.isClosed());
+			data.setPassword("password");
+			Serializer.write(data, out, "entry", null);
+			assertFalse(out.isClosed());
+			Serializer.write(data, out, null, null);
+			assertFalse(out.isClosed());
+		} finally {
+			out.close();
+		}
+		//Be sure FakeOutputStream detects when it is closed
+		assertTrue(out.isClosed());
 	}
 }

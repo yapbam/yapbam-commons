@@ -47,8 +47,8 @@ public class DecrypterTask implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
+		if (TRACE) System.out.println ("Start "+getClass().getName());
 		try {
-			if (TRACE) System.out.println ("Start "+getClass().getName());
 			cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password, compatibilityMode);
 			this.out = new CipherOutputStream(out, cipher);
 			verifyPassword(in, password);
