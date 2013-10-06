@@ -36,7 +36,7 @@ public class DecrypterTask implements Callable<Void> {
 		this.compatibilityMode = compatibilityMode;
 	}
 
-	private static void verifyPassword(InputStream stream, String password) throws IOException, AccessControlException {
+	public static void verifyPassword(InputStream stream, String password) throws IOException, AccessControlException {
 		byte[] digest = EncrypterTask.getDigest(password);
 		byte[] fileDigest = new byte[digest.length];
 		for (int missing=fileDigest.length; missing>0; ) {

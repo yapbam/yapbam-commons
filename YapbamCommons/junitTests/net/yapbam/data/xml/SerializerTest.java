@@ -7,9 +7,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.util.Collections;
@@ -57,7 +59,6 @@ public class SerializerTest {
 		testInstance(data);
 	}
 
-	
 	private void testInstance(GlobalData data) throws IOException {
 		GlobalData other = reread(data);
 		
@@ -175,18 +176,55 @@ public class SerializerTest {
 
 	@Test
 	public void pre0_16_0() {
+		testPwdOk("pre0.16.0.xml", null, true);
+		testPwdOk("pre0.16.0.xml", "gti", false);
 		testPre0_16_0("pre0.16.0.xml", null);
+		
+		testPwdOk("pre0.16.0-gti.xml", null, false);
+		testPwdOk("pre0.16.0-gti.xml", "gti", true);
 		testPre0_16_0("pre0.16.0-gti.xml", "gti");
+		
+		testPwdOk("pre0.16.0-été.xml", null, false);
+		testPwdOk("pre0.16.0-été.xml", "gti", false);
+		testPwdOk("pre0.16.0-été.xml", "été", true);
 		testPre0_16_0("pre0.16.0-été.xml", "été");
+		
+		testPwdOk("pre0.16.0.zip", null, true);
+		testPwdOk("pre0.16.0.zip", "gti", false);
 		testPre0_16_0("pre0.16.0.zip", null);
+
+		testPwdOk("pre0.16.0-gti.zip", null, false);
+		testPwdOk("pre0.16.0-gti.zip", "gti", true);
 		testPre0_16_0("pre0.16.0-gti.zip", "gti");
+		
+		testPwdOk("pre0.16.0-été.zip", null, false);
+		testPwdOk("pre0.16.0-été.zip", "gti", false);
+		testPwdOk("pre0.16.0-été.zip", "été", true);
 		testPre0_16_0("pre0.16.0-été.zip", "été");
 	}
-	
+		
+	private void testPwdOk(String resName, String password, boolean expectedResult) {
+		try {
+			URL resource = getClass().getResource(resName);
+			if (resource==null) fail("Unable to locate "+resName);
+			
+			InputStream in = resource.openStream();
+			try {
+				assertEquals(expectedResult, Serializer.isPasswordOk(in, password));
+			} finally {
+				in.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Get an IOException while processing "+resName);
+		}
+	}
+
 	private void testPre0_16_0(String resName, String password) {
 		try {
 			URL resource = getClass().getResource(resName);
 			if (resource==null) fail("Unable to locate "+resName);
+			
 			InputStream in = resource.openStream();
 			try {
 				GlobalData data = Serializer.read(password, in, null);
@@ -226,5 +264,26 @@ public class SerializerTest {
 	public void pre0_16_0WrongPwd_6() {
 		testPre0_16_0("pre0.16.0-été.zip", null);
 	}
-
+	
+	@Test
+	public void testWithZipFile() throws IOException {
+		GlobalData data = new GlobalData();
+		String pwd = "gti";
+		data.setPassword(pwd);
+		File file = File.createTempFile("yapbam", null);
+		file.deleteOnExit();
+		OutputStream out = new FileOutputStream(file);
+		try {
+			Serializer.write(data, out, "the entry name", null);
+		} finally {
+			out.close();
+		}
+		
+		InputStream in = new FileInputStream(file);
+		try {
+			Serializer.read(pwd, in, null);
+		} finally {
+			in.close();
+		}
+	}
 }
