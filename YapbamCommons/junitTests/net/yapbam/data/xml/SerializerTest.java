@@ -200,8 +200,9 @@ public class SerializerTest {
 		}
 	}
 	
-	@Test(expected = AccessControlException.class)
+	@Test
 	public void pre0_16_0WrongPwd_1() {
+		// Password is wrong, but should be ignored
 		testPre0_16_0("pre0.16.0.xml", "xxx");
 	}
 	@Test(expected = AccessControlException.class)
@@ -212,8 +213,9 @@ public class SerializerTest {
 	public void pre0_16_0WrongPwd_3() {
 		testPre0_16_0("pre0.16.0-été.xml", "ete");
 	}
-	@Test(expected = AccessControlException.class)
+	@Test
 	public void pre0_16_0WrongPwd_4() {
+		// Password is wrong, but should be ignored
 		testPre0_16_0("pre0.16.0.zip", "xxx");
 	}
 	@Test(expected = AccessControlException.class)

@@ -166,7 +166,7 @@ public class Serializer {
 	 * @param report A progress report to observe the progress, or null
 	 * @return The data red.
 	 * @throws IOException If something goes wrong while reading
-	 * @throws AccessControlException If the password is wrong
+	 * @throws AccessControlException If the password is wrong. Note that if data is not password protected, password argument is ignored
 	 * @throws UnsupportedFormatException If the format of data in the input stream is not supported
 	 */
 	public static GlobalData read(String password, InputStream in, ProgressReport report) throws IOException, AccessControlException {
@@ -184,12 +184,8 @@ public class Serializer {
 
 		SerializationData serializationData = getSerializationData(in);
 		boolean encoded = serializationData.isPasswordRequired;
-		if (password!=null) {
-			// A password is provided
-			if (!encoded) {
-				// password is provided but stream is not encoded
-				throw new AccessControlException("Stream is not encoded"); //$NON-NLS-1$
-			}
+		if (encoded) {
+			if (password==null) throw new AccessControlException("Stream is encoded but password is null"); //$NON-NLS-1$
 			// Pass the header
 			for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) in.read();
 			
@@ -223,9 +219,13 @@ public class Serializer {
 				throw new RuntimeException(e);
 			}
 		} else {
-			// Stream should be not encoded
-			if (encoded) throw new AccessControlException("Stream is encoded but password is null"); //$NON-NLS-1$
-			return XMLSerializer.read(password, in, report);
+			// Stream is not encoded
+//		// A password is provided
+//		if (password!=null) {
+//			// password is provided but stream is not encoded
+//			throw new AccessControlException("Stream is not encoded"); //$NON-NLS-1$
+//		}
+			return XMLSerializer.read(in, report);
 		}
 	}
 	
