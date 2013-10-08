@@ -4,6 +4,8 @@ import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 public class PipeTask implements Callable<Void> {
+	static final int BUFFER_SIZE = 1024;
+
 	private static boolean TRACE = false;
 	private InputStream in;
 	private OutputStream out;
@@ -21,7 +23,7 @@ public class PipeTask implements Callable<Void> {
 	public Void call() throws Exception {
 		if (TRACE) System.out.println ("Start "+getClass().getName());
 		try {
-			byte[] buffer = new byte[512];
+			byte[] buffer = new byte[BUFFER_SIZE];
 			for (;;) {
 				int bytes_read = in.read(buffer);
 				if (bytes_read == -1) break;

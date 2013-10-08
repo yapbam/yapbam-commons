@@ -27,7 +27,7 @@ public class InflaterTask implements Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		if (TRACE) System.out.println ("Start "+getClass().getName());
-		byte[] buffer = new byte[512];
+		byte[] buffer = new byte[PipeTask.BUFFER_SIZE];
 		int bytes_read;
 		try {
 			for (;;) {
