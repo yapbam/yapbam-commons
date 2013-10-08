@@ -70,17 +70,24 @@ public class Serializer {
 	/** Saves the data to a stream.
 	 * @param data The data to save
 	 * @param out The outputStream (Note that this stream is not closed by this method).
-	 * @param entryName If you want the data to be wrapped in a zip: the name of the zip entry. Pass null to output the raw uncompressed data.
+	 * @param entryName the name of the zip entry where to put the content.
 	 * @param report a progress report
 	 * @throws IOException if something goes wrong while writing
 	 */
-	public static void write(GlobalData data, OutputStream out, String entryName, ProgressReport report) throws IOException {
-		ZipEntry entry = null;
-		if (entryName!=null) {
-			out = new ZipOutputStream(out);
-      entry = new ZipEntry(entryName);
-			((ZipOutputStream)out).putNextEntry(entry);
-		}
+	public static void write(GlobalData data, ZipOutputStream out, String entryName, ProgressReport report) throws IOException {
+    ZipEntry entry = new ZipEntry(entryName);
+		out.putNextEntry(entry);
+		write(data, out, report);
+		out.closeEntry();
+	}
+
+	/** Saves the data to a stream.
+	 * @param data The data to save
+	 * @param out The outputStream (Note that this stream is not closed by this method).
+	 * @param report a progress report
+	 * @throws IOException if something goes wrong while writing
+	 */
+	public static void write(GlobalData data, OutputStream out, ProgressReport report) throws IOException {
 		String password = data.getPassword();
 		if (password!=null) {
 			// If the file has to be protected by a password
@@ -128,10 +135,6 @@ public class Serializer {
 			xmlSerializer.serialize(data, report);
 			xmlSerializer.closeDocument();
 		}
-
-		if (out instanceof ZipOutputStream) {
-			((ZipOutputStream) out).closeEntry();
-		}
 	}
 
 	private static byte[] getHeader(String version) {
@@ -168,7 +171,8 @@ public class Serializer {
 	
 	/** Reads global data.
 	 * @param password The password of the data (null if the data is not password protected)
-	 * @param in The input stream containing the data
+	 * @param in The input stream containing the data (if the stream is a stream on a zipped file, for instance created by write(GlobalData, ZipOutputStream, String, ProgressReport)
+	 * the data is automatically unzipped from the first entry).
 	 * @param report A progress report to observe the progress, or null
 	 * @return The data red.
 	 * @throws IOException If something goes wrong while reading

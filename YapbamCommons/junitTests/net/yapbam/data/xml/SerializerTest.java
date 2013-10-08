@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
+import java.util.zip.ZipOutputStream;
 
 import net.yapbam.data.Account;
 import net.yapbam.data.Category;
@@ -126,7 +127,7 @@ public class SerializerTest {
 	private GlobalData reread(GlobalData data) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		try {
-			Serializer.write(data, os, null, null);
+			Serializer.write(data, os, null);
 		} finally {
 			os.flush();
 			os.close();
@@ -307,7 +308,8 @@ public class SerializerTest {
 		file.deleteOnExit();
 		OutputStream out = new FileOutputStream(file);
 		try {
-			Serializer.write(data, out, "the entry name", null);
+			out = new ZipOutputStream(out);
+			Serializer.write(data, (ZipOutputStream) out, "the entry name", null);
 		} finally {
 			out.flush();
 			out.close();
@@ -326,14 +328,16 @@ public class SerializerTest {
 		GlobalData data = new GlobalData();
 		FakeOutputStream out = new FakeOutputStream();
 		try {
-			Serializer.write(data, out, null, null);
-			assertFalse(out.isClosed());
-			Serializer.write(data, out, "entry", null);
+			Serializer.write(data, out, null);
 			assertFalse(out.isClosed());
 			data.setPassword("password");
-			Serializer.write(data, out, "entry", null);
+			Serializer.write(data, out, null);
 			assertFalse(out.isClosed());
-			Serializer.write(data, out, null, null);
+			ZipOutputStream zipOut = new ZipOutputStream(out);
+			Serializer.write(data, zipOut, "entry", null);
+			assertFalse(out.isClosed());
+			zipOut = new ZipOutputStream(out);
+			Serializer.write(data, zipOut, "entry", null);
 			assertFalse(out.isClosed());
 		} finally {
 			out.close();
