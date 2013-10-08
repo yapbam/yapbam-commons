@@ -49,14 +49,11 @@ public class DecrypterTask implements Callable<Void> {
 	public Void call() throws Exception {
 		if (TRACE) System.out.println ("Start "+getClass().getName());
 		try {
+			verifyPassword(in, password);
 			cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password, compatibilityMode);
 			this.out = new CipherOutputStream(out, cipher);
-			verifyPassword(in, password);
-			byte[] buffer = new byte[512];
-			int bytes_read;
-			for (;;) {
-				bytes_read = in.read(buffer);
-				if (bytes_read == -1) break;
+			byte[] buffer = new byte[PipeTask.BUFFER_SIZE];
+			for (int bytes_read = in.read(buffer); bytes_read!=-1; bytes_read = in.read(buffer)) {
 				out.write(buffer, 0, bytes_read);
 			}
 			return null;
