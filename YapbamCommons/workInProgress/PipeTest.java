@@ -33,9 +33,8 @@ public class PipeTest {
 				PipedInputStream encoderInput = new PipedInputStream(compressorOutput);
 				
 				ExecutorService service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,0, TimeUnit.SECONDS,
-	          new SynchronousQueue<Runnable>());;
+	          new SynchronousQueue<Runnable>());
 				
-
 	      List<Future<? extends Object>> futures = new ArrayList<Future<? extends Object>>(3);
 	      futures.add(service.submit(new WriterTask(data, xmlOutput)));
 	      futures.add(service.submit(new DeflaterTask(compressorInput, compressorOutput)));
