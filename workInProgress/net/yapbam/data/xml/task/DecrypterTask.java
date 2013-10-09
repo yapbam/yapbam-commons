@@ -40,7 +40,9 @@ public class DecrypterTask implements Callable<Void> {
 		byte[] digest = EncrypterTask.getDigest(password);
 		byte[] fileDigest = new byte[digest.length];
 		for (int missing=fileDigest.length; missing>0; ) {
-			missing -= stream.read(fileDigest, fileDigest.length-missing, missing);
+			int nb = stream.read(fileDigest, fileDigest.length-missing, missing);
+			if (nb==-1) throw new IOException("end of stream reached before end of password digest");
+			missing -= nb;
 		}
 		if (!MessageDigest.isEqual(digest, fileDigest)) throw new AccessControlException("invalid password");
 	}
@@ -56,6 +58,7 @@ public class DecrypterTask implements Callable<Void> {
 			for (int bytes_read = in.read(buffer); bytes_read!=-1; bytes_read = in.read(buffer)) {
 				out.write(buffer, 0, bytes_read);
 			}
+			out.flush();
 			return null;
 		} finally {
 			in.close();

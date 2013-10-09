@@ -91,13 +91,8 @@ public class Serializer {
 		String password = data.getPassword();
 		if (password!=null) {
 			// If the file has to be protected by a password
-			if (NEW_ENCODER_ON) {
-				// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
-				out.write(getHeader(V2));
-			} else {
-				// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
-				out.write(getHeader(V1));
-			}
+			// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
+			out.write(getHeader(NEW_ENCODER_ON?V2:V1));
 			PipedOutputStream xmlOutput = new PipedOutputStream();
 			PipedInputStream compressorInput = new PipedInputStream(xmlOutput);
 			
