@@ -97,6 +97,7 @@ public class EncrypterTask implements Callable<Void> {
 	public Void call() throws Exception {
 		if (TRACE) System.out.println ("Start "+getClass().getName());
 		byte[] buffer = new byte[PipeTask.BUFFER_SIZE];
+		// output password digest
 		out.write(getDigest(password));
 		Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, password, compatibilityMode);
 		CipherOutputStream po = new CipherOutputStream(out, cipher);
@@ -110,6 +111,7 @@ public class EncrypterTask implements Callable<Void> {
 		} finally {
 			in.close();
 			po.close();
+			out.flush();
 			out.close();
 			if (TRACE) System.out.println ("Stop "+getClass().getName());
 		}
