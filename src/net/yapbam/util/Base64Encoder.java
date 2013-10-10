@@ -11,7 +11,8 @@ import java.lang.reflect.Method;
 public class Base64Encoder {
 	/** Encodes bytes.
 	 * @param bytes The bytes to encode (If you try to encode strings, be aware that String.getBytes() does not return the same bytes on every platforms.
-	 * @return The Base64 encoded string
+	 * You should prefer the method String.getBytes(String) that allows you to specify the encoding.
+	 * @return The Base64 encoded string without any end char (Android Base64 default encoder adds a char of value 10 at the end of the encoded bytes, this doesn't).
 	 */
 	public static String encode(byte[] bytes) {
 		try {
@@ -23,9 +24,13 @@ public class Base64Encoder {
 				try { // Android
 					Class<?> class1 = Class.forName("android.util.Base64");
 					Method method = class1.getMethod("encode", new Class<?>[]{byte[].class, int.class});
-					return new String((byte[])method.invoke(null, bytes, 0));
+					int flags = class1.getField("NO_WRAP").getInt(null);
+					return new String((byte[])method.invoke(null, bytes, flags));
 				} catch (ClassNotFoundException e1) {
 					// Unable to perform the operation
+					throw new UnsupportedOperationException();
+				} catch (NoSuchFieldException e1) {
+					// TODO Auto-generated catch block
 					throw new UnsupportedOperationException();
 				}
 			}
