@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.security.AccessControlException;
-import java.security.Security;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
@@ -127,7 +126,7 @@ public class SerializerTest {
 	private GlobalData reread(GlobalData data) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		try {
-			Serializer.write(data, os, null);
+			new Serializer().write(data, os, null);
 		} finally {
 			os.flush();
 			os.close();
@@ -138,7 +137,7 @@ public class SerializerTest {
 		
 		ByteArrayInputStream is = new ByteArrayInputStream(serialized);
 		try {
-			GlobalData other = Serializer.read(data.getPassword(), is, null);
+			GlobalData other = new Serializer().read(data.getPassword(), is, null);
 			return other;
 		} finally {
 			is.close();
@@ -174,7 +173,7 @@ public class SerializerTest {
 			try {
 				FileInputStream in = new FileInputStream(file);
 				try {
-					Serializer.read(null, in, null);
+					new Serializer().read(null, in, null);
 				} finally {
 					in.close();
 				}
@@ -197,7 +196,7 @@ public class SerializerTest {
 		try {
 			InputStream in = getClass().getResource("bugpre0.13.3.xml").openStream();
 			try {
-				Serializer.read(null, in, null);
+				new Serializer().read(null, in, null);
 			} catch (Exception e) {
 				fail("Unable to read pre-0.12.0 file");
 			} finally {
@@ -244,7 +243,7 @@ public class SerializerTest {
 			
 			InputStream in = resource.openStream();
 			try {
-				assertEquals(expectedResult, Serializer.isPasswordOk(in, password));
+				assertEquals(expectedResult, new Serializer().isPasswordOk(in, password));
 			} finally {
 				in.close();
 			}
@@ -261,7 +260,7 @@ public class SerializerTest {
 			
 			InputStream in = resource.openStream();
 			try {
-				GlobalData data = Serializer.read(password, in, null);
+				GlobalData data = new Serializer().read(password, in, null);
 				assertEquals(1, data.getAccountsNumber());
 			} finally {
 				in.close();
@@ -309,7 +308,7 @@ public class SerializerTest {
 		OutputStream out = new FileOutputStream(file);
 		try {
 			out = new ZipOutputStream(out);
-			Serializer.write(data, (ZipOutputStream) out, "the entry name", null);
+			new Serializer().writeToZip(data, (ZipOutputStream) out, "the entry name", null);
 		} finally {
 			out.flush();
 			out.close();
@@ -317,7 +316,7 @@ public class SerializerTest {
 		
 		InputStream in = new FileInputStream(file);
 		try {
-			Serializer.read(pwd, in, null);
+			new Serializer().read(pwd, in, null);
 		} finally {
 			in.close();
 		}
@@ -328,16 +327,16 @@ public class SerializerTest {
 		GlobalData data = new GlobalData();
 		FakeOutputStream out = new FakeOutputStream();
 		try {
-			Serializer.write(data, out, null);
+			new Serializer().write(data, out, null);
 			assertFalse(out.isClosed());
 			data.setPassword("password");
-			Serializer.write(data, out, null);
+			new Serializer().write(data, out, null);
 			assertFalse(out.isClosed());
 			ZipOutputStream zipOut = new ZipOutputStream(out);
-			Serializer.write(data, zipOut, "entry", null);
+			new Serializer().writeToZip(data, zipOut, "entry", null);
 			assertFalse(out.isClosed());
 			zipOut = new ZipOutputStream(out);
-			Serializer.write(data, zipOut, "entry", null);
+			new Serializer().writeToZip(data, zipOut, "entry", null);
 			assertFalse(out.isClosed());
 		} finally {
 			out.close();
