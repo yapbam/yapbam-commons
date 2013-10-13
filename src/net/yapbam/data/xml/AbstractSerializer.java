@@ -18,7 +18,6 @@ import net.yapbam.data.xml.task.DeflaterTask;
 import net.yapbam.data.xml.task.EncrypterTask;
 import net.yapbam.data.xml.task.InflaterTask;
 import net.yapbam.data.xml.task.PipeTask;
-import net.yapbam.data.xml.task.WriterTask;
 import net.yapbam.util.Crypto;
 
 /** The class implements xml yapbam data serialization and deserialization to (or from) an URL.
@@ -70,12 +69,12 @@ public abstract class AbstractSerializer<T> {
 	 * @param report a progress report
 	 * @throws IOException if something goes wrong while writing
 	 */
-	public void write(T data, OutputStream out, String password, ProgressReport report) throws IOException {
+	public void write(final T data, OutputStream out, String password, final ProgressReport report) throws IOException {
 		if (password!=null) {
 			// If the file has to be protected by a password
 			// outputs the magic bytes that will allow Yapbam to recognize the file is crypted.
 			out.write(getHeader(NEW_ENCODER_ON?V2:V1));
-			PipedOutputStream xmlOutput = new PipedOutputStream();
+			final PipedOutputStream xmlOutput = new PipedOutputStream();
 			PipedInputStream compressorInput = new PipedInputStream(xmlOutput);
 			
 			PipedOutputStream compressorOutput = new PipedOutputStream();
@@ -84,8 +83,18 @@ public abstract class AbstractSerializer<T> {
 			ExecutorService service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,0, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());;
 
 			List<Future<? extends Object>> futures = new ArrayList<Future<? extends Object>>(3);
-			//FIXME WriterTask should be internal
-			futures.add(service.submit(new WriterTask(this, data, xmlOutput, report)));
+			Callable<Void> c = new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					try {
+						directWrite(data, xmlOutput, report);
+						return null;
+					} finally {
+						xmlOutput.close();
+					}
+				}
+			};
+			futures.add(service.submit(c));
 			futures.add(service.submit(new DeflaterTask(compressorInput, compressorOutput)));
       
 			// As encryterTask closes its output stream (required to process the doFinal of the encryption cipher),
