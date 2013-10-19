@@ -18,7 +18,6 @@ public class CheckSumTest {
 
 	private void test(byte[] bytes) {
 		String toString = CheckSum.toString(bytes);
-		System.out.println (toString);
 		byte[] toBytes = CheckSum.toBytes(toString);
 		assertArrayEquals(bytes, toBytes);
 	}
