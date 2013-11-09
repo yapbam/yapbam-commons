@@ -51,7 +51,16 @@ public class CurrencyNames {
 	private static boolean tryLoading(Properties properties, String name) throws IOException {
 		InputStream stream = CurrencyNames.class.getResourceAsStream(name);
 		if (stream==null) return false;
-		properties.load(new InputStreamReader(stream, "ISO8859-1"));
-		return true;
+		try {
+			InputStreamReader reader = new InputStreamReader(stream, "ISO8859-1");
+			try {
+				properties.load(reader);
+				return true;
+			} finally {
+				reader.close();
+			}
+		} finally {
+			stream.close();
+		}
 	}
 }

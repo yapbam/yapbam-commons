@@ -83,4 +83,9 @@ public class MonthDateStepper extends  DateStepper {
 		}
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		return this.day+this.period+this.lastDate;
+	}
 }
