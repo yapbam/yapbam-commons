@@ -81,4 +81,9 @@ public class DeferredValueDateComputer extends DateStepper {
 		}
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		return getDebtDay()*100+getStopDay();
+	}
 }

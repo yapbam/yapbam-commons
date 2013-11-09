@@ -56,4 +56,9 @@ public class DayDateStepper extends DateStepper {
 		if (result) result = (getStep()==((DayDateStepper)obj).getStep()) && (lastDate==((DayDateStepper)obj).lastDate);
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		return getStep()+this.lastDate;
+	}
 }
