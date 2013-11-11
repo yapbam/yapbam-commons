@@ -44,7 +44,11 @@ public abstract class AbstractTransaction implements Cloneable {
 		this.account = account;
 		this.mode = mode;
 		this.category = category;
-		this.subTransactions = subTransactions!=null?subTransactions:Collections.EMPTY_LIST;
+		if (subTransactions!=null) {
+			this.subTransactions = subTransactions;
+		} else {
+			this.subTransactions = Collections.emptyList();
+		}
 		setId(this);
 	}
 	
@@ -88,6 +92,18 @@ public abstract class AbstractTransaction implements Cloneable {
 	 */
 	public String getDescription() {
 		return this.description;
+	}
+	
+	/** Gets the transaction's description.
+	 * @param mergeComment true to merge comment with description
+	 * @return the description
+	 */
+	public String getDescription (boolean mergeComment) {
+		if (!mergeComment || (getComment()==null)) {
+			return getDescription();
+		} else {
+			return getDescription() + " ("+getComment()+")";
+		}
 	}
 
 	/** Gets the transaction's comment.
