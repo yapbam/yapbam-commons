@@ -96,7 +96,7 @@ public class EncrypterTask implements Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		if (TRACE) System.out.println ("Start "+getClass().getName());
-		byte[] buffer = new byte[PipeTask.BUFFER_SIZE];
+		byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
 		// output password digest
 		out.write(getDigest(password));
 		Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, password, compatibilityMode);

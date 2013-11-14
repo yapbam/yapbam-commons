@@ -54,7 +54,7 @@ public class DecrypterTask implements Callable<Void> {
 			verifyPassword(in, password);
 			cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password, compatibilityMode);
 			this.out = new CipherOutputStream(out, cipher);
-			byte[] buffer = new byte[PipeTask.BUFFER_SIZE];
+			byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
 			for (int bytes_read = in.read(buffer); bytes_read!=-1; bytes_read = in.read(buffer)) {
 				out.write(buffer, 0, bytes_read);
 			}
