@@ -15,7 +15,9 @@ public class Category implements Serializable, Comparable<Category> {
 	 * @throws IllegalArgumentException if the parameter is null.
 	 */
 	public Category(String name) {
-		if (name==null) throw new IllegalArgumentException();
+		if (name==null) {
+			throw new IllegalArgumentException();
+		}
 		this.name = name;
 	}
 
@@ -33,7 +35,9 @@ public class Category implements Serializable, Comparable<Category> {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj==null) return false;
+		if ( (obj==null) || !(obj instanceof Category)) {
+			return false;
+		}
 		return ((Category)obj).name.equals(name);
 	}
 
@@ -58,12 +62,16 @@ public class Category implements Serializable, Comparable<Category> {
 	}
 
 	void setName(String name) {
-		if (name==null) throw new IllegalArgumentException();
+		if (name==null) {
+			throw new IllegalArgumentException();
+		}
 		this.name = name;
 	}
 	
 	public Category getSuperCategory(char categorySeparator) {
-		if (this==Category.UNDEFINED) return this;
+		if (this==Category.UNDEFINED) {
+			return this;
+		}
 		int index = name.indexOf(categorySeparator);
 		if (index>=0) {
 			return new Category(name.substring(0,index));
