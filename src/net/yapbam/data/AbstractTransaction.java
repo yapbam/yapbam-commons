@@ -76,6 +76,7 @@ public abstract class AbstractTransaction implements Cloneable {
 			}
 			setId(result);
 		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
 		}
 		return result;
 	}

@@ -20,7 +20,7 @@ public class Base64Encoder {
 				Class<?> class1 = Class.forName("javax.xml.bind.DatatypeConverter");
 				Method method = class1.getMethod("printBase64Binary", new Class<?>[]{byte[].class});
 				return (String) method.invoke(null, bytes);
-			} catch (ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) { // NOSONAR No need to rethrow this exception, it simply denotes we are not on a java desktop machine
 				try { // Android
 					Class<?> class1 = Class.forName("android.util.Base64");
 					Method method = class1.getMethod("encode", new Class<?>[]{byte[].class, int.class});
@@ -28,18 +28,18 @@ public class Base64Encoder {
 					return new String((byte[])method.invoke(null, bytes, flags));
 				} catch (ClassNotFoundException e1) {
 					// Unable to perform the operation
-					throw new UnsupportedOperationException();
+					throw new UnsupportedOperationException(e1);
 				} catch (NoSuchFieldException e1) {
 					// TODO Auto-generated catch block
-					throw new UnsupportedOperationException();
+					throw new UnsupportedOperationException(e1);
 				}
 			}
 		} catch (NoSuchMethodException e) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException(e);
 		} catch (IllegalAccessException e) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException(e);
 		} catch (InvocationTargetException e) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException(e);
 		}
 	}
 }

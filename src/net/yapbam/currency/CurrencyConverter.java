@@ -98,11 +98,11 @@ public class CurrencyConverter {
 			parse(false);
 			try {
 				update();
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				// Don't throw any exception if update fails as the instance is already initialized with the cache
 				// isSynchronized method will return false, indicating that this instance is not synchronized with Internet
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			// Cache parsing failed, maybe cache file is not present or is corrupted. 
 			// We will call update without try/catch clause to throw exceptions if data can't be red.
 			this.update();

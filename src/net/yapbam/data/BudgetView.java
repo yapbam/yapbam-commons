@@ -37,6 +37,9 @@ public class BudgetView extends DefaultListenable {
 		}
 		@Override
 		public boolean equals(Object obj) {
+			if (obj==null || !(obj instanceof Key)) {
+				return false;
+			}
 			Key key = (Key) obj;
 			return this.date.equals(key.date) && this.category.equals(key.category);
 		}
