@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
+import java.util.Set;
 
 import net.yapbam.util.NullUtils;
 import net.yapbam.util.TextMatcher;
@@ -21,9 +22,9 @@ public class Filter extends Observable {
 	public static final int ALL = CHECKED+NOT_CHECKED+EXPENSES+RECEIPTS;
 
 	private int filter;
-	private HashSet<Account> validAccounts;
-	private HashSet<String> validModes;
-	private HashSet<Category> validCategories;
+	private Set<Account> validAccounts;
+	private Set<String> validModes;
+	private Set<Category> validCategories;
 	private Date dateFrom;
 	private Date dateTo;
 	private Date valueDateFrom;
@@ -55,7 +56,9 @@ public class Filter extends Observable {
 	@Override
 	protected void setChanged() {
 		super.setChanged();
-		if (!suspended) this.notifyObservers();
+		if (!suspended) {
+			this.notifyObservers();
+		}
 	}
 	
 	/** Sets the suspended state of the filter.
@@ -66,7 +69,9 @@ public class Filter extends Observable {
 	 */
 	public void setSuspended(boolean suspended) {
 		this.suspended = suspended;
-		if (!this.suspended && this.hasChanged()) this.notifyObservers();
+		if (!this.suspended && this.hasChanged()) {
+			this.notifyObservers();
+		}
 	}
 
 	/** Gets the valid accounts for this filter.
@@ -74,7 +79,9 @@ public class Filter extends Observable {
 	 * @return the valid accounts (null means all accounts are ok).
 	 */
 	public List<Account> getValidAccounts() {
-		if (validAccounts==null) return null;
+		if (validAccounts==null) {
+			return null;
+		}
 		ArrayList<Account> result = new ArrayList<Account>(validAccounts.size());
 		for (Account account:validAccounts) {
 			result.add(account);
@@ -103,12 +110,20 @@ public class Filter extends Observable {
 	}
 	
 	private static <T> boolean testEquals(Collection<T> c1, Collection<T> c2) {
-		if ((c1==null) && (c2==null)) return true; 
-		if ((c1==null) || (c2==null)) return false;
+		if ((c1==null) && (c2==null)) {
+			return true; 
+		}
+		if ((c1==null) || (c2==null)) {
+			return false;
+		}
 		// Both are not null if we arrive here
-		if (c1.size()!=c2.size()) return false;
+		if (c1.size()!=c2.size()) {
+			return false;
+		}
 		for (T element:c1) {
-			if (!c2.contains(element)) return false;
+			if (!c2.contains(element)) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -119,7 +134,9 @@ public class Filter extends Observable {
 	 * @see #setValidModes(List)
 	 */
 	public List<String> getValidModes() {
-		if (validModes==null) return null;
+		if (validModes==null) {
+			return null;
+		}
 		ArrayList<String> result = new ArrayList<String>(validModes.size());
 		for (String name:validModes) {
 			result.add(name);
@@ -133,7 +150,9 @@ public class Filter extends Observable {
 	 * @see #setValidModes(List)
 	 */
 	public boolean isOk(Mode mode) {
-		if (validModes==null) return true;
+		if (validModes==null) {
+			return true;
+		}
 		String name = mode.equals(Mode.UNDEFINED)?"":mode.getName(); //$NON-NLS-1$
 		return (validModes.contains(name));
 	}
@@ -161,7 +180,9 @@ public class Filter extends Observable {
 	 * @return the valid categories (null means, all categories are ok).
 	 */
 	public List<Category> getValidCategories() {
-		if (validCategories==null) return null;
+		if (validCategories==null) {
+			return null;
+		}
 		ArrayList<Category> result = new ArrayList<Category>(validCategories.size());
 		for (Category account:validCategories) {
 			result.add(account);
@@ -265,8 +286,9 @@ public class Filter extends Observable {
 	 * @throws IllegalArgumentException if minAmount > maxAmount or if minimum amount is negative
 	 */
 	public void setAmountFilter(int property, double minAmount, double maxAmount) {
-		if (minAmount>maxAmount) throw new IllegalArgumentException();
-		if (minAmount<0) throw new IllegalArgumentException();
+		if ((minAmount>maxAmount) || (minAmount<0)) {
+			throw new IllegalArgumentException();
+		}
 		int mask = Filter.EXPENSES+Filter.RECEIPTS;
 		if ((GlobalData.AMOUNT_COMPARATOR.compare(minAmount, this.minAmount) != 0) ||
 				(GlobalData.AMOUNT_COMPARATOR.compare(maxAmount, this.maxAmount) != 0) ||
@@ -274,7 +296,9 @@ public class Filter extends Observable {
 			this.minAmount = minAmount;
 			this.maxAmount = maxAmount;
 			filter = (filter & ~mask) | (property & mask);
-			if (DEBUG) System.out.println("-> filter : "+filter); //$NON-NLS-1$
+			if (DEBUG) {
+				System.out.println("-> filter : "+filter); //$NON-NLS-1$
+			}
 			this.setChanged();
 		}
 	}
@@ -285,10 +309,16 @@ public class Filter extends Observable {
 	 */
 	public boolean isAmountOk(double amount) {
 		// We use the currency comparator to implement amount filtering because double are very tricky to compare.
-		if ((GlobalData.AMOUNT_COMPARATOR.compare(amount, 0.0)<0) && (!isOk(EXPENSES))) return false;
-		if ((GlobalData.AMOUNT_COMPARATOR.compare(amount, 0.0)>0) && (!isOk(RECEIPTS))) return false;
+		if ((GlobalData.AMOUNT_COMPARATOR.compare(amount, 0.0)<0) && (!isOk(EXPENSES))) {
+			return false;
+		}
+		if ((GlobalData.AMOUNT_COMPARATOR.compare(amount, 0.0)>0) && (!isOk(RECEIPTS))) {
+			return false;
+		}
 		amount = Math.abs(amount);
-		if (GlobalData.AMOUNT_COMPARATOR.compare(amount, getMinAmount())<0) return false;
+		if (GlobalData.AMOUNT_COMPARATOR.compare(amount, getMinAmount())<0) {
+			return false;
+		}
 		return GlobalData.AMOUNT_COMPARATOR.compare(amount, getMaxAmount())<=0;
 	}
 
@@ -360,12 +390,16 @@ public class Filter extends Observable {
 	}
 
 	public void setStatementFilter (int property, TextMatcher statementFilter) {
-		if (((property & Filter.CHECKED) == 0) && (statementFilter!=null)) throw new IllegalArgumentException();
+		if (((property & Filter.CHECKED) == 0) && (statementFilter!=null)) {
+			throw new IllegalArgumentException();
+		}
 		int mask = Filter.CHECKED+Filter.NOT_CHECKED;
 		if (!NullUtils.areEquals(statementFilter, this.statementMatcher) || ((property & mask)!=(filter & mask))) {
 			this.statementMatcher = statementFilter;
 			filter = (filter & ~mask) | (property & mask);
-			if (DEBUG) System.out.println("-> filter : "+filter); //$NON-NLS-1$
+			if (DEBUG) {
+				System.out.println("-> filter : "+filter); //$NON-NLS-1$
+			}
 			this.setChanged();
 		}
 	}
@@ -374,8 +408,12 @@ public class Filter extends Observable {
 		if (statement==null) { // Not checked transaction
 			return isOk(Filter.NOT_CHECKED);
 		} else { // Checked transaction
-			if (!isOk(Filter.CHECKED)) return false;
-			if (statementMatcher==null) return true;
+			if (!isOk(Filter.CHECKED)) {
+				return false;
+			}
+			if (statementMatcher==null) {
+				return true;
+			}
 			return statementMatcher.matches(statement);
 		}
 	}

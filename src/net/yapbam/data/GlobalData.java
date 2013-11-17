@@ -50,7 +50,9 @@ public class GlobalData extends DefaultListenable {
 		@Override
 		public int compare(PeriodicalTransaction o1, PeriodicalTransaction o2) {
 			int result = o1.getDescription().compareToIgnoreCase(o2.getDescription());
-			if (result==0) result = Long.signum(o1.getId()-o2.getId());
+			if (result==0) {
+				result = Long.signum(o1.getId()-o2.getId());
+			}
 			return result;
 		}
 	};
@@ -64,7 +66,9 @@ public class GlobalData extends DefaultListenable {
 		@Override
 		public int compare(Double o1, Double o2) {
 			// o1.equals(o2) is here because if the doubles are positive or negative infinity, their difference is not defined
-			if (o1.equals(o2) || (Math.abs(o1-o2)<defaultPrecision)) return 0;
+			if (o1.equals(o2) || (Math.abs(o1-o2)<defaultPrecision)) {
+				return 0;
+			}
 			return o1<o2?-1:1;
 		}
 	};
@@ -129,14 +133,18 @@ public class GlobalData extends DefaultListenable {
 	public void setURI(URI uri) {
 		URI old = this.uri;
 		this.uri = uri;
-		if (!this.uri.equals(old)) fireEvent(new URIChangedEvent(this));
+		if (!this.uri.equals(old)) {
+			fireEvent(new URIChangedEvent(this));
+		}
 	}
 
 	/** Sets the password used to protect the data (to encrypt the file containing it).
 	 * @param password a string (null or an empty string if the data is not protected).
 	 */
 	public void setPassword(String password) {
-		if ((password!=null) && (password.length()==0)) password = null;
+		if ((password!=null) && (password.length()==0)) {
+			password = null;
+		}
 		if (!NullUtils.areEquals(this.password, password)) {
 			String old = this.password;
 			this.password = password;
@@ -155,9 +163,13 @@ public class GlobalData extends DefaultListenable {
 	 * @param enabled true to enable events, false to disable events.
 	 */
 	public void setEventsEnabled(boolean enabled) {
-		if (super.IsEventsEnabled()) eventsPending = false;
+		if (super.IsEventsEnabled()) {
+			eventsPending = false;
+		}
 		super.setEventsEnabled(enabled);
-		if (enabled && (eventsPending)) fireEvent(new EverythingChangedEvent(this));
+		if (enabled && (eventsPending)) {
+			fireEvent(new EverythingChangedEvent(this));
+		}
 	}
 
 	/** Tests whether the events are enabled or not.
@@ -182,7 +194,9 @@ public class GlobalData extends DefaultListenable {
 	 */
 	public Account getAccount(String name) {
 		for (Account account : this.accounts) {
-			if (account.getName().equalsIgnoreCase(name)) return account;
+			if (account.getName().equalsIgnoreCase(name)) {
+				return account;
+			}
 		}
 		return null;
 	}
@@ -207,7 +221,9 @@ public class GlobalData extends DefaultListenable {
 	}
 
 	public void add(Account account) {
-		if (getAccount(account.getName())!=null) throw new IllegalArgumentException("Duplicate account name : "+account); //$NON-NLS-1$
+		if (getAccount(account.getName())!=null) {
+			throw new IllegalArgumentException("Duplicate account name : "+account); //$NON-NLS-1$
+		}
 		this.accounts.add(account);
 		fireEvent(new AccountAddedEvent(this, account));
 		this.setChanged();
@@ -226,12 +242,16 @@ public class GlobalData extends DefaultListenable {
 	 */
 	public void add(Transaction[] transactions) {
 		Logger.getLogger("GlobalData").finest("start adding transactions to global data");
-		if (transactions.length==0) return;
+		if (transactions.length==0) {
+			return;
+		}
 		// In order to optimize the number of events fired, we will group transactions by account before
 		// adding them to their accounts (so, we will generate a maximum of one event per account).
 		// Initialize the lists of transactions per account.
 		List<Collection<Transaction>> accountTransactions = new ArrayList<Collection<Transaction>>(this.getAccountsNumber());
-		for (int i = 0; i < this.getAccountsNumber(); i++) accountTransactions.add(new ArrayList<Transaction>());
+		for (int i = 0; i < this.getAccountsNumber(); i++) {
+			accountTransactions.add(new ArrayList<Transaction>());
+		}
 		for (Transaction transaction : transactions) {
 			int index = -Collections.binarySearch(this.transactions, transaction, COMPARATOR)-1;
 			this.transactions.add(index, transaction);
@@ -339,7 +359,9 @@ public class GlobalData extends DefaultListenable {
 	}
 
 	public Category getCategory(String categoryId) {
-		if (categoryId==null) return Category.UNDEFINED;
+		if (categoryId==null) {
+			return Category.UNDEFINED;
+		}
 		int index = Collections.binarySearch(categories, new Category(categoryId));
 		if (index<0) {
 			return null;
@@ -353,7 +375,9 @@ public class GlobalData extends DefaultListenable {
 	}
 
 	public void add(Category category) {
-		if (category.getName()==null) throw new IllegalArgumentException();
+		if (category.getName()==null) {
+			throw new IllegalArgumentException();
+		}
 		int index = -Collections.binarySearch(categories, category)-1;
 		this.categories.add(index, category);
 		fireEvent(new CategoryAddedEvent(this, category));
@@ -407,7 +431,9 @@ public class GlobalData extends DefaultListenable {
 	 * @param transactions The transactions to add
 	 */
 	public void add(PeriodicalTransaction[] transactions) {
-		if (transactions.length==0) return;
+		if (transactions.length==0) {
+			return;
+		}
 		for (PeriodicalTransaction transaction : transactions) {
 			int index = -Collections.binarySearch(this.periodicals, transaction, PERIODICAL_COMPARATOR)-1;
 			this.periodicals.add(index, transaction);
@@ -436,7 +462,9 @@ public class GlobalData extends DefaultListenable {
 		int[] indexes = new int[periodicals.length];
 		for (PeriodicalTransaction transaction : periodicals) {
 			indexes[nb] = Collections.binarySearch(this.periodicals, transaction, PERIODICAL_COMPARATOR);
-			if (indexes[nb]>=0) nb++;
+			if (indexes[nb]>=0) {
+				nb++;
+			}
 		}
 		if (nb>0) { // If some were found
 			PeriodicalTransaction[] removed = new PeriodicalTransaction[nb];
@@ -456,7 +484,9 @@ public class GlobalData extends DefaultListenable {
 	 */
 	public void remove (PeriodicalTransaction periodical) {
 		int index = Collections.binarySearch(this.periodicals, periodical, PERIODICAL_COMPARATOR);
-		if (index>=0) this.removePeriodicalTransaction(index);
+		if (index>=0) {
+			this.removePeriodicalTransaction(index);
+		}
 	}
 
 	/** Removes a periodical transaction identified by its index.
@@ -519,13 +549,17 @@ public class GlobalData extends DefaultListenable {
 			if (account.getTransactionsNumber()!=0) {
 				List<Transaction> removed = new ArrayList<Transaction>(account.getTransactionsNumber());
 				for (Transaction transaction : this.transactions) {
-					if (transaction.getAccount()==account) removed.add(transaction);
+					if (transaction.getAccount()==account) {
+						removed.add(transaction);
+					}
 				}
 				this.remove(removed.toArray(new Transaction[removed.size()]));
 			}
 			List<PeriodicalTransaction> removed = new ArrayList<PeriodicalTransaction>();
 			for (PeriodicalTransaction transaction : this.periodicals) {
-				if (transaction.getAccount()==account) removed.add(transaction);
+				if (transaction.getAccount()==account) {
+					removed.add(transaction);
+				}
 			}
 			this.remove(removed.toArray(new PeriodicalTransaction[removed.size()]));
 			this.accounts.remove(index);
@@ -544,7 +578,9 @@ public class GlobalData extends DefaultListenable {
 		if (!old.equals(value)) {
 			// Check that this account name is not already used
 			Account accountByName = getAccount(value);
-			if ((accountByName != null) && (accountByName!=account)) throw new IllegalArgumentException("Account name already exists"); //$NON-NLS-1$
+			if ((accountByName != null) && (accountByName!=account)) {
+				throw new IllegalArgumentException("Account name already exists"); //$NON-NLS-1$
+			}
 			account.setName(value);
 			this.fireEvent(new AccountPropertyChangedEvent(this, AccountPropertyChangedEvent.NAME, account, old,value));
 			this.setChanged();

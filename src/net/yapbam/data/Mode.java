@@ -54,7 +54,7 @@ public class Mode implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj==null) return false;
+		if ((obj==null) || !(obj instanceof Mode)) return false;
 		return NullUtils.areEquals(this.getName(),((Mode)obj).getName());
 	}
 
