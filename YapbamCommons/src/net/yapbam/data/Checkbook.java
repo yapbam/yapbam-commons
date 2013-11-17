@@ -30,7 +30,9 @@ public class Checkbook implements Serializable {
 		this.numberLength = start.add(BigInteger.valueOf(size)).toString().length();
 		if (next!=null) {
 			this.used = next.subtract(start).intValue();
-			if (used>=size) throw new IllegalArgumentException();
+			if (used>=size) {
+				throw new IllegalArgumentException();
+			}
 		} else {
 			used = size;
 		}
@@ -40,7 +42,9 @@ public class Checkbook implements Serializable {
 	 * @return the check number, or null if there is no more check in this checkbook
 	 */
 	public BigInteger getNext() {
-		if (isEmpty()) return null;
+		if (isEmpty()) {
+			return null;
+		}
 		return getFirst().add(BigInteger.valueOf(used));
 	}
 
@@ -49,7 +53,9 @@ public class Checkbook implements Serializable {
 	 * @return the check number, or null if the checkbook has less than index-1 checks
 	 */
 	public BigInteger get(int index) {
-		if (index>=this.size) return null;
+		if (index>=this.size) {
+			return null;
+		}
 		return getFirst().add(BigInteger.valueOf(index));
 	}
 
@@ -59,7 +65,9 @@ public class Checkbook implements Serializable {
 	 * @see #getNumber(String)
 	 */
 	public String getFullNumber(BigInteger shortNumber) {
-		if (shortNumber==null) return null;
+		if (shortNumber==null) {
+			return null;
+		}
 		String number = prefix + shortNumber.toString();
 		StringBuilder leadingZeros = new StringBuilder();
 		for (int i = number.length(); i < this.numberLength; i++) {
@@ -140,11 +148,15 @@ public class Checkbook implements Serializable {
 	 * @see #getFullNumber(BigInteger)
 	 */
 	public BigInteger getNumber(String fullNumber) {
-		if (!fullNumber.startsWith(this.prefix)) return null;
+		if (!fullNumber.startsWith(this.prefix)) {
+			return null;
+		}
 		String numberString = fullNumber.substring(this.prefix.length());
 		try {
 			BigInteger result = new BigInteger(numberString);
-			if ((result.compareTo(this.firstNumber)<0) || (result.compareTo(this.getFirst().add(BigInteger.valueOf(this.size)))>=0)) return null;
+			if ((result.compareTo(this.firstNumber)<0) || (result.compareTo(this.getFirst().add(BigInteger.valueOf(this.size)))>=0)) {
+				return null;
+			}
 			return result;
 		} catch (NumberFormatException e) {
 			return null;

@@ -123,7 +123,6 @@ public class XMLSerializer {
 
 	private AttributesImpl atts;
 	private TransformerHandler hd;
-	private OutputStream os;
 	
 	/** Creates a new XML Serializer.
 	 * <br>The serializer outputs the xml header. After all elements are output, you should call closedocument in order
@@ -134,8 +133,7 @@ public class XMLSerializer {
 	 */
 	public XMLSerializer (OutputStream os) throws IOException {
 		try {
-			this.os = os;
-			StreamResult streamResult = new StreamResult(this.os);
+			StreamResult streamResult = new StreamResult(os);
 			SAXTransformerFactory tf = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 			hd = tf.newTransformerHandler();
 			Transformer serializer = hd.getTransformer();
@@ -194,8 +192,7 @@ public class XMLSerializer {
 		} catch (SAXException e) {
 			throw new RuntimeException(e);
 		}
-		GlobalData data = dh.getData();
-		return data;
+		return dh.getData();
 	}
 
 	public void serialize (GlobalData data, ProgressReport report) throws IOException {
@@ -210,20 +207,20 @@ public class XMLSerializer {
 			hd.startElement(EMPTY,EMPTY,GLOBAL_DATA_TAG,atts);
 			
 			// Accounts.
-			for (int i=0;i<data.getAccountsNumber();i++)
-			{
+			for (int i=0;i<data.getAccountsNumber();i++) {
 				serialize(data.getAccount(i));
 			}
 			// Categories
-			for (int i=0;i<data.getCategoriesNumber();i++)
-			{
+			for (int i=0;i<data.getCategoriesNumber();i++) {
 				serialize(data.getCategory(i));
 			}
 			// Periodical transactions
 			for (int i = 0; i < data.getPeriodicalTransactionsNumber(); i++) {
 				serialize(data.getPeriodicalTransaction(i));
 			}
-			if (report!=null) report.setMax(data.getTransactionsNumber());
+			if (report!=null) {
+				report.setMax(data.getTransactionsNumber());
+			}
 			//Transactions
 			for (int i=0;i<data.getTransactionsNumber();i++) {
 				if (SLOW_WRITING) {
@@ -232,7 +229,9 @@ public class XMLSerializer {
 					} catch (InterruptedException e) {}
 				}
 				serialize(data.getTransaction(i));
-				if (report!=null) report.reportProgress(i+1);
+				if (report!=null) {
+					report.reportProgress(i+1);
+				}
 			}
 			hd.endElement(EMPTY,EMPTY,GLOBAL_DATA_TAG);
 		} catch (SAXException e) {
@@ -242,12 +241,24 @@ public class XMLSerializer {
 	
 	public void serialize(Filter filter) throws SAXException {
 		atts.clear();
-		if (filter.getDateFrom()!=null) atts.addAttribute(EMPTY,EMPTY,FILTER_DATE_FROM_ATTRIBUTE,CDATA,toString(filter.getDateFrom()));
-		if (filter.getDateTo()!=null) atts.addAttribute(EMPTY,EMPTY,FILTER_DATE_TO_ATTRIBUTE,CDATA,toString(filter.getDateTo()));
-		if (filter.getValueDateTo()!=null) atts.addAttribute(EMPTY,EMPTY,FILTER_VALUE_DATE_TO_ATTRIBUTE,CDATA,toString(filter.getValueDateTo()));
-		if (filter.getValueDateFrom()!=null) atts.addAttribute(EMPTY,EMPTY,FILTER_VALUE_DATE_FROM_ATTRIBUTE,CDATA,toString(filter.getValueDateFrom()));
-		if (filter.getMinAmount()!=0.0) atts.addAttribute(EMPTY,EMPTY,FILTER_AMOUNT_FROM_ATTRIBUTE,CDATA,Double.toString(filter.getMinAmount()));
-		if (filter.getMaxAmount()!=Double.POSITIVE_INFINITY) atts.addAttribute(EMPTY,EMPTY,FILTER_AMOUNT_TO_ATTRIBUTE,CDATA,Double.toString(filter.getMaxAmount()));
+		if (filter.getDateFrom()!=null) {
+			atts.addAttribute(EMPTY,EMPTY,FILTER_DATE_FROM_ATTRIBUTE,CDATA,toString(filter.getDateFrom()));
+		}
+		if (filter.getDateTo()!=null) {
+			atts.addAttribute(EMPTY,EMPTY,FILTER_DATE_TO_ATTRIBUTE,CDATA,toString(filter.getDateTo()));
+		}
+		if (filter.getValueDateTo()!=null) {
+			atts.addAttribute(EMPTY,EMPTY,FILTER_VALUE_DATE_TO_ATTRIBUTE,CDATA,toString(filter.getValueDateTo()));
+		}
+		if (filter.getValueDateFrom()!=null) {
+			atts.addAttribute(EMPTY,EMPTY,FILTER_VALUE_DATE_FROM_ATTRIBUTE,CDATA,toString(filter.getValueDateFrom()));
+		}
+		if (filter.getMinAmount()!=0.0) {
+			atts.addAttribute(EMPTY,EMPTY,FILTER_AMOUNT_FROM_ATTRIBUTE,CDATA,Double.toString(filter.getMinAmount()));
+		}
+		if (filter.getMaxAmount()!=Double.POSITIVE_INFINITY) {
+			atts.addAttribute(EMPTY,EMPTY,FILTER_AMOUNT_TO_ATTRIBUTE,CDATA,Double.toString(filter.getMaxAmount()));
+		}
 		List<Account> accounts = filter.getValidAccounts();
 		if (accounts!=null) {
 			String[] strings = new String[accounts.size()];
@@ -269,16 +280,34 @@ public class XMLSerializer {
 			atts.addAttribute(EMPTY, EMPTY, CATEGORY_ATTRIBUTE, CDATA, ArrayUtils.toString(strings));
 		}
 		int mask = 0;
-		if (filter.isOk(Filter.RECEIPTS)) mask += Filter.RECEIPTS;
-		if (filter.isOk(Filter.EXPENSES)) mask += Filter.EXPENSES;
-		if (filter.isOk(Filter.CHECKED)) mask += Filter.CHECKED;
-		if (filter.isOk(Filter.NOT_CHECKED)) mask += Filter.NOT_CHECKED;
-		if (mask!=(Filter.ALL)) atts.addAttribute(EMPTY, EMPTY, FILTER_ATTRIBUTE, CDATA, Integer.toString(mask));
+		if (filter.isOk(Filter.RECEIPTS)) {
+			mask += Filter.RECEIPTS;
+		}
+		if (filter.isOk(Filter.EXPENSES)) {
+			mask += Filter.EXPENSES;
+		}
+		if (filter.isOk(Filter.CHECKED)) {
+			mask += Filter.CHECKED;
+		}
+		if (filter.isOk(Filter.NOT_CHECKED)) {
+			mask += Filter.NOT_CHECKED;
+		}
+		if (mask!=(Filter.ALL)) {
+			atts.addAttribute(EMPTY, EMPTY, FILTER_ATTRIBUTE, CDATA, Integer.toString(mask));
+		}
 		hd.startElement(EMPTY, EMPTY, FILTER_TAG, atts);
-		if (filter.getDescriptionMatcher()!=null) serialize(filter.getDescriptionMatcher(), FILTER_DESCRIPTION_ID);
-		if (filter.getCommentMatcher()!=null) serialize(filter.getCommentMatcher(), FILTER_COMMENT_ID);
-		if (filter.getNumberMatcher()!=null) serialize(filter.getNumberMatcher(), FILTER_NUMBER_ID);
-		if (filter.getStatementMatcher()!=null) serialize(filter.getStatementMatcher(), FILTER_STATEMENT_ID);
+		if (filter.getDescriptionMatcher()!=null) {
+			serialize(filter.getDescriptionMatcher(), FILTER_DESCRIPTION_ID);
+		}
+		if (filter.getCommentMatcher()!=null) {
+			serialize(filter.getCommentMatcher(), FILTER_COMMENT_ID);
+		}
+		if (filter.getNumberMatcher()!=null) {
+			serialize(filter.getNumberMatcher(), FILTER_NUMBER_ID);
+		}
+		if (filter.getStatementMatcher()!=null) {
+			serialize(filter.getStatementMatcher(), FILTER_STATEMENT_ID);
+		}
 		hd.endElement(EMPTY,EMPTY,FILTER_TAG);
 	}
 
@@ -340,7 +369,9 @@ public class XMLSerializer {
 		}
 		for (int i = 0; i < account.getModesNumber(); i++) {
 			Mode mode = account.getMode(i);
-			if (!mode.equals(Mode.UNDEFINED)) serialize(mode);
+			if (!mode.equals(Mode.UNDEFINED)) {
+				serialize(mode);
+			}
 		}
 		for (int i = 0; i < account.getCheckbooksNumber(); i++) {
 			serialize(account.getCheckbook(i));
@@ -354,10 +385,14 @@ public class XMLSerializer {
 	 * @throws IllegalArgumentException if mode is Mode.UNDEFINED
 	 */
 	private void serialize(Mode mode) throws SAXException {
-		if (mode.equals(Mode.UNDEFINED)) throw new IllegalArgumentException();
+		if (mode.equals(Mode.UNDEFINED)) {
+			throw new IllegalArgumentException();
+		}
 		atts.clear();
 		atts.addAttribute(EMPTY,EMPTY,ID_ATTRIBUTE,CDATA,mode.getName());
-		if (mode.isUseCheckBook()) atts.addAttribute(EMPTY, EMPTY, CHECKBOOK_ATTRIBUTE, CDATA, TRUE);
+		if (mode.isUseCheckBook()) {
+			atts.addAttribute(EMPTY, EMPTY, CHECKBOOK_ATTRIBUTE, CDATA, TRUE);
+		}
 		hd.startElement(EMPTY,EMPTY,MODE_TAG,atts);
 		DateStepper expense = mode.getExpenseVdc();
 		if (expense!=null) {
@@ -379,7 +414,9 @@ public class XMLSerializer {
 		atts.addAttribute(EMPTY,EMPTY,PREFIX_ATTRIBUTE,CDATA,book.getPrefix());
 		atts.addAttribute(EMPTY,EMPTY,FIRST_NUMBER_ATTRIBUTE,CDATA,book.getFirst().toString());
 		atts.addAttribute(EMPTY,EMPTY,SIZE_ATTRIBUTE,CDATA,Integer.toString(book.size()));
-		if (!book.isEmpty()) atts.addAttribute(EMPTY, EMPTY, NEXT_NUMBER_ATTRIBUTE, CDATA, book.getFirst().add(BigInteger.valueOf(book.getUsed())).toString());
+		if (!book.isEmpty()) {
+			atts.addAttribute(EMPTY, EMPTY, NEXT_NUMBER_ATTRIBUTE, CDATA, book.getFirst().add(BigInteger.valueOf(book.getUsed())).toString());
+		}
 		hd.startElement(EMPTY,EMPTY,CHECKBOOK_TAG,atts);
 		hd.endElement(EMPTY,EMPTY,CHECKBOOK_TAG);
 	}
@@ -415,20 +452,32 @@ public class XMLSerializer {
 		atts.clear();
 		atts.addAttribute(EMPTY,EMPTY,ACCOUNT_ATTRIBUTE,CDATA,transaction.getAccount().getName());
 		String description = transaction.getDescription();
-		if (description!=null) atts.addAttribute(EMPTY,EMPTY,DESCRIPTION_ATTRIBUTE,CDATA,description);
+		if (description!=null) {
+			atts.addAttribute(EMPTY,EMPTY,DESCRIPTION_ATTRIBUTE,CDATA,description);
+		}
 		String comment = transaction.getComment();
-		if (comment!=null) atts.addAttribute(EMPTY,EMPTY,COMMENT_ATTRIBUTE,CDATA,comment);
+		if (comment!=null) {
+			atts.addAttribute(EMPTY,EMPTY,COMMENT_ATTRIBUTE,CDATA,comment);
+		}
 		atts.addAttribute(EMPTY,EMPTY,DATE_ATTRIBUTE,CDATA,toString(transaction.getDate()));
 		atts.addAttribute(EMPTY,EMPTY,AMOUNT_ATTRIBUTE,CDATA,Double.toString(transaction.getAmount()));
 		Mode mode = transaction.getMode();
-		if (!mode.equals(Mode.UNDEFINED)) atts.addAttribute(EMPTY,EMPTY,MODE_ATTRIBUTE,CDATA,mode.getName());
+		if (!mode.equals(Mode.UNDEFINED)) {
+			atts.addAttribute(EMPTY,EMPTY,MODE_ATTRIBUTE,CDATA,mode.getName());
+		}
 		String number = transaction.getNumber();
-		if ((number!=null) && (number.length()>0)) atts.addAttribute(EMPTY,EMPTY,NUMBER_ATTRIBUTE,CDATA,number);
+		if ((number!=null) && (number.length()>0)) {
+			atts.addAttribute(EMPTY,EMPTY,NUMBER_ATTRIBUTE,CDATA,number);
+		}
 		Category category = transaction.getCategory();
-		if (!category.equals(Category.UNDEFINED)) atts.addAttribute(EMPTY,EMPTY,CATEGORY_ATTRIBUTE,CDATA,category.getName());
+		if (!category.equals(Category.UNDEFINED)) {
+			atts.addAttribute(EMPTY,EMPTY,CATEGORY_ATTRIBUTE,CDATA,category.getName());
+		}
 		atts.addAttribute(EMPTY,EMPTY,VALUE_DATE_ATTRIBUTE,CDATA,toString(transaction.getValueDate()));
 		String statement = transaction.getStatement();
-		if (statement!=null) atts.addAttribute(EMPTY,EMPTY,STATEMENT_ATTRIBUTE,CDATA,statement);
+		if (statement!=null) {
+			atts.addAttribute(EMPTY,EMPTY,STATEMENT_ATTRIBUTE,CDATA,statement);
+		}
 		hd.startElement(EMPTY,EMPTY,TRANSACTION_TAG,atts);
 		for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
 			serialize(transaction.getSubTransaction(i));
@@ -441,7 +490,9 @@ public class XMLSerializer {
 		atts.addAttribute(EMPTY, EMPTY, DESCRIPTION_ATTRIBUTE, CDATA, subTransaction.getDescription());
 		atts.addAttribute(EMPTY, EMPTY, AMOUNT_ATTRIBUTE, CDATA, Double.toString(subTransaction.getAmount()));
 		Category category = subTransaction.getCategory();
-		if (!category.equals(Category.UNDEFINED)) atts.addAttribute(EMPTY, EMPTY, CATEGORY_ATTRIBUTE, CDATA,category.getName());
+		if (!category.equals(Category.UNDEFINED)) {
+			atts.addAttribute(EMPTY, EMPTY, CATEGORY_ATTRIBUTE, CDATA,category.getName());
+		}
 		hd.startElement(EMPTY,EMPTY,SUBTRANSACTION_TAG,atts);
 		hd.endElement(EMPTY,EMPTY,SUBTRANSACTION_TAG);
 	}
@@ -450,20 +501,32 @@ public class XMLSerializer {
 		atts.clear();
 		atts.addAttribute(EMPTY,EMPTY,ACCOUNT_ATTRIBUTE,CDATA,periodicalTransaction.getAccount().getName());
 		String description = periodicalTransaction.getDescription();
-		if (description!=null) atts.addAttribute(EMPTY,EMPTY,DESCRIPTION_ATTRIBUTE,CDATA,description);
+		if (description!=null) {
+			atts.addAttribute(EMPTY,EMPTY,DESCRIPTION_ATTRIBUTE,CDATA,description);
+		}
 		String comment = periodicalTransaction.getComment();
-		if (comment!=null) atts.addAttribute(EMPTY,EMPTY,COMMENT_ATTRIBUTE,CDATA,comment);
+		if (comment!=null) {
+			atts.addAttribute(EMPTY,EMPTY,COMMENT_ATTRIBUTE,CDATA,comment);
+		}
 		atts.addAttribute(EMPTY,EMPTY,AMOUNT_ATTRIBUTE,CDATA,Double.toString(periodicalTransaction.getAmount()));
 		Mode mode = periodicalTransaction.getMode();
-		if (!mode.equals(Mode.UNDEFINED)) atts.addAttribute(EMPTY,EMPTY,MODE_ATTRIBUTE,CDATA,mode.getName());
+		if (!mode.equals(Mode.UNDEFINED)) {
+			atts.addAttribute(EMPTY,EMPTY,MODE_ATTRIBUTE,CDATA,mode.getName());
+		}
 		Category category = periodicalTransaction.getCategory();
-		if (!category.equals(Category.UNDEFINED)) atts.addAttribute(EMPTY,EMPTY,CATEGORY_ATTRIBUTE,CDATA,category.getName());
+		if (!category.equals(Category.UNDEFINED)) {
+			atts.addAttribute(EMPTY,EMPTY,CATEGORY_ATTRIBUTE,CDATA,category.getName());
+		}
 		atts.addAttribute(EMPTY,EMPTY,ENABLED_ATTRIBUTE,CDATA,Boolean.toString(periodicalTransaction.isEnabled()));
 		Date nextDate = periodicalTransaction.getNextDate();
-		if (nextDate!=null) atts.addAttribute(EMPTY,EMPTY,NEXT_DATE_ATTRIBUTE,CDATA,toString(nextDate));
+		if (nextDate!=null) {
+			atts.addAttribute(EMPTY,EMPTY,NEXT_DATE_ATTRIBUTE,CDATA,toString(nextDate));
+		}
 		hd.startElement(EMPTY,EMPTY,PERIODICAL_TAG,atts);
 		DateStepper nextDateBuilder = periodicalTransaction.getNextDateBuilder();
-		if (nextDateBuilder!=null) serialize(nextDateBuilder);
+		if (nextDateBuilder!=null) {
+			serialize(nextDateBuilder);
+		}
 		for (int i = 0; i < periodicalTransaction.getSubTransactionSize(); i++) {
 			serialize(periodicalTransaction.getSubTransaction(i));
 		}
@@ -478,7 +541,9 @@ public class XMLSerializer {
 			atts.addAttribute(EMPTY, EMPTY, PERIOD_ATTRIBUTE, CDATA, Integer.toString(mds.getPeriod()));
 			atts.addAttribute(EMPTY, EMPTY, DAY_ATTRIBUTE, CDATA, Integer.toString(mds.getDay()));
 			Date last = mds.getLastDate();
-			if (last!=null) atts.addAttribute(EMPTY, EMPTY, LAST_DATE_ATTRIBUTE, CDATA, toString(last));
+			if (last!=null) {
+				atts.addAttribute(EMPTY, EMPTY, LAST_DATE_ATTRIBUTE, CDATA, toString(last));
+			}
 			hd.startElement(EMPTY,EMPTY,DATE_STEPPER_TAG, atts);
 			hd.endElement(EMPTY,EMPTY,DATE_STEPPER_TAG);
 		} else if (stepper instanceof DayDateStepper) {
@@ -486,7 +551,9 @@ public class XMLSerializer {
 			atts.addAttribute(EMPTY, EMPTY, KIND_ATTRIBUTE, CDATA, RELATIVE_DATE_STEPPER_KIND);
 			atts.addAttribute(EMPTY, EMPTY, PERIOD_ATTRIBUTE, CDATA, Integer.toString(dds.getStep()));
 			Date last = dds.getLastDate();
-			if (last!=null) atts.addAttribute(EMPTY, EMPTY, LAST_DATE_ATTRIBUTE, CDATA, toString(last));
+			if (last!=null) {
+				atts.addAttribute(EMPTY, EMPTY, LAST_DATE_ATTRIBUTE, CDATA, toString(last));
+			}
 			hd.startElement(EMPTY,EMPTY,DATE_STEPPER_TAG, atts);
 			hd.endElement(EMPTY,EMPTY,DATE_STEPPER_TAG);
 			atts.clear();

@@ -15,7 +15,7 @@ public abstract class DateStepper {
 		}
 		@Override
 		public boolean equals(Object obj) {
-			return this.getClass().equals(obj.getClass());
+			return (obj!=null) && getClass().equals(obj.getClass());
 		}
 		@Override
 		public int hashCode() {
@@ -45,7 +45,6 @@ public abstract class DateStepper {
 	 * @returns true if this is from the same class than obj.
 	 */
 	public boolean equals(Object obj) {
-		if (obj==null) return false;
-		return this.getClass().equals(obj.getClass());
+		return (obj!=null) && this.getClass().equals(obj.getClass());
 	}
 }
