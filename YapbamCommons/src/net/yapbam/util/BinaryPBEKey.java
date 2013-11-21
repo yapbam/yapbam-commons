@@ -16,16 +16,14 @@ public class BinaryPBEKey implements SecretKey {
 	/**
 	 * Creates a PBE key from a given binary key.
 	 * 
-	 * @param key
-	 *          The key.
+	 * @param theKey The key.
 	 */
-	public BinaryPBEKey(byte[] key) throws InvalidKeySpecException {
-		if (key == null) {
+	public BinaryPBEKey(byte[] theKey) throws InvalidKeySpecException {
+		if (theKey == null) {
 			this.key = new byte[0];
 		} else {
-			this.key = (byte[]) key.clone();
+			this.key = (byte[]) theKey.clone();
 		}
-		Arrays.fill(key, (byte) 0);
 	}
 
 	public byte[] getEncoded() {
@@ -50,14 +48,15 @@ public class BinaryPBEKey implements SecretKey {
 		for (int xa = 1; xa < this.key.length; xa++) {
 			ret += (this.key[xa] * xa);
 		}
-		return (ret ^= getAlgorithm().toUpperCase().hashCode());
+		ret ^= getAlgorithm().toUpperCase().hashCode();
+		return ret;
 	}
 
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
 		}
-		if (obj.getClass() != getClass()) {
+		if ((obj == null) || !obj.getClass().equals(getClass())) {
 			return false;
 		}
 

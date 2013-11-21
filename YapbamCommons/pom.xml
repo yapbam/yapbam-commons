@@ -19,6 +19,20 @@
 	<url>https://yapbam.fathzer.com</url>
 	<description>Commons Yapbam classes used by desktop and Android versions.</description>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.5</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>junitTests</testSourceDirectory>
