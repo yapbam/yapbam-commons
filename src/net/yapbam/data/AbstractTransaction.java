@@ -1,5 +1,6 @@
 package net.yapbam.data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,7 +8,9 @@ import java.util.List;
 /** An abstract transaction.
  * These transactions have a description, an amount, an account, a mode, a category and a list of subtransactions.
  */
-public abstract class AbstractTransaction implements Cloneable {
+public abstract class AbstractTransaction implements Cloneable, Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private static volatile long currentId = 0;
 	
 	private long id;
