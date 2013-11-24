@@ -43,13 +43,19 @@ public class Statement  {
 		Arrays.sort(statements, new Comparator<Statement>() {
 			@Override
 			public int compare(Statement o2, Statement o1) {
-				if ((o2.getId()==null) || (o1.getId()==null)) return NullUtils.compareTo(o2.getId(),o1.getId(),false);
+				if ((o2.getId()==null) || (o1.getId()==null)) {
+					return NullUtils.compareTo(o2.getId(),o1.getId(),false);
+				}
 				int result = o2.getMediumDate()-o1.getMediumDate();
-				if (result==0) result = NullUtils.compareTo(o2.getId(),o1.getId(),false);
+				if (result==0) {
+					result = NullUtils.compareTo(o2.getId(),o1.getId(),false);
+				}
 				return result;
 			}
 		});
-		if (statements.length==0) statements = new Statement[]{new Statement(null)}; 
+		if (statements.length==0) {
+			statements = new Statement[]{new Statement(null)}; 
+		}
 		statements[0].setStartBalance(account.getInitialBalance());
 		for (int i = 1; i < statements.length; i++) {
 			statements[i].setStartBalance(statements[i-1].getEndBalance());
@@ -77,8 +83,11 @@ public class Statement  {
 	private void add(Transaction transaction) {
 		this.nbTransactions++;
 		double amount = transaction.getAmount();
-		if (amount>0) this.positiveBalance += amount;
-		else this.negativeBalance -= amount;
+		if (amount>0) {
+			this.positiveBalance += amount;
+		} else {
+			this.negativeBalance -= amount;
+		}
 		this.dateSum += transaction.getValueDateAsInteger();
 	}
 	

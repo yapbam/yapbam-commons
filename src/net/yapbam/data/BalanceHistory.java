@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import net.yapbam.util.NullUtils;
 
@@ -34,8 +35,8 @@ public class BalanceHistory implements Serializable {
 	private Date minMaxEndDate;
 	private double minBalance;
 	private double maxBalance;
-	private ArrayList<BalanceHistoryElement> elements;
-	private ArrayList<Transaction> transactions;
+	private List<BalanceHistoryElement> elements;
+	private List<Transaction> transactions;
 	
 	/** Constructor.
 	 * @param intialBalance The initial balance (at the beginning of times).

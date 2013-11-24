@@ -40,7 +40,7 @@ public abstract class DefaultListenable {
 	/** Tests whether events are enabled or not.
 	 * @return true if events are enabled.
 	 */
-	protected boolean IsEventsEnabled() {
+	protected boolean isEventsEnabled() {
 		return !this.eventsDisabled;
 	}
     
@@ -49,13 +49,21 @@ public abstract class DefaultListenable {
 	 */
 	@SuppressWarnings("nls")
 	protected void fireEvent(DataEvent event) {
-		if (eventsDisabled) return;
-		if (TRACE_EVENTS && !TRACE_ALL) trace("Event "+event+" occurs on "+this); //$NON-NLS-1$ //$NON-NLS-2$
+		if (eventsDisabled) {
+			return;
+		}
+		if (TRACE_EVENTS && !TRACE_ALL) {
+			trace("Event "+event+" occurs on "+this); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		Iterator<DataListener> iterator = listeners.iterator();
-		if (TRACE_ALL && (listeners.size()==0)) trace("Event "+event+" occurs on "+this+" but nobody is listening"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (TRACE_ALL && listeners.isEmpty()) {
+			trace("Event "+event+" occurs on "+this+" but nobody is listening"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 		while (iterator.hasNext()) {
 			DataListener listener = iterator.next();
-			if (TRACE_ALL) trace("Send event "+event+" on "+this+" to "+listener); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (TRACE_ALL) {
+				trace("Send event "+event+" on "+this+" to "+listener); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
 			indent += 2;
 			try {
 				listener.processEvent(event);
@@ -76,15 +84,21 @@ public abstract class DefaultListenable {
 	 * @param listener The listener to add.
 	 */
 	public void addListener(DataListener listener) {
-		if (listeners==null) this.listeners = new ArrayList<DataListener>();
-		if (TRACE_ALL || TRACE_LISTENERS) System.err.println ("Add listener "+listener+" on "+this); //$NON-NLS-1$ //$NON-NLS-2$
+		if (listeners==null) {
+			this.listeners = new ArrayList<DataListener>();
+		}
+		if (TRACE_ALL || TRACE_LISTENERS) {
+			System.err.println ("Add listener "+listener+" on "+this); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		listeners.add(listener);
 	}
 	
 	/** Removes all the previously registered listeners.
 	 */
 	public void clearListeners() {
-		if (TRACE_ALL || TRACE_LISTENERS) System.err.println ("All listeners are cleared on "+this); //$NON-NLS-1$
+		if (TRACE_ALL || TRACE_LISTENERS) {
+			System.err.println ("All listeners are cleared on "+this); //$NON-NLS-1$
+		}
 		this.listeners.clear();
 	}
 	

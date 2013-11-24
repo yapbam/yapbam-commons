@@ -16,7 +16,7 @@ import net.yapbam.util.NullUtils;
  */
 public class FilteredData extends DefaultListenable {
 	private GlobalData data;
-	private ArrayList<Transaction> transactions;
+	private List<Transaction> transactions;
 	private Comparator<Transaction> comparator = TransactionComparator.INSTANCE;
 	private BalanceData balanceData;
 	private Filter filter;
@@ -38,7 +38,9 @@ public class FilteredData extends DefaultListenable {
 		this.data.addListener(new DataListener() {
 			@Override
 			public void processEvent(DataEvent event) {
-				if (eventImplySorting(event)) Collections.sort(transactions, comparator);
+				if (eventImplySorting(event)) {
+					Collections.sort(transactions, comparator);
+				}
 				if (event instanceof EverythingChangedEvent) {
 					filter.clear(); // If everything changed, reset the filter
 					filter();
@@ -49,7 +51,7 @@ public class FilteredData extends DefaultListenable {
 						double initialBalance = account.getInitialBalance();
 						balanceData.updateBalance(initialBalance, false);
 						int index = validAccounts==null?((AccountRemovedEvent) event).getIndex():filter.getValidAccounts().indexOf(account);
-						filter.setValidAccounts((validAccounts==null) || (validAccounts.size()==0)?null:validAccounts);
+						filter.setValidAccounts((validAccounts==null) || validAccounts.isEmpty()?null:validAccounts);
 						fireEvent(new AccountRemovedEvent(FilteredData.this, index, account));
 					}
 				} else if (event instanceof CategoryRemovedEvent) {
@@ -57,7 +59,7 @@ public class FilteredData extends DefaultListenable {
 					List<Category> validCategories = filter.getValidCategories();
 					if ((validCategories==null) || validCategories.remove(category)) {
 						int index = validCategories==null?((CategoryRemovedEvent) event).getIndex():filter.getValidCategories().indexOf(category);
-						filter.setValidCategories((validCategories==null) || (validCategories.size()==0)?null:validCategories);
+						filter.setValidCategories((validCategories==null) || validCategories.isEmpty()?null:validCategories);
 						fireEvent(new CategoryRemovedEvent(FilteredData.this, index, category));
 					}
 				} else if (event instanceof TransactionsAddedEvent) {
@@ -82,9 +84,13 @@ public class FilteredData extends DefaultListenable {
 					}
 					balanceData.updateBalance(addedAmount, true);
 					// If some transactions in a valid account were removed, update the balance data
-					if (accountOkTransactions.size()>0) balanceData.updateBalance(accountOkTransactions.toArray(new Transaction[accountOkTransactions.size()]), true);
+					if (!accountOkTransactions.isEmpty()) {
+						balanceData.updateBalance(accountOkTransactions.toArray(new Transaction[accountOkTransactions.size()]), true);
+					}
 					// If some valid transactions were removed, fire an event.
-					if (okTransactions.size()>0) fireEvent(new TransactionsAddedEvent(FilteredData.this, okTransactions.toArray(new Transaction[okTransactions.size()])));
+					if (!okTransactions.isEmpty()) {
+						fireEvent(new TransactionsAddedEvent(FilteredData.this, okTransactions.toArray(new Transaction[okTransactions.size()])));
+					}
 				} else if (event instanceof TransactionsRemovedEvent) {
 					Transaction[] ts = ((TransactionsRemovedEvent)event).getRemoved();
 					Collection<Transaction> accountOkTransactions = new ArrayList<Transaction>(ts.length);
@@ -107,9 +113,13 @@ public class FilteredData extends DefaultListenable {
 					}
 					balanceData.updateBalance(addedAmount, true);
 					// If some transactions in a valid account were removed, update the balance data
-					if (accountOkTransactions.size()>0) balanceData.updateBalance(accountOkTransactions.toArray(new Transaction[accountOkTransactions.size()]), false);
+					if (!accountOkTransactions.isEmpty()) {
+						balanceData.updateBalance(accountOkTransactions.toArray(new Transaction[accountOkTransactions.size()]), false);
+					}
 					// If some valid transactions were removed, fire an event.
-					if (okTransactions.size()>0) fireEvent(new TransactionsRemovedEvent(FilteredData.this, okTransactions.toArray(new Transaction[okTransactions.size()])));
+					if (!okTransactions.isEmpty()) {
+						fireEvent(new TransactionsRemovedEvent(FilteredData.this, okTransactions.toArray(new Transaction[okTransactions.size()])));
+					}
 				} else if (event instanceof AccountAddedEvent) {
 					Account account = ((AccountAddedEvent)event).getAccount();
 					if (filter.isOk(account)) {
@@ -158,7 +168,7 @@ public class FilteredData extends DefaultListenable {
 							}
 						}
 						if (needRemoving) {
-							filter.setValidModes(validModes.size()==0?null:validModes);
+							filter.setValidModes(validModes.isEmpty()?null:validModes);
 							fireEvent (event);
 						}
 					}
@@ -237,9 +247,8 @@ public class FilteredData extends DefaultListenable {
 			if (isOk(transaction.getSubTransaction(i))) {
 				return true;
 			}
-			if (isComplementOk(transaction)) return true;
 		}
-		return false;
+		return isComplementOk(transaction);
 	}
 	
 	/** Gets a subtransaction validity.
