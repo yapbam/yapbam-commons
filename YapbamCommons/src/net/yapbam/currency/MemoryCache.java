@@ -32,6 +32,7 @@ public class MemoryCache implements Cache {
 
 	@Override
 	public void commit() {
-		this.charArrays = null; // Force re-creation of this field
+		// Force re-creation of the charArrays field
+		this.charArrays = null;
 	}
 }

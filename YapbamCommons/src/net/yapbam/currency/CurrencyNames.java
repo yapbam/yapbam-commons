@@ -38,11 +38,15 @@ public class CurrencyNames {
 			boolean ok = false;
 			try {
 				ok = tryLoading(properties, BUNDLE_NAME+"_"+lang+resourceSuffix);
-				if (!ok) ok = tryLoading(properties, BUNDLE_NAME+resourceSuffix);
+				if (!ok) {
+					ok = tryLoading(properties, BUNDLE_NAME+resourceSuffix);
+				}
 			} catch (IOException e) {
 				ok = false;
 			}
-			if (!ok) throw new MissingResourceException("", "", BUNDLE_NAME);
+			if (!ok) {
+				throw new MissingResourceException("", "", BUNDLE_NAME);
+			}
 			RESOURCE_BUNDLE = properties;
 			resourceBundleLocale = Locale.getDefault();
 		}
@@ -50,7 +54,9 @@ public class CurrencyNames {
 	
 	private static boolean tryLoading(Properties properties, String name) throws IOException {
 		InputStream stream = CurrencyNames.class.getResourceAsStream(name);
-		if (stream==null) return false;
+		if (stream==null) {
+			return false;
+		}
 		try {
 			InputStreamReader reader = new InputStreamReader(stream, "ISO8859-1");
 			try {
