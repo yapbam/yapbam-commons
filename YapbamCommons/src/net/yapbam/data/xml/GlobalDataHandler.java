@@ -33,7 +33,7 @@ class GlobalDataHandler extends DefaultHandler {
 	private int currentProgress;
 	
 	private Collection<Transaction> transactions;
-	private HashMap<String,String> tagToCData;
+	private Map<String,String> tagToCData;
 	private String currentTag;
 	private Locator locator;
 	private boolean schemaValidation;

@@ -7,6 +7,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.yapbam.data.event.*;
 import net.yapbam.util.DateUtils;
@@ -18,12 +19,12 @@ import net.yapbam.util.DateUtils;
 public class BudgetView extends DefaultListenable {
 	private FilteredData data;
 	private boolean year;
-	private HashMap<Key, Double> values;
+	private Map<Key, Double> values;
 	private Calendar firstDate;
 	private Calendar lastDate;
 	private List<Category> categories;
-	private HashMap<Category, Double> categoryToSum;
-	private HashMap<Date, Double> dateToSum;
+	private Map<Category, Double> categoryToSum;
+	private Map<Date, Double> dateToSum;
 	private double sum;
 	private boolean groupSubCategories;
 	

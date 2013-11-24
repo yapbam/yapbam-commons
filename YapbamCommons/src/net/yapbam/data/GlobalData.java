@@ -163,7 +163,7 @@ public class GlobalData extends DefaultListenable {
 	 * @param enabled true to enable events, false to disable events.
 	 */
 	public void setEventsEnabled(boolean enabled) {
-		if (super.IsEventsEnabled()) {
+		if (isEventsEnabled()) {
 			eventsPending = false;
 		}
 		super.setEventsEnabled(enabled);
@@ -176,12 +176,12 @@ public class GlobalData extends DefaultListenable {
 	 * @return true if the events are enabled.
 	 */
 	public boolean isEventsEnabled() {
-		return super.IsEventsEnabled();
+		return super.isEventsEnabled();
 	}
 
 	@Override
 	protected void fireEvent(DataEvent event) {
-		if (IsEventsEnabled()) {
+		if (isEventsEnabled()) {
 			super.fireEvent(event);
 		} else {
 			eventsPending = true;
@@ -258,8 +258,10 @@ public class GlobalData extends DefaultListenable {
 			accountTransactions.get(indexOf(transaction.getAccount())).add(transaction);
 		}
 		Logger.getLogger("GlobalData").finest("start adding transactions to accounts");
-		for (Collection<Transaction> collection : accountTransactions) { // For each account (there's one collection per account)
-			if (collection.size()>0) { // If this account has some transactions added
+		for (Collection<Transaction> collection : accountTransactions) {
+			// For each account (there's one collection per account)
+			if (!collection.isEmpty()) {
+				// If this account has some transactions added
 				Transaction[] addedAccountTransactions = collection.toArray(new Transaction[collection.size()]);
 				addedAccountTransactions[0].getAccount().add(addedAccountTransactions);
 			}
@@ -272,23 +274,24 @@ public class GlobalData extends DefaultListenable {
 		for (Transaction transaction : transactions) {
 			// Let's examine if this new transaction is a check and has a number behind next check available
 			// If so, detach the checks between current "next check" and this one (included).
-			if (transaction.getMode().isUseCheckBook() && (transaction.getAmount()<=0)) { // If transaction use checkbook
-					// Detach check
-					String number = transaction.getNumber();
-					if (number!=null) {
-						Account account = transaction.getAccount();
-						for (int j = 0; j < account.getCheckbooksNumber(); j++) {
-							Checkbook checkbook = account.getCheckbook(j);
-							BigInteger shortNumber = checkbook.getNumber(number);
-							if (!checkbook.isEmpty() && (shortNumber!=null)) {
-								if (shortNumber.compareTo(checkbook.getNext())>=0) {
-									Checkbook newOne = new Checkbook(checkbook.getPrefix(), checkbook.getFirst(), checkbook.size(), shortNumber.equals(checkbook.getLast())?null:shortNumber.add(BigInteger.ONE));
-									setCheckbook(account, checkbook, newOne);
-								}
-								break;
+			if (transaction.getMode().isUseCheckBook() && (transaction.getAmount()<=0)) {
+				// If transaction use checkbook
+				// Detach check
+				String number = transaction.getNumber();
+				if (number!=null) {
+					Account account = transaction.getAccount();
+					for (int j = 0; j < account.getCheckbooksNumber(); j++) {
+						Checkbook checkbook = account.getCheckbook(j);
+						BigInteger shortNumber = checkbook.getNumber(number);
+						if (!checkbook.isEmpty() && (shortNumber!=null)) {
+							if (shortNumber.compareTo(checkbook.getNext())>=0) {
+								Checkbook newOne = new Checkbook(checkbook.getPrefix(), checkbook.getFirst(), checkbook.size(), shortNumber.equals(checkbook.getLast())?null:shortNumber.add(BigInteger.ONE));
+								setCheckbook(account, checkbook, newOne);
 							}
+							break;
 						}
 					}
+				}
 			}
 		}
 		Logger.getLogger("GlobalData").finest("End adding transactions");
@@ -313,7 +316,9 @@ public class GlobalData extends DefaultListenable {
 		// removing them from their accounts (so, we will generate a maximum of one event per account).
 		// Initialize the lists of transactions per account.
 		List<Collection<Transaction>> accountTransactions = new ArrayList<Collection<Transaction>>(this.getAccountsNumber());
-		for (int i = 0; i < this.getAccountsNumber(); i++) accountTransactions.add(new ArrayList<Transaction>());
+		for (int i = 0; i < this.getAccountsNumber(); i++) {
+			accountTransactions.add(new ArrayList<Transaction>());
+		}
 		for (Transaction transaction: transactions) {
 			int index = indexOf(transaction);
 			if (index>=0) {
@@ -322,9 +327,10 @@ public class GlobalData extends DefaultListenable {
 				accountTransactions.get(indexOf(transaction.getAccount())).add(removedTransaction);
 			}
 		}
-		if (removed.size()>0) {
+		if (!removed.isEmpty()) {
 			for (Collection<Transaction> collection : accountTransactions) { // For each account (there's one collection per account)
-				if (collection.size()>0) { // If this account has some transactions removed
+				if (!collection.isEmpty()) {
+					// If this account has some transactions removed
 					Transaction[] removedAccountTransactions = collection.toArray(new Transaction[collection.size()]);
 					removedAccountTransactions[0].getAccount().remove(removedAccountTransactions);
 				}
@@ -458,7 +464,8 @@ public class GlobalData extends DefaultListenable {
 	 * @param periodicals The periodical transactions to remove
 	 */
 	public void remove (PeriodicalTransaction[] periodicals) {
-		int nb = 0; // The number of effectively removed transactions (the ones found in this).
+		// nb is the number of effectively removed transactions (the ones found in this).
+		int nb = 0;
 		int[] indexes = new int[periodicals.length];
 		for (PeriodicalTransaction transaction : periodicals) {
 			indexes[nb] = Collections.binarySearch(this.periodicals, transaction, PERIODICAL_COMPARATOR);
@@ -466,7 +473,8 @@ public class GlobalData extends DefaultListenable {
 				nb++;
 			}
 		}
-		if (nb>0) { // If some were found
+		if (nb>0) {
+			// If some were found
 			PeriodicalTransaction[] removed = new PeriodicalTransaction[nb];
 			int[] removedIndexes = (nb==periodicals.length)?indexes:Arrays.copyOf(indexes, nb);
 			Arrays.sort(removedIndexes);

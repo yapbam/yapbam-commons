@@ -55,7 +55,9 @@ public class FilterHandler extends DefaultHandler {
 						Account account = data.getAccount(name);
 						if (account != null) accounts.add(account);
 					}
-					if (accounts.size()!=0) filter.setValidAccounts(accounts);
+					if (!accounts.isEmpty()) {
+						filter.setValidAccounts(accounts);
+					}
 				}
 			} {
 				String categoriesString = attributes.getValue(XMLSerializer.CATEGORY_ATTRIBUTE);
@@ -67,7 +69,9 @@ public class FilterHandler extends DefaultHandler {
 						Category category = name.isEmpty()?Category.UNDEFINED:data.getCategory(name);
 						if (category != null) categories.add(category);
 					}
-					if ((categories.size()!=0) && (categories.size()!=data.getCategoriesNumber())) filter.setValidCategories(categories);
+					if (!categories.isEmpty() && (categories.size()!=data.getCategoriesNumber())) {
+						filter.setValidCategories(categories);
+					}
 				}
 			} {
 				String modesString = attributes.getValue(XMLSerializer.MODE_ATTRIBUTE);
@@ -79,7 +83,9 @@ public class FilterHandler extends DefaultHandler {
 						name = name.trim();
 						if (dataNames.contains(name)) modes.add(name);
 					}
-					if ((modes.size()!=0) && (modes.size()!=dataNames.size())) filter.setValidModes(modes);
+					if (!modes.isEmpty() && (modes.size()!=dataNames.size())) {
+						filter.setValidModes(modes);
+					}
 				}
 			}
 		} else if (qName.equals(XMLSerializer.TEXT_MATCHER_TAG)) {
