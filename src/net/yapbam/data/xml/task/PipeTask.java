@@ -21,18 +21,24 @@ public class PipeTask implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
-		if (TRACE) System.out.println ("Start "+getClass().getName());
+		if (TRACE) {
+			System.out.println ("Start "+getClass().getName());
+		}
 		try {
 			byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
 			for (;;) {
-				int bytes_read = in.read(buffer);
-				if (bytes_read == -1) break;
-				out.write(buffer, 0, bytes_read);
+				int bytesRead = in.read(buffer);
+				if (bytesRead == -1) {
+					break;
+				}
+				out.write(buffer, 0, bytesRead);
 			}
 			return null;
 		} finally {
 			in.close();
-			if (TRACE) System.out.println ("Stop "+getClass().getName());
+			if (TRACE) {
+				System.out.println ("Stop "+getClass().getName());
+			}
 		}
 	}
 }

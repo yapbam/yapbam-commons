@@ -18,7 +18,6 @@ public class DecrypterTask implements Callable<Void> {
 
 	private InputStream in;
 	private OutputStream out;
-	private Cipher cipher;
 	private boolean compatibilityMode;
 
 	private String password;
@@ -41,29 +40,37 @@ public class DecrypterTask implements Callable<Void> {
 		byte[] fileDigest = new byte[digest.length];
 		for (int missing=fileDigest.length; missing>0; ) {
 			int nb = stream.read(fileDigest, fileDigest.length-missing, missing);
-			if (nb==-1) throw new IOException("end of stream reached before end of password digest");
+			if (nb==-1) {
+				throw new IOException("end of stream reached before end of password digest");
+			}
 			missing -= nb;
 		}
-		if (!MessageDigest.isEqual(digest, fileDigest)) throw new AccessControlException("invalid password");
+		if (!MessageDigest.isEqual(digest, fileDigest)) {
+			throw new AccessControlException("invalid password");
+		}
 	}
 
 	@Override
 	public Void call() throws Exception {
-		if (TRACE) System.out.println ("Start "+getClass().getName());
+		if (TRACE) {
+			System.out.println ("Start "+getClass().getName());
+		}
 		try {
 			verifyPassword(in, password);
-			cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password, compatibilityMode);
+			Cipher cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password, compatibilityMode);
 			this.out = new CipherOutputStream(out, cipher);
 			byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
-			for (int bytes_read = in.read(buffer); bytes_read!=-1; bytes_read = in.read(buffer)) {
-				out.write(buffer, 0, bytes_read);
+			for (int bytesRead = in.read(buffer); bytesRead!=-1; bytesRead = in.read(buffer)) {
+				out.write(buffer, 0, bytesRead);
 			}
 			out.flush();
 			return null;
 		} finally {
 			in.close();
 			out.close();
-			if (TRACE) System.out.println ("Stop "+getClass().getName());
+			if (TRACE) {
+				System.out.println ("Stop "+getClass().getName());
+			}
 		}
 	}
 }

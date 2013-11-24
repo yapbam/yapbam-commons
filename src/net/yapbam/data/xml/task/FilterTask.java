@@ -24,21 +24,26 @@ abstract class FilterTask implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
-		if (TRACE) System.out.println ("Start "+getClass().getName());
+		if (TRACE) {
+			System.out.println ("Start "+getClass().getName());
+		}
 		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytes_read;
 		try {
 			for (;;) {
-				bytes_read = in.read(buffer);
-				if (bytes_read == -1) break;
-				po.write(buffer, 0, bytes_read);
+				int bytesRead = in.read(buffer);
+				if (bytesRead == -1) {
+					break;
+				}
+				po.write(buffer, 0, bytesRead);
 			}
 			return null;
 		} finally {
 			in.close();
 			po.flush(); //TODO Could be removed ?
 			po.close();
-			if (TRACE) System.out.println ("Stop "+getClass().getName());
+			if (TRACE) {
+				System.out.println ("Stop "+getClass().getName());
+			}
 		}
 	}
 }

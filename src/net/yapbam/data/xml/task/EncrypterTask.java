@@ -27,7 +27,7 @@ public class EncrypterTask implements Callable<Void> {
 
 	private static final byte[] SALT = new byte[]{ (byte)0xc7, (byte)0x23, (byte)0xa5, (byte)0xfc, (byte)0x7e, (byte)0x38, (byte)0xee, (byte)0x09};
 	static final String ALGORITHM = "PBEWITHMD5ANDDES"; //$NON-NLS-1$
-	static final PBEParameterSpec pbeParamSpec = new PBEParameterSpec(SALT, 16);
+	static final PBEParameterSpec PBE_PARAM_SPEC = new PBEParameterSpec(SALT, 16);
 
 	private InputStream in;
 	private OutputStream out;
@@ -52,7 +52,7 @@ public class EncrypterTask implements Callable<Void> {
 	static Cipher getCipher(int mode, String password, boolean compatibilityMode) throws GeneralSecurityException {
 		SecretKey pbeKey = getSecretKey(password, compatibilityMode);
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
-		cipher.init(mode, pbeKey, pbeParamSpec);
+		cipher.init(mode, pbeKey, PBE_PARAM_SPEC);
 		return cipher;
 	}
 	
@@ -95,7 +95,9 @@ public class EncrypterTask implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
-		if (TRACE) System.out.println ("Start "+getClass().getName());
+		if (TRACE) {
+			System.out.println ("Start "+getClass().getName());
+		}
 		byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
 		// output password digest
 		out.write(getDigest(password));
@@ -103,9 +105,11 @@ public class EncrypterTask implements Callable<Void> {
 		CipherOutputStream po = new CipherOutputStream(out, cipher);
 		try {
 			for (;;) {
-				int bytes_read = in.read(buffer);
-				if (bytes_read == -1) break;
-				po.write(buffer, 0, bytes_read);
+				int bytesRead = in.read(buffer);
+				if (bytesRead == -1) {
+					break;
+				}
+				po.write(buffer, 0, bytesRead);
 			}
 			return null;
 		} finally {
@@ -113,7 +117,9 @@ public class EncrypterTask implements Callable<Void> {
 			po.close();
 			out.flush();
 			out.close();
-			if (TRACE) System.out.println ("Stop "+getClass().getName());
+			if (TRACE) {
+				System.out.println ("Stop "+getClass().getName());
+			}
 		}
 	}
 }
