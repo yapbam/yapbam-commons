@@ -78,7 +78,7 @@ public class CurrencyConverter {
 	
 	private Proxy proxy = Proxy.NO_PROXY;
 	private Cache cache;
-	private HashMap<String, Long> fxRates = new HashMap<String, Long>(40);
+	private Map<String, Long> fxRates = new HashMap<String, Long>(40);
 	private Date referenceDate = null;
 	private long lastTryCacheRefresh;
 	private boolean isSynchronized;
@@ -115,6 +115,7 @@ public class CurrencyConverter {
 	 * @param message
 	 */
 	protected void log(String message) {
+		// Default implementation does nothing
 	}
 	
 	/**
@@ -177,8 +178,12 @@ public class CurrencyConverter {
 	 *           If a wrong (non-existing) currency argument was supplied.
 	 */
 	private boolean checkCurrencyArgs(String fromCurrency, String toCurrency) throws IllegalArgumentException {
-		if (!fxRates.containsKey(fromCurrency)) throw new IllegalArgumentException(fromCurrency + " currency is not available."); //$NON-NLS-1$
-		if (!fxRates.containsKey(toCurrency)) throw new IllegalArgumentException(toCurrency + " currency is not available."); //$NON-NLS-1$
+		if (!fxRates.containsKey(fromCurrency)) {
+			throw new IllegalArgumentException(fromCurrency + " currency is not available."); //$NON-NLS-1$
+		}
+		if (!fxRates.containsKey(toCurrency)) {
+			throw new IllegalArgumentException(toCurrency + " currency is not available."); //$NON-NLS-1$
+		}
 		return (!fromCurrency.equals(toCurrency));
 	}
 
@@ -270,11 +275,15 @@ public class CurrencyConverter {
 	 * @return true if cache file needs to be updated, false otherwise.
 	 */
 	private boolean cacheIsExpired() {
-		if (referenceDate == null) return true;
+		if (referenceDate == null) {
+			return true;
+		}
 		// If we connect to ECB since less than one minute ... do nothing
 		// This could happen if ECB doesn't refresh its rates since the last time we
 		// updated the cache file (and more than the "standard" cache expiration time - see below)
-		if (System.currentTimeMillis() - lastTryCacheRefresh < 60000) return false;
+		if (System.currentTimeMillis() - lastTryCacheRefresh < 60000) {
+			return false;
+		}
 		
 		final int tolerance = 12;
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
@@ -282,11 +291,13 @@ public class CurrencyConverter {
 		cal.setTime(referenceDate);
 		// hypothetical: rates are never published on Saturdays and Sunday
 		int hoursValid = 24 + tolerance;
-		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) hoursValid = 72;
-		else if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) hoursValid = 48; 
+		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+			hoursValid = 72;
+		} else if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+			hoursValid = 48; 
+		}
 
-		if (hoursOld > hoursValid) return true;
-		return false;
+		return hoursOld > hoursValid;
 	}
 
 	/**
@@ -304,12 +315,11 @@ public class CurrencyConverter {
 			HttpURLConnection ct = (HttpURLConnection) new URL(ECB_RATES_URL).openConnection(proxy);
 			int errorCode = ct.getResponseCode();
 			if (errorCode == HttpURLConnection.HTTP_OK) {
-				InputStreamReader in = new InputStreamReader(ct.getInputStream());
+				InputStream in = ct.getInputStream();
 				try {
 					Writer out = cache.getWriter();
 					try {
-						int c;
-						while ((c = in.read()) != -1) {
+						for (int c=in.read() ; c!=-1; c=in.read()) {
 							out.write(c);
 						}
 					} catch (IOException e) {
@@ -348,12 +358,17 @@ public class CurrencyConverter {
 		String wholePart = ""; //$NON-NLS-1$
 		String fractionPart = ""; //$NON-NLS-1$
 		if (decimalPoint > -1) {
-			if (decimalPoint > 0) wholePart = str.substring(0, decimalPoint);
+			if (decimalPoint > 0) {
+				wholePart = str.substring(0, decimalPoint);
+			}
 			fractionPart = str.substring(decimalPoint + 1);
 			String padString = "0000"; //$NON-NLS-1$
 			int padLength = 4 - fractionPart.length();
-			if (padLength > 0) fractionPart += padString.substring(0, padLength);
-			else if (padLength < 0) fractionPart = fractionPart.substring(0, 4);
+			if (padLength > 0) {
+				fractionPart += padString.substring(0, padLength);
+			} else if (padLength < 0) {
+				fractionPart = fractionPart.substring(0, 4);
+			}
 		} else {
 			wholePart = str;
 			fractionPart = "0000"; //$NON-NLS-1$
@@ -374,7 +389,7 @@ public class CurrencyConverter {
 		DefaultHandler handler = new DefaultHandler() {
 			@Override
 			public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-				if (qName.equals("Cube")) { //$NON-NLS-1$
+				if ("Cube".equals(qName)) { //$NON-NLS-1$
 					String date = attributes.getValue("time"); //$NON-NLS-1$
 					if (date != null) {
 						String[] ids = TimeZone.getAvailableIDs();
