@@ -38,7 +38,7 @@ public class BudgetView extends DefaultListenable {
 		}
 		@Override
 		public boolean equals(Object obj) {
-			if (obj==null || !(obj instanceof Key)) {
+			if (!(obj instanceof Key)) {
 				return false;
 			}
 			Key key = (Key) obj;
@@ -59,7 +59,9 @@ public class BudgetView extends DefaultListenable {
 		this.data.addListener(new DataListener() {
 			@Override
 			public void processEvent(DataEvent event) {
-				if (! isNeutral(event)) update();
+				if (! isNeutral(event)) {
+					update();
+				}
 			}
 		});
 		this.year = year;
@@ -129,7 +131,9 @@ public class BudgetView extends DefaultListenable {
 	 * @return an integer. 0 if the budget is empty.
 	 */
 	public int getDatesSize() {
-		if (this.firstDate==null) return 0;
+		if (this.firstDate==null) {
+			return 0;
+		}
 		return 1+(this.year?this.lastDate.get(Calendar.YEAR)-this.firstDate.get(Calendar.YEAR):DateUtils.getMonthlyDistance(this.firstDate, this.lastDate));
 	}
 	
@@ -142,7 +146,9 @@ public class BudgetView extends DefaultListenable {
 	 */
 	@SuppressWarnings("deprecation")
 	public Date getDate(int index) {
-		if (index>=getDatesSize()) throw new ArrayIndexOutOfBoundsException(index);
+		if (index>=getDatesSize()) {
+			throw new ArrayIndexOutOfBoundsException(index);
+		}
 		if (year) {
 			return new Date(firstDate.get(Calendar.YEAR)-1900+index, 0, 1);
 		} else {
@@ -162,7 +168,9 @@ public class BudgetView extends DefaultListenable {
 	 */
 	@SuppressWarnings("deprecation")
 	public Date getLastDate(int index) {
-		if (index>=getDatesSize()) throw new ArrayIndexOutOfBoundsException(index);
+		if (index>=getDatesSize()) {
+			throw new ArrayIndexOutOfBoundsException(index);
+		}
 		if (year) {
 			return new Date(firstDate.get(Calendar.YEAR)+index, 11, 31);
 		} else {
@@ -210,7 +218,9 @@ public class BudgetView extends DefaultListenable {
 	 * @see #getCategory(int)
 	 */
 	public double getAverage(Category category) {
-		if (getDatesSize()==0) return 0.0;
+		if (getDatesSize()==0) {
+			return 0.0;
+		}
 		return getSum(category)/getDatesSize();
 	}
 
@@ -262,25 +272,36 @@ public class BudgetView extends DefaultListenable {
 				this.firstDate = c;
 				this.lastDate = this.firstDate;
 			} else {
-				if (DateUtils.getMonthlyDistance(firstDate, c)<0) this.firstDate = c;
-				else if (DateUtils.getMonthlyDistance(lastDate, c)>0) this.lastDate = c;
+				if (DateUtils.getMonthlyDistance(firstDate, c)<0) {
+					this.firstDate = c;
+				} else if (DateUtils.getMonthlyDistance(lastDate, c)>0) {
+					this.lastDate = c;
+				}
 			}
 			// Insert the category in the budget
 			int index = Collections.binarySearch(categories, key.category);
-			if (index<0) categories.add(-index-1, key.category);
+			if (index<0) {
+				categories.add(-index-1, key.category);
+			}
 			// Add the amount to that category/date item
 			Double value = this.values.get(key);
-			if (value==null) value = 0.0;
+			if (value==null) {
+				value = 0.0;
+			}
 			value += amount;
 			this.values.put (key, value);
 			// Add the amount to that category sum
 			value = this.categoryToSum.get(key.category);
-			if (value==null) value = 0.0;
+			if (value==null) {
+				value = 0.0;
+			}
 			value += amount;
 			this.categoryToSum.put (key.category, value);
 			// Add the amount to that date sum
 			value = this.dateToSum.get(key.date);
-			if (value==null) value = 0.0;
+			if (value==null) {
+				value = 0.0;
+			}
 			value += amount;
 			this.dateToSum.put (key.date, value);
 		}
@@ -290,7 +311,9 @@ public class BudgetView extends DefaultListenable {
 		Calendar c = new GregorianCalendar();
 		c.setTime(date);
 		c.set(Calendar.DAY_OF_MONTH, 1);
-		if (year) c.set(Calendar.MONTH, 0);
+		if (year) {
+			c.set(Calendar.MONTH, 0);
+		}
 		return c.getTime();
 	}
 	

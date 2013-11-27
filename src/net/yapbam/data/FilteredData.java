@@ -200,8 +200,7 @@ public class FilteredData extends DefaultListenable {
 		boolean modeRenamed = (event instanceof ModePropertyChangedEvent) &&
 		((((ModePropertyChangedEvent)event).getChanges() & ModePropertyChangedEvent.NAME)!=0) &&
 		filter.isOk(((ModePropertyChangedEvent)event).getNewMode());
-		boolean result = (accountRenamed || categoryRenamed || modeRenamed);
-		return result;
+		return (accountRenamed || categoryRenamed || modeRenamed);
 	}
 	
 	/** Gets the filter used in this filtered data.
@@ -232,22 +231,33 @@ public class FilteredData extends DefaultListenable {
 	 * @return true if the transaction is valid.
 	 */
 	public boolean isOk(Transaction transaction) {
-		if (!filter.isOk(transaction.getAccount())) return false;
-		if (!filter.isOk(transaction.getMode())) return false;
-		if (!filter.isStatementOk(transaction.getStatement())) return false;
-		if (!filter.isNumberOk(transaction.getNumber())) return false;
-		if ((filter.getDateFrom()!=null) && (transaction.getDate().compareTo(filter.getDateFrom())<0)) return false;
-		if ((filter.getDateTo()!=null) && (transaction.getDate().compareTo(filter.getDateTo())>0)) return false;
-		if ((filter.getValueDateFrom()!=null) && (transaction.getValueDate().compareTo(filter.getValueDateFrom())<0)) return false;
-		if ((filter.getValueDateTo()!=null) && (transaction.getValueDate().compareTo(filter.getValueDateTo())>0)) return false;
+		if (!filter.isOk(transaction.getAccount()) || !filter.isOk(transaction.getMode()) ||
+				!filter.isStatementOk(transaction.getStatement()) || !filter.isNumberOk(transaction.getNumber())) {
+			return false;
+		}
+		if ((filter.getDateFrom()!=null) && (transaction.getDate().compareTo(filter.getDateFrom())<0)) {
+			return false;
+		}
+		if ((filter.getDateTo()!=null) && (transaction.getDate().compareTo(filter.getDateTo())>0)) {
+			return false;
+		}
+		if ((filter.getValueDateFrom()!=null) && (transaction.getValueDate().compareTo(filter.getValueDateFrom())<0)) {
+			return false;
+		}
+		if ((filter.getValueDateTo()!=null) && (transaction.getValueDate().compareTo(filter.getValueDateTo())>0)) {
+			return false;
+		}
 		if (filter.isOk(transaction.getCategory()) && filter.isAmountOk(transaction.getAmount()) &&
-				filter.isDescriptionOk(transaction.getDescription()) && filter.isCommentOk(transaction.getComment())) return true;
+				filter.isDescriptionOk(transaction.getDescription()) && filter.isCommentOk(transaction.getComment())) {
+			return true;
+		}
 		// The transaction may also be valid if one of its subtransactions is valid 
 		for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
 			if (isOk(transaction.getSubTransaction(i))) {
 				return true;
 			}
 		}
+		// The transaction may also be valid if its subtransactions complement is valid 
 		return isComplementOk(transaction);
 	}
 	
@@ -274,7 +284,9 @@ public class FilteredData extends DefaultListenable {
 	 */
 	public boolean isComplementOk(Transaction transaction) {
 		double amount = transaction.getComplement();
-		if ((transaction.getSubTransactionSize()!=0) && (GlobalData.AMOUNT_COMPARATOR.compare(amount,0.0)==0)) return false;
+		if ((transaction.getSubTransactionSize()!=0) && (GlobalData.AMOUNT_COMPARATOR.compare(amount,0.0)==0)) {
+			return false;
+		}
 		return filter.isOk(transaction.getCategory()) && filter.isAmountOk(amount) && filter.isDescriptionOk(transaction.getDescription()) && filter.isCommentOk(transaction.getComment());
 	}
 	
@@ -282,7 +294,9 @@ public class FilteredData extends DefaultListenable {
 		double initialBalance = 0;
 		for (int i = 0; i < this.getGlobalData().getAccountsNumber(); i++) {
 			Account account = this.getGlobalData().getAccount(i);
-			if (filter.isOk(account)) initialBalance += account.getInitialBalance();
+			if (filter.isOk(account)) {
+				initialBalance += account.getInitialBalance();
+			}
 		}
 		balanceData.enableEvents(false);
 		balanceData.clear(initialBalance);
