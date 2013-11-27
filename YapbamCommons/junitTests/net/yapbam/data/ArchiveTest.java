@@ -33,13 +33,13 @@ public class ArchiveTest {
 		Mode mode = new Mode(MODE_1, DateStepper.IMMEDIATE, DateStepper.IMMEDIATE, true);
 		account1.add(mode);
 		Mode mode2 = new Mode(MODE_2, DateStepper.IMMEDIATE, DateStepper.IMMEDIATE, false);
-		data.add(account1);
 		account1.add(mode2);
-		date = new GregorianCalendar(2013, 10, 26).getTime();
-		archive_data.add(new Transaction(date, null, "transaction 1", null, -10, account1,
-				mode, new Category(CATEGORY_1), date, "1", null));
+		data.add(account1);
 		Account account2 = new Account(ACCOUNT_2_NAME, 0.0);
 		data.add(account2);
+		date = new GregorianCalendar(2013, 10, 26).getTime();
+		data.add(new Transaction(date, null, "transaction 1", null, -10, account1,
+				mode, new Category(CATEGORY_1), date, "1", null));
 		
 		Account account = archive_data.getAccount(ACCOUNT_1_NAME);
 		assertNotEquals(account.getBalanceData().getFinalBalance(),data.getAccount(ACCOUNT_1_NAME));
