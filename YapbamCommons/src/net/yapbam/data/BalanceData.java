@@ -39,19 +39,33 @@ public class BalanceData extends DefaultListenable {
 
 	void enableEvents(boolean enabled) {
 		super.setEventsEnabled(enabled);
-		if (enabled) fireEvent(new EverythingChangedEvent(this));
+		if (enabled) {
+			fireEvent(new EverythingChangedEvent(this));
+		}
 	}
 
 	void updateBalance(Transaction[] transactions, boolean add) {
-		if (transactions.length==0) return;
+		if (transactions.length==0) {
+			return;
+		}
 		for (Transaction transaction : transactions) {
-			if (add) this.balanceHistory.add(transaction); else this.balanceHistory.remove(transaction);
+			if (add) {
+				this.balanceHistory.add(transaction);
+			} else {
+				this.balanceHistory.remove(transaction);
+			}
 			double amount = transaction.getAmount();
 			if (GlobalData.AMOUNT_COMPARATOR.compare(amount, 0.0)!=0) {
-				if (!add) amount = -amount;
+				if (!add) {
+					amount = -amount;
+				}
 				this.finalBalance += amount;
-				if (transaction.isChecked()) this.checkedBalance += amount;
-				if (transaction.getValueDateAsInteger()<=this.currentBalanceDate) this.currentBalance += amount;
+				if (transaction.isChecked()) {
+					this.checkedBalance += amount;
+				}
+				if (transaction.getValueDateAsInteger()<=this.currentBalanceDate) {
+					this.currentBalance += amount;
+				}
 			}
 		}
 		this.fireEvent(new EverythingChangedEvent(this));
@@ -59,7 +73,9 @@ public class BalanceData extends DefaultListenable {
 
 	void updateBalance(double amount, boolean add) {
 		if (amount==0) return;
-		if (!add) amount = -amount;
+		if (!add) {
+			amount = -amount;
+		}
 		this.finalBalance += amount;
 		this.checkedBalance += amount;
 		this.currentBalance += amount;

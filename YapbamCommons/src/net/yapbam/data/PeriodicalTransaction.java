@@ -35,10 +35,14 @@ public class PeriodicalTransaction extends AbstractTransaction {
 	public PeriodicalTransaction(String description, String comment, double amount, Account account, Mode mode, Category category,
 			List<SubTransaction> subTransactions, Date nextDate, boolean enabled, DateStepper nextDateBuilder) {
 		super(description, comment, amount, account, mode, category, subTransactions);
-		if (enabled && (nextDate==null)) throw new IllegalArgumentException("Next date is Null and enabled is true"); //$NON-NLS-1$
+		if (enabled && (nextDate==null)) {
+			throw new IllegalArgumentException("Next date is Null and enabled is true"); //$NON-NLS-1$
+		}
 		this.nextDate = DateUtils.dateToInteger(nextDate);
 		Date last = nextDateBuilder==null ? null : nextDateBuilder.getLastDate();
-		if ((last!=null) && (DateUtils.dateToInteger(last)<this.nextDate)) throw new IllegalArgumentException("Next date is after End date"); //$NON-NLS-1$
+		if ((last!=null) && (DateUtils.dateToInteger(last)<this.nextDate)) {
+			throw new IllegalArgumentException("Next date is after End date"); //$NON-NLS-1$
+		}
 		this.nextDateBuilder = nextDateBuilder;
 		this.enabled =  enabled;
 	}
@@ -70,7 +74,9 @@ public class PeriodicalTransaction extends AbstractTransaction {
 	}
 	
 	PeriodicalTransaction change(Category oldCategory, Category newCategory) {
-		if (!hasCategory(oldCategory)) return null;
+		if (!hasCategory(oldCategory)) {
+			return null;
+		}
 		List<SubTransaction> subTransactions = changeSubTransactions(oldCategory, newCategory);
 		return new PeriodicalTransaction(getDescription(), getComment(), getAmount(), getAccount(), getMode(),
 				(getCategory().equals(oldCategory)?newCategory:getCategory()), subTransactions,
@@ -98,13 +104,17 @@ public class PeriodicalTransaction extends AbstractTransaction {
 	 * @return a transaction list (the one passed as second argument).
 	 */
 	public List<Transaction> generate(Date date, List<Transaction> result) {
-		if (result==null) result = new ArrayList<Transaction>();
+		if (result==null) {
+			result = new ArrayList<Transaction>();
+		}
 		if (hasPendingTransactions(date)) {
 			double amount = getAmount();
 			Mode mode = getMode();
 			DateStepper vdStepper = amount<0?mode.getExpenseVdc():mode.getReceiptVdc();
 			// Be aware that the date stepper may not be available anymore (if the mode is no more usable for this kind of transaction)
-			if (vdStepper==null) vdStepper = DateStepper.IMMEDIATE;
+			if (vdStepper==null) {
+				vdStepper = DateStepper.IMMEDIATE;
+			}
 			//Be aware, when the transaction has an "end date", and the date is after this "end date", tDate become null
 			for (Date tDate = getNextDate();((tDate!=null)&&(tDate.compareTo(date)<=0));tDate=getNextDateBuilder().getNextStep(tDate)) {
 				result.add(new Transaction(tDate, null, getDescription(), getComment(), amount, getAccount(), mode, getCategory(),

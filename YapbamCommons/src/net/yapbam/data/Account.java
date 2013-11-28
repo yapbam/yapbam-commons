@@ -72,7 +72,9 @@ public class Account implements Serializable {
 	 */
 	public Mode getMode(String name) {
 		for (int i = 0; i < this.modes.size(); i++) {
-			if (this.modes.get(i).getName().equalsIgnoreCase(name)) return this.modes.get(i);
+			if (this.modes.get(i).getName().equalsIgnoreCase(name)) {
+				return this.modes.get(i);
+			}
 		}
 		return null;
 	}
@@ -226,7 +228,9 @@ public class Account implements Serializable {
 		long firstAlertDate = balanceHistory.getFirstAlertDate(from, to, getAlertThreshold());
 		if (firstAlertDate>=0) {
 			Date date = new Date();
-			if (firstAlertDate>0) date.setTime(firstAlertDate);
+			if (firstAlertDate>0) {
+				date.setTime(firstAlertDate);
+			}
 			return new Alert(date, this, balanceHistory.getBalance(date));
 		} else {
 			return null;

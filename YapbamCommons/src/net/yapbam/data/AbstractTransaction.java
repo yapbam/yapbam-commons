@@ -23,7 +23,9 @@ public abstract class AbstractTransaction implements Cloneable, Serializable {
 	private List<SubTransaction> subTransactions;
 	
 	private static synchronized void setId(AbstractTransaction transaction) {
-		if (currentId==Long.MAX_VALUE) throw new RuntimeException("Transaction counter has an overflow"); //$NON-NLS-1$
+		if (currentId==Long.MAX_VALUE) {
+			throw new RuntimeException("Transaction counter has an overflow"); //$NON-NLS-1$
+		}
 		transaction.id = currentId++;
 	}
 
@@ -39,9 +41,13 @@ public abstract class AbstractTransaction implements Cloneable, Serializable {
 	 */
 	public AbstractTransaction(String description, String comment, double amount, Account account, Mode mode, Category category, List<SubTransaction> subTransactions) {
 		super();
-		if ((mode==null) || (category==null) || (description==null)) throw new IllegalArgumentException();
+		if ((mode==null) || (category==null) || (description==null)) {
+			throw new IllegalArgumentException();
+		}
 		this.description = getCachedDescription(description);
-		if ((comment!=null) && (comment.isEmpty())) comment = null;
+		if ((comment!=null) && (comment.isEmpty())) {
+			comment = null;
+		}
 		this.comment = comment;
 		this.amount = amount;
 		this.account = account;
@@ -192,9 +198,13 @@ public abstract class AbstractTransaction implements Cloneable, Serializable {
 	 * @return true if the category is used
 	 */
 	public boolean hasCategory(Category category) {
-		if (getCategory().equals(category)) return true;
+		if (getCategory().equals(category)) {
+			return true;
+		}
 		for (int j = 0; j < getSubTransactionSize(); j++) {
-			if (getSubTransaction(j).getCategory().equals(category)) return true;
+			if (getSubTransaction(j).getCategory().equals(category)) {
+				return true;
+			}
 		}
 		return false;
 	}

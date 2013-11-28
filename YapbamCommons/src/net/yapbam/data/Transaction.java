@@ -35,10 +35,14 @@ public class Transaction extends AbstractTransaction implements Serializable {
 		super(description, comment, amount, account, mode, category, subTransactions);
 		this.date = date;
 		this.number = number;
-		if ((number!=null) && number.trim().isEmpty()) this.number = null;
+		if ((number!=null) && number.trim().isEmpty()) {
+			this.number = null;
+		}
 		this.valueDate = valueDate;
 		this.statementId = statementId;
-		if ((statementId!=null) && statementId.trim().isEmpty()) this.statementId=null;
+		if ((statementId!=null) && statementId.trim().isEmpty()) {
+			this.statementId=null;
+		}
 	}
 
 	/** Constructor.
@@ -101,7 +105,9 @@ public class Transaction extends AbstractTransaction implements Serializable {
 	 * @return a new updated transaction or null if the old category was not used in this transaction.
 	 */
 	Transaction change(Category oldCategory, Category newCategory) {
-		if (!hasCategory(oldCategory)) return null;
+		if (!hasCategory(oldCategory)) {
+			return null;
+		}
 		List<SubTransaction> subTransactions = changeSubTransactions(oldCategory, newCategory);
 		return new Transaction(getDate(), getNumber(), getDescription(), getComment(), getAmount(), getAccount(), getMode(),
 				(getCategory().equals(oldCategory)?newCategory:getCategory()), getValueDate(), getStatement(), subTransactions);

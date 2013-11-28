@@ -21,6 +21,7 @@ package net.yapbam.currency;
 import java.net.*;
 import java.io.*;
 
+import org.slf4j.LoggerFactory;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
@@ -101,11 +102,13 @@ public class CurrencyConverter {
 			} catch (Exception e) {
 				// Don't throw any exception if update fails as the instance is already initialized with the cache
 				// isSynchronized method will return false, indicating that this instance is not synchronized with Internet
+				LoggerFactory.getLogger(getClass()).warn("Update failed", e);
 			}
 		} catch (Exception e) {
 			// Cache parsing failed, maybe cache file is not present or is corrupted. 
 			// We will call update without try/catch clause to throw exceptions if data can't be red.
 			this.update();
+			LoggerFactory.getLogger(getClass()).warn("Parse failed", e);
 		}
 	}
 
@@ -133,7 +136,7 @@ public class CurrencyConverter {
 	 * @throws IllegalArgumentException
 	 *           If a wrong (non-existing) currency argument was supplied.
 	 */
-	public double convert(double amount, String fromCurrency, String toCurrency) throws IllegalArgumentException {
+	public double convert(double amount, String fromCurrency, String toCurrency) {
 		if (checkCurrencyArgs(fromCurrency, toCurrency)) {
 			amount *= fxRates.get(toCurrency);
 			amount /= fxRates.get(fromCurrency);
@@ -158,7 +161,7 @@ public class CurrencyConverter {
 	 * @throws IllegalArgumentException
 	 *           If a wrong (non-existing) currency argument was supplied.
 	 */
-	public long convert(long amount, String fromCurrency, String toCurrency) throws IllegalArgumentException {
+	public long convert(long amount, String fromCurrency, String toCurrency) {
 		if (checkCurrencyArgs(fromCurrency, toCurrency)) {
 			amount *= fxRates.get(toCurrency);
 			amount /= fxRates.get(fromCurrency);
@@ -177,14 +180,14 @@ public class CurrencyConverter {
 	 * @throws IllegalArgumentException
 	 *           If a wrong (non-existing) currency argument was supplied.
 	 */
-	private boolean checkCurrencyArgs(String fromCurrency, String toCurrency) throws IllegalArgumentException {
+	private boolean checkCurrencyArgs(String fromCurrency, String toCurrency) {
 		if (!fxRates.containsKey(fromCurrency)) {
 			throw new IllegalArgumentException(fromCurrency + " currency is not available."); //$NON-NLS-1$
 		}
 		if (!fxRates.containsKey(toCurrency)) {
 			throw new IllegalArgumentException(toCurrency + " currency is not available."); //$NON-NLS-1$
 		}
-		return (!fromCurrency.equals(toCurrency));
+		return !fromCurrency.equals(toCurrency);
 	}
 
 	/**
@@ -195,7 +198,7 @@ public class CurrencyConverter {
 	 * @return True if exchange rate exists, false otherwise.
 	 */
 	public boolean isAvailable(String currency) {
-		return (fxRates.containsKey(currency));
+		return fxRates.containsKey(currency);
 	}
 
 	/**
@@ -204,8 +207,7 @@ public class CurrencyConverter {
 	 * @return String array with ISO 4217 currency codes.
 	 */
 	public String[] getCurrencies() {
-		String[] currencies = fxRates.keySet().toArray(new String[fxRates.size()]);
-		return currencies;
+		return fxRates.keySet().toArray(new String[fxRates.size()]);
 	}
 
 	/**
@@ -324,6 +326,7 @@ public class CurrencyConverter {
 						}
 					} catch (IOException e) {
 						lastError = "Read/Write Error: " + e.getMessage(); //$NON-NLS-1$
+						LoggerFactory.getLogger(getClass()).warn("Http read failed", e);
 					} finally {
 						out.flush();
 						out.close();
@@ -353,7 +356,7 @@ public class CurrencyConverter {
 	 * @throws NumberFormatException
 	 *           If "str" argument is not numeric.
 	 */
-	private long stringToLong(String str) throws NumberFormatException {
+	private long stringToLong(String str) {
 		int decimalPoint = str.indexOf('.');
 		String wholePart = ""; //$NON-NLS-1$
 		String fractionPart = ""; //$NON-NLS-1$
@@ -373,7 +376,7 @@ public class CurrencyConverter {
 			wholePart = str;
 			fractionPart = "0000"; //$NON-NLS-1$
 		}
-		return (Long.parseLong(wholePart + fractionPart));
+		return Long.parseLong(wholePart + fractionPart);
 	}
 
 	/**

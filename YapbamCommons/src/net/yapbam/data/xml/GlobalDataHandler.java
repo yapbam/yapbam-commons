@@ -58,7 +58,9 @@ class GlobalDataHandler extends DefaultHandler {
 		this.tempData = new Stack<Object>();
 		this.transactions = new ArrayList<Transaction>();
 		this.tagToCData = new HashMap<String, String>();
-		if (report!=null) report.setMax(-1);
+		if (report!=null) {
+			report.setMax(-1);
+		}
 	}
 	
 	private Map<String, String> buildMap(Attributes attributes) {
@@ -77,20 +79,28 @@ class GlobalDataHandler extends DefaultHandler {
 		if (!this.schemaValidation) {
 			// A very basic alternative to schema validation. We just verify root tag is GLOBAL_DATA_TAG and is not duplicated
 			// If root tag is not GLOBAL_DATA_TAG, the file is not a Yapbam file
-			if ((currentTag==null) && !qName.equals(XMLSerializer.GLOBAL_DATA_TAG)) throw new SAXParseException(XMLSerializer.GLOBAL_DATA_TAG+" expected as root tag", locator);
+			if ((currentTag==null) && !qName.equals(XMLSerializer.GLOBAL_DATA_TAG)) {
+				throw new SAXParseException(XMLSerializer.GLOBAL_DATA_TAG+" expected as root tag", locator);
+			}
 			// If there's more than one GLOBAL_DATA_TAG there's a problem 
-			if ((currentTag!=null) && qName.equals(XMLSerializer.GLOBAL_DATA_TAG)) throw new SAXParseException(XMLSerializer.GLOBAL_DATA_TAG+" expected as root tag", locator);
+			if ((currentTag!=null) && qName.equals(XMLSerializer.GLOBAL_DATA_TAG)) {
+				throw new SAXParseException(XMLSerializer.GLOBAL_DATA_TAG+" expected as root tag", locator);
+			}
 		}
 		this.currentTag = qName;
 		if (qName.equals(XMLSerializer.GLOBAL_DATA_TAG)) {
 			try {
-				if (SLOW_READING) Thread.sleep(1000);
+				if (SLOW_READING) {
+					Thread.sleep(1000);
+				}
 			} catch (InterruptedException e) {
 			}
 			// Verify that the version is ok
 			String dummy = attributes.getValue(XMLSerializer.VERSION_ATTRIBUTE);
 			int version = dummy==null?0:Integer.parseInt(dummy);
-			if (version>XMLSerializer.CURRENT_VERSION) throw new SaxUnsupportedFileVersionException(locator, version);
+			if (version>XMLSerializer.CURRENT_VERSION) {
+				throw new SaxUnsupportedFileVersionException(locator, version);
+			}
 			if (report!=null) {
 				String attr = attributes.getValue(XMLSerializer.NB_TRANSACTIONS_ATTRIBUTE);
 				if (attr!=null) {
@@ -134,7 +144,7 @@ class GlobalDataHandler extends DefaultHandler {
 			if (data.getCategory(id)==null) {
 				// In version before 0.9.8, it was possible to create categories ending (or starting) with a space
 				// So, it was possible to have two categories named "x" and "x ".
-				// Now, the category's name is trimed, so we have to merge those equivalent categories. 
+				// Now, the category's name is trimmed, so we have to merge those equivalent categories. 
 				Category cat = new Category(id);
 				this.data.add(cat);
 			}
@@ -166,7 +176,9 @@ class GlobalDataHandler extends DefaultHandler {
 			}
 			DateStepper[] vdcs = (DateStepper[]) this.tempData.peek();
 			int index = qName.equals(XMLSerializer.EXPENSE_VDC_TAG) ? 0 : 1;
-			if (vdcs[index]!=null) System.err.println("too much value date computer");//LOG  //$NON-NLS-1$
+			if (vdcs[index]!=null) {
+				System.err.println("too much value date computer");//LOG  //$NON-NLS-1$
+			}
 			vdcs[index] = vdc;
 		} else if (qName.equals(XMLSerializer.TRANSACTION_TAG)) {
 			//We can't directly push the attributes because SAX may reuse the same instance to store next element's attributes.
@@ -176,7 +188,9 @@ class GlobalDataHandler extends DefaultHandler {
 			double amount = Double.parseDouble(attributes.getValue(XMLSerializer.AMOUNT_ATTRIBUTE));
 			String description = attributes.getValue(XMLSerializer.DESCRIPTION_ATTRIBUTE);
 			String categoryId = attributes.getValue(XMLSerializer.CATEGORY_ATTRIBUTE);
-			if (categoryId!=null) categoryId = categoryId.trim();
+			if (categoryId!=null) {
+				categoryId = categoryId.trim();
+			}
 			Category category = this.data.getCategory(categoryId);
 			SubTransaction sub = new SubTransaction(amount, description, category);
 			List<SubTransaction> lst = (ArrayList<SubTransaction>) this.tempData.peek();
@@ -197,7 +211,9 @@ class GlobalDataHandler extends DefaultHandler {
 			DateStepper stepper;
 			if (kind.equals(XMLSerializer.MONTHLY_DATE_STEPPER_KIND)) {
 				int period = Integer.parseInt(attributes.getValue(XMLSerializer.PERIOD_ATTRIBUTE));
-				if (period<=0) throw new IllegalArgumentException();
+				if (period<=0) {
+					throw new IllegalArgumentException();
+				}
 				int day = Integer.parseInt(attributes.getValue(XMLSerializer.DAY_ATTRIBUTE));
 				String dummy =  attributes.getValue(XMLSerializer.LAST_DATE_ATTRIBUTE);
 				Date lastDate = dummy==null?null:DateUtils.integerToDate(XMLSerializer.toDate(dummy));
@@ -214,7 +230,9 @@ class GlobalDataHandler extends DefaultHandler {
 			Object old = this.tempData.pop();
 			this.tempData.push(stepper);
 			this.tempData.push(obj);
-			if (old!=null) throw new IllegalStateException("Two date steppers found"); // Hu ! there are two date steppers !!!  //$NON-NLS-1$
+			if (old!=null) {
+				throw new IllegalStateException("Two date steppers found"); // Hu ! there are two date steppers !!!  //$NON-NLS-1$
+			}
 		} else {
 			// Simply ignore unknown tags (Maybe we're using a previous Yapbam version)
 		}
@@ -242,7 +260,8 @@ class GlobalDataHandler extends DefaultHandler {
 		} else if (qName.equals(XMLSerializer.MODE_TAG)) {
 			DateStepper[] vdcs = (DateStepper[]) this.tempData.pop();
 			boolean useCheckbook = (Boolean) this.tempData.pop();
-			String id = (String) this.tempData.pop(); id = id.trim();
+			String id = (String) this.tempData.pop();
+			id = id.trim();
 			Account account = (Account) this.tempData.peek();
 			if (account.getMode(id)==null) {
 				// In Yapbam versions before 0.9.8, it was possible to create modes ending (or starting) with a space
@@ -273,7 +292,9 @@ class GlobalDataHandler extends DefaultHandler {
 					report.reportProgress(currentProgress);
 				}
 				try {
-					if (SLOW_READING) Thread.sleep(1);
+					if (SLOW_READING) {
+						Thread.sleep(1);
+					}
 				} catch (InterruptedException e) {
 				}
 			}
@@ -295,7 +316,9 @@ class GlobalDataHandler extends DefaultHandler {
 			}
 			// In previous Yapbam versions, next date could also be null on enabled periodical transactions
 			// Now, it would launch an IllegalArgumentException
-			if (nextDate==null) enabled = false;
+			if (nextDate==null) {
+				enabled = false;
+			}
 			this.data.add(new PeriodicalTransaction(p.description, p.comment, p.amount, p.account, p.mode, p.category, lst, nextDate, enabled, stepper));
 		} else if (qName.equals(XMLSerializer.DATE_STEPPER_TAG)) {
 		} else {

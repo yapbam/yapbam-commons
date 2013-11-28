@@ -11,7 +11,8 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Logger;
+
+import org.slf4j.LoggerFactory;
 
 import net.yapbam.data.event.*;
 import net.yapbam.date.helpers.DateStepper;
@@ -241,7 +242,7 @@ public class GlobalData extends DefaultListenable {
 	 * @param transactions The transactions to add
 	 */
 	public void add(Transaction[] transactions) {
-		Logger.getLogger("GlobalData").finest("start adding transactions to global data");
+		LoggerFactory.getLogger(getClass()).trace("start adding transactions to global data");
 		if (transactions.length==0) {
 			return;
 		}
@@ -257,7 +258,7 @@ public class GlobalData extends DefaultListenable {
 			this.transactions.add(index, transaction);
 			accountTransactions.get(indexOf(transaction.getAccount())).add(transaction);
 		}
-		Logger.getLogger("GlobalData").finest("start adding transactions to accounts");
+		LoggerFactory.getLogger(getClass()).trace("start adding transactions to accounts");
 		for (Collection<Transaction> collection : accountTransactions) {
 			// For each account (there's one collection per account)
 			if (!collection.isEmpty()) {
@@ -269,7 +270,7 @@ public class GlobalData extends DefaultListenable {
 		fireEvent(new TransactionsAddedEvent(this, transactions));
 		this.setChanged();
 		
-		Logger.getLogger("GlobalData").finest("Start looking for checkbooks updates");
+		LoggerFactory.getLogger(getClass()).trace("Start looking for checkbooks updates");
 		
 		for (Transaction transaction : transactions) {
 			// Let's examine if this new transaction is a check and has a number behind next check available
@@ -294,7 +295,7 @@ public class GlobalData extends DefaultListenable {
 				}
 			}
 		}
-		Logger.getLogger("GlobalData").finest("End adding transactions");
+		LoggerFactory.getLogger(getClass()).trace("End adding transactions");
 	}
 
 	/** Adds a transaction.
@@ -670,7 +671,9 @@ public class GlobalData extends DefaultListenable {
 		String old = category.getName();
 		if (!old.equals(value)) {
 			// Check that this category name is not already used
-			if (getCategory(value) != null) throw new IllegalArgumentException("Category name already exists"); //$NON-NLS-1$
+			if (getCategory(value) != null) {
+				throw new IllegalArgumentException("Category name already exists"); //$NON-NLS-1$
+			}
 			// Category list is sorted by name => we have to change the category position
 			this.categories.remove(indexOf(category));
 			category.setName(value);
@@ -721,7 +724,9 @@ public class GlobalData extends DefaultListenable {
 	}
 
 	public void setMode(Account account, Mode oldMode, Mode newMode) {
-		if (oldMode.equals(Mode.UNDEFINED)) throw new IllegalArgumentException("Undefined mode can't be modified");
+		if (oldMode.equals(Mode.UNDEFINED)) {
+			throw new IllegalArgumentException("Undefined mode can't be modified");
+		}
 		ModePropertyChangedEvent event = new ModePropertyChangedEvent(this, account, oldMode, newMode);
 		if (event.getChanges()!=0) {
 			// oldMode object will be updated. In order to send the right event data, we have to remember it
@@ -795,7 +800,9 @@ public class GlobalData extends DefaultListenable {
 	 */
 	public boolean hasPendingPeriodicalTransactions(Date date) {
 		for (int i = 0; i < getPeriodicalTransactionsNumber(); i++) {
-			if (getPeriodicalTransaction(i).hasPendingTransactions(date)) return true;
+			if (getPeriodicalTransaction(i).hasPendingTransactions(date)) {
+				return true;
+			}
 		}
 		return false;
 	}

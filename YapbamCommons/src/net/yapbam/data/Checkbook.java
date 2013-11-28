@@ -2,6 +2,7 @@ package net.yapbam.data;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.text.MessageFormat;
 
 /** A checkbook.
  * A check number is composed of a prefix, which could be not numeric and a number.
@@ -131,7 +132,7 @@ public class Checkbook implements Serializable {
 
 	@Override
 	public String toString() {
-		return prefix+"["+getFullNumber(getNext())+"-"+getFullNumber(getLast())+"]->"+getFullNumber(getNext()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return MessageFormat.format("{0}[{1}-{2}]->{3}", prefix, getFullNumber(getNext()), getFullNumber(getLast()), getFullNumber(getNext())); //$NON-NLS-1$
 	}
 
 	void copy(Checkbook checkbook) {
