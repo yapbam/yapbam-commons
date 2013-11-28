@@ -28,8 +28,12 @@ public class Mode implements Serializable {
 	 * @throws IllegalArgumentException if useCheckbook is true and vdcForExpenditure is false;
 	 */
 	public Mode(String name, DateStepper receiptVDC, DateStepper expenseVDC, boolean useCheckbook) {
-		if (name==null) throw new IllegalArgumentException();
-		if (useCheckbook && (expenseVDC==null)) throw new IllegalArgumentException();
+		if (name==null) {
+			throw new IllegalArgumentException();
+		}
+		if (useCheckbook && (expenseVDC==null)) {
+			throw new IllegalArgumentException();
+		}
 		this.name = name;
 		this.receiptVDC = receiptVDC;
 		this.expenseVDC = expenseVDC;
@@ -54,7 +58,9 @@ public class Mode implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if ((obj==null) || !(obj instanceof Mode)) return false;
+		if ((obj==null) || !(obj instanceof Mode)) {
+			return false;
+		}
 		return NullUtils.areEquals(this.getName(),((Mode)obj).getName());
 	}
 

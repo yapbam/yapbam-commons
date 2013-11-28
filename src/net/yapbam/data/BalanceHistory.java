@@ -74,7 +74,9 @@ public class BalanceHistory implements Serializable {
 	 * the date.getTime() of the searched date in other cases.
 	 */
 	public long getFirstAlertDate(Date from, Date to, AlertThreshold alert) {
-		if (alert.isLifeless()) return -1;
+		if (alert.isLifeless()) {
+			return -1;
+		}
 		int firstIndex = from==null?0:find(from);
 		int lastIndex = to==null?elements.size()-1:find(to);
 		for (int i=firstIndex; i<=lastIndex; i++) {
@@ -108,10 +110,15 @@ public class BalanceHistory implements Serializable {
 			this.maxBalance = get(0).getBalance();
 			this.minBalance = this.maxBalance;
 			for (BalanceHistoryElement element : elements) {
-				if ((endDate!=null) && (element.getRelativePosition(endDate)<0)) break;
+				if ((endDate!=null) && (element.getRelativePosition(endDate)<0)) {
+					break;
+				}
 				double balance = element.getBalance();
-				if (this.maxBalance<balance) this.maxBalance = balance;
-				else if (this.minBalance>balance) this.minBalance = balance;
+				if (this.maxBalance<balance) {
+					this.maxBalance = balance;
+				} else if (this.minBalance>balance) {
+					this.minBalance = balance;
+				}
 			}
 			this.minMaxEndDate = endDate;
 			minMaxCached = true;
@@ -207,7 +214,9 @@ public class BalanceHistory implements Serializable {
 	void remove(Transaction transaction) {
 		this.add(-transaction.getAmount(), transaction.getValueDate());
 		int index = Collections.binarySearch(transactions, transaction, TransactionComparator.VALUE_DATE_COMPARATOR);
-		if (index>=0) transactions.remove(index);
+		if (index>=0) {
+			transactions.remove(index);
+		}
 	}
 
 	/** Gets the number of transactions in the history.
