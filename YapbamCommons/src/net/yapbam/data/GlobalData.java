@@ -353,6 +353,9 @@ public class GlobalData extends DefaultListenable {
 		return Collections.binarySearch(this.transactions, transaction, COMPARATOR);
 	}
 
+	/** Gets the number of categories.
+	 * @return an integer.
+	 */
 	public int getCategoriesNumber() {
 		return this.categories.size();
 	}
@@ -365,11 +368,15 @@ public class GlobalData extends DefaultListenable {
 		return this.categories.get(index);
 	}
 
-	public Category getCategory(String categoryId) {
-		if (categoryId==null) {
+	/** Gets a category by its name.
+	 * @param categoryName The category's name, or null which identifies the UNDEFINED category.
+	 * @return a category
+	 */
+	public Category getCategory(String categoryName) {
+		if (categoryName==null) {
 			return Category.UNDEFINED;
 		}
-		int index = Collections.binarySearch(categories, new Category(categoryId));
+		int index = Collections.binarySearch(categories, new Category(categoryName));
 		if (index<0) {
 			return null;
 		} else {
@@ -377,10 +384,18 @@ public class GlobalData extends DefaultListenable {
 		}
 	}
 	
+	/** Gets the index of a category.
+	 * @param category
+	 * @return a integer (<0 if the category is unknown)
+	 */
 	public int indexOf(Category category) {
 		return Collections.binarySearch(categories, category);
 	}
 
+	/** Adds a category.
+	 * @param category The category to add.
+	 * @throws IllegalArgumentException if this already contains a category with the same name as the argument.
+	 */
 	public void add(Category category) {
 		if (category.getName()==null) {
 			throw new IllegalArgumentException();
