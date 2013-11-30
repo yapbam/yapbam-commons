@@ -13,7 +13,8 @@ import java.util.StringTokenizer;
 public final class ArrayUtils {
 	private static final String ENCODING = "UTF-8";
 
-	private ArrayUtils() {}
+	private ArrayUtils() {
+	}
 	
 	/** Converts an int array to a string.
 	 * @param array an int array
@@ -23,7 +24,9 @@ public final class ArrayUtils {
 	public static String toString(int[] array) {
 		StringBuilder builder = new StringBuilder("[");
 		for (int i = 0; i < array.length; i++) {
-			if (i!=0) builder.append(", ");
+			if (i!=0) {
+				builder.append(", ");
+			}
 			builder.append(array[i]);
 		}
 		builder.append("]");
@@ -49,10 +52,14 @@ public final class ArrayUtils {
 	 * @see #parseStringArray(String)
 	 */
 	public static String toString(String[] array) {
-		if (array.length==0) return "";
+		if (array.length==0) {
+			return "";
+		}
 		StringBuilder builder = new StringBuilder("[");
 		for (int i = 0; i < array.length; i++) {
-			if (i!=0) builder.append(",");
+			if (i!=0) {
+				builder.append(",");
+			}
 			try {
 				builder.append(URLEncoder.encode(array[i], ENCODING));
 			} catch (UnsupportedEncodingException e) {
@@ -68,8 +75,12 @@ public final class ArrayUtils {
 	 * @return a String array.
 	 */
 	public static String[] parseStringArray(String string) {
-		if (string.length()==0) return new String[0];
-		if (!string.startsWith("[") || !string.endsWith("]")) throw new IllegalArgumentException();
+		if (string.length()==0) {
+			return new String[0];
+		}
+		if (!string.startsWith("[") || !string.endsWith("]")) {
+			throw new IllegalArgumentException();
+		}
 		string = string.substring(1, string.length()-1);
 		String[] array = string.split(",");
 		for (int i = 0; i < array.length; i++) {
@@ -120,8 +131,10 @@ public final class ArrayUtils {
 	 * @return a boolean array.
 	 */
 	public static boolean[] buildBooleanArray(int length, boolean value) {
-		boolean result[] = new boolean[length];
-		if (value) Arrays.fill(result, value);
+		boolean[] result = new boolean[length];
+		if (value) {
+			Arrays.fill(result, value);
+		}
 		return result;
 	}
 }

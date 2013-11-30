@@ -47,7 +47,9 @@ public class TextMatcher {
 	 */
 	public TextMatcher(Kind kind, String filter, boolean caseSensitive, boolean diacriticalSensitive) {
 		super();
-		if (kind==null) throw new IllegalArgumentException();
+		if (kind==null) {
+			throw new IllegalArgumentException();
+		}
 		this.kind = kind;
 		this.filter = filter;
 		this.caseSensitive = caseSensitive;
@@ -113,8 +115,12 @@ public class TextMatcher {
 	 * @return true if the string matches. If the string is null, this method always returns false
 	 */
 	public boolean matches(String text) {
-		if (text==null) return false;
-		if (!diacriticalSensitive) text = removeDiacriticals(text);
+		if (text==null) {
+			return false;
+		}
+		if (!diacriticalSensitive) {
+			text = removeDiacriticals(text);
+		}
 		if (kind==Kind.REGULAR) {
 			return ((Pattern)internalFilter).matcher(text).matches();
 		} else if (kind==Kind.EQUALS) {
@@ -125,7 +131,9 @@ public class TextMatcher {
 			} else {
 				return text.toUpperCase().contains((CharSequence) internalFilter);
 			}
-		} else throw new UnsupportedOperationException();
+		} else {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	@Override
