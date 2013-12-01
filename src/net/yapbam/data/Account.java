@@ -219,7 +219,9 @@ public class Account implements Serializable {
 		this.comment = comment;
 		if (this.comment!=null) {
 			this.comment = this.comment.trim();
-			if (this.comment.length()==0) this.comment = null;
+			if (this.comment.length()==0) {
+				this.comment = null;
+			}
 		}
 	}
 

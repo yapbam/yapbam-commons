@@ -96,8 +96,12 @@ public class SecureDownloader {
 		int size;
 		byte[] buffer = new byte[8192];
 		while ((size = in.read(buffer, 0, buffer.length)) != -1) {
-			if (cancelled) break;
-			if (out!=null) out.write(buffer, 0, size);
+			if (cancelled) {
+				break;
+			}
+			if (out!=null) {
+				out.write(buffer, 0, size);
+			}
 			if (size>0) {
 				digest.update(buffer, 0, size);
 				length += size;
@@ -113,7 +117,9 @@ public class SecureDownloader {
 	 * <br>The default implementation does nothing.
 	 * @see #download(URL, File)
 	 */
-	protected void progress(long downloadedSize) {}
+	protected void progress(long downloadedSize) {
+		// Default implementation does nothing
+	}
 
 	/** Tests whether the download has been canceled or not.
 	 * @return true if the download has been canceled. Please note that each time the download method is call, this value is reset to false.

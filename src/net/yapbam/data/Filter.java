@@ -50,7 +50,7 @@ public class Filter extends Observable {
 			System.out.println("filter  : "+Integer.toBinaryString(this.filter)); //$NON-NLS-1$
 			System.out.println("result  : "+Integer.toBinaryString(property & this.filter)); //$NON-NLS-1$
 		}
-		return ((property & this.filter) != 0);
+		return (property & this.filter) != 0;
 	}
 	
 	@Override
@@ -154,7 +154,7 @@ public class Filter extends Observable {
 			return true;
 		}
 		String name = mode.equals(Mode.UNDEFINED)?"":mode.getName(); //$NON-NLS-1$
-		return (validModes.contains(name));
+		return validModes.contains(name);
 	}
 
 	/** Sets the valid modes names for this filter.
@@ -405,9 +405,11 @@ public class Filter extends Observable {
 	}
 		
 	public boolean isStatementOk(String statement) {
-		if (statement==null) { // Not checked transaction
+		if (statement==null) {
+			// Not checked transaction
 			return isOk(Filter.NOT_CHECKED);
-		} else { // Checked transaction
+		} else {
+			// Checked transaction
 			if (!isOk(Filter.CHECKED)) {
 				return false;
 			}

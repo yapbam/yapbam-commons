@@ -57,7 +57,9 @@ public class MonthDateStepper extends  DateStepper {
 			System.out.println("----------------------"); //$NON-NLS-1$
 		}
 		Date result = gc.getTime();
-		if (DateUtils.dateToInteger(result)>this.lastDate) result = null;
+		if (DateUtils.dateToInteger(result)>this.lastDate) {
+			result = null;
+		}
 		return result;
 	}
 

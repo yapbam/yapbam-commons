@@ -32,7 +32,9 @@ public final class Crypto {
 	static final String ALGORITHM = "PBEWITHMD5ANDDES"; //$NON-NLS-1$
 
 	// An interesting article to implement file encryption : http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html
-	private Crypto(){}
+	private Crypto(){
+		// Nothing to do
+	}
 	
 	/** Decrypt a text previously crypted by the encrypt method.
 	 * @param key The secret key used for the encryption
@@ -174,7 +176,9 @@ public final class Crypto {
 		for (int missing=fileDigest.length; missing>0; ) {
 			missing -= stream.read(fileDigest, fileDigest.length-missing, missing);
 		}
-		if (!MessageDigest.isEqual(digest, fileDigest)) throw new AccessControlException("invalid password");
+		if (!MessageDigest.isEqual(digest, fileDigest)) {
+			throw new AccessControlException("invalid password");
+		}
 	}
 
 	/** Gets the SHA digest of a password.

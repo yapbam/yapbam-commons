@@ -45,10 +45,18 @@ public class CheckbookPropertyChangedEvent extends DataEvent {
 		this.oldBook = oldBook;
 		this.newBook = newBook;
 		changes = 0;
-		if (!oldBook.getPrefix().equals(newBook.getPrefix())) changes += PREFIX;
-		if (!oldBook.getFirst().equals(newBook.getFirst())) changes += FIRST;
-		if (!NullUtils.areEquals(oldBook.getNext(),newBook.getNext())) changes += NEXT;
-		if (oldBook.size()!=newBook.size()) changes += SIZE;
+		if (!oldBook.getPrefix().equals(newBook.getPrefix())) {
+			changes += PREFIX;
+		}
+		if (!oldBook.getFirst().equals(newBook.getFirst())) {
+			changes += FIRST;
+		}
+		if (!NullUtils.areEquals(oldBook.getNext(),newBook.getNext())) {
+			changes += NEXT;
+		}
+		if (oldBook.size()!=newBook.size()) {
+			changes += SIZE;
+		}
 	}
 
 	/** Returns the changes on the updated checkbook.
