@@ -41,10 +41,18 @@ public class ModePropertyChangedEvent extends DataEvent {
 		this.oldMode = oldMode;
 		this.newMode = newMode;
 		changes = 0;
-		if (!NullUtils.areEquals(oldMode.getName(),newMode.getName())) changes += NAME;
-		if (!NullUtils.areEquals(oldMode.getExpenseVdc(),newMode.getExpenseVdc())) changes += EXPENSE_VDC;
-		if (!NullUtils.areEquals(oldMode.getReceiptVdc(),newMode.getReceiptVdc())) changes += RECEIPT_VDC;
-		if (oldMode.isUseCheckBook()!=newMode.isUseCheckBook()) changes += CHECKBOOK;
+		if (!NullUtils.areEquals(oldMode.getName(),newMode.getName())) {
+			changes += NAME;
+		}
+		if (!NullUtils.areEquals(oldMode.getExpenseVdc(),newMode.getExpenseVdc())) {
+			changes += EXPENSE_VDC;
+		}
+		if (!NullUtils.areEquals(oldMode.getReceiptVdc(),newMode.getReceiptVdc())) {
+			changes += RECEIPT_VDC;
+		}
+		if (oldMode.isUseCheckBook()!=newMode.isUseCheckBook()) {
+			changes += CHECKBOOK;
+		}
 	}
 
 	/** Returns the changes on the updated mode.

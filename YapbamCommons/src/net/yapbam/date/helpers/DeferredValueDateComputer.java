@@ -52,18 +52,26 @@ public class DeferredValueDateComputer extends DateStepper {
 			}
 		}
 		gc.set(year, month, 1);
-		if (DEBUG) System.out.println("  1 du mois du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+		if (DEBUG) {
+			System.out.println("  1 du mois du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+		}
 		gc.add(GregorianCalendar.MONTH, 1);
-		if (DEBUG) System.out.println("  1 du mois suivant  : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+		if (DEBUG) {
+			System.out.println("  1 du mois suivant  : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+		}
 		gc.add(GregorianCalendar.DAY_OF_MONTH, -1);
-		if (DEBUG) System.out.println("  Dernier jour du mois du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+		if (DEBUG) {
+			System.out.println("  Dernier jour du mois du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+		}
 		if (debtDay<gc.get(GregorianCalendar.DAY_OF_MONTH)) {
 			gc.set(GregorianCalendar.DATE, debtDay);
 		} else if (DEBUG) {
 			 System.out.println ("  Le mois a moins de "+debtDay+" jours, on prend le dernier jour du mois"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		if (DEBUG) System.out.println("Jour du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
-		if (DEBUG) System.out.println("----------------------"); //$NON-NLS-1$
+		if (DEBUG) {
+			System.out.println("Jour du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+			System.out.println("----------------------"); //$NON-NLS-1$
+		}
 		return gc.getTime();
 	}
 

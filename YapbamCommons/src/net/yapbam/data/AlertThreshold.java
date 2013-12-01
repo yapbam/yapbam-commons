@@ -8,7 +8,7 @@ public class AlertThreshold {
 	/** A threshold that never generates any alert.
 	 * Useful to ask for no alerts on an account.
 	 */
-	public static AlertThreshold NO = new AlertThreshold(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+	public static final AlertThreshold NO = new AlertThreshold(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 	
 	private double lessThreshold;
 	private double moreThreshold;
@@ -66,14 +66,20 @@ public class AlertThreshold {
 	 * @return an integer. <0 if the tested amount is less than the "less threshold", >0 if the tested amount is more than the "more threshold", 0 if no trigger is raised.
 	 */
 	public int getTrigger(double amount) {
-		if (GlobalData.AMOUNT_COMPARATOR.compare(amount,this.lessThreshold)<0) return -1;
-		else if (GlobalData.AMOUNT_COMPARATOR.compare(amount,this.moreThreshold)>0) return 1;
-		return  0;
+		if (GlobalData.AMOUNT_COMPARATOR.compare(amount,this.lessThreshold)<0) {
+			return -1;
+		} else if (GlobalData.AMOUNT_COMPARATOR.compare(amount,this.moreThreshold)>0) {
+			return 1;
+		} else {
+			return  0;
+		}
 	}
 	
 	@Override
 	public int hashCode() {
-		if (isLifeless()) return 1;
+		if (isLifeless()) {
+			return 1;
+		}
 		return (int) Math.min(this.lessThreshold,this.moreThreshold);
 	}
 }

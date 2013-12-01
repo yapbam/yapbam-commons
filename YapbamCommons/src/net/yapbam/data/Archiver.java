@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.yapbam.util.NullUtils;
 
@@ -103,8 +104,10 @@ public final class Archiver {
 			accountToInitialBalance.put(account, initialBalance);
 		}
 		data.setEventsEnabled(false);
-		for (Account account : accountToInitialBalance.keySet()) {
-			data.setInitialBalance(account, accountToInitialBalance.get(account));
+		for (Entry<Account, Double> entry : accountToInitialBalance.entrySet()) {
+			Account account = entry.getKey();
+			Double initialBalance = entry.getValue();
+			data.setInitialBalance(account, initialBalance);
 		}
 		data.remove(transactions);
 		data.setEventsEnabled(true);

@@ -12,7 +12,9 @@ public final class DateUtils {
 	private final static long MILLIS_PER_DAY = 24 * 3600 * 1000;
 	
 	// Be sure nobody will instantiate this class
-	private DateUtils(){};
+	private DateUtils(){
+		// Nothing to do
+	};
 	
 	/** Computes the number of months between two dates.
 	 * @param first The first date
@@ -45,7 +47,9 @@ public final class DateUtils {
 	 * @see #dateToInteger(Date)
 	 */
 	public static Date integerToDate(int date) {
-		if (date<0) return null;
+		if (date<0) {
+			return null;
+		}
 		int year = date/10000;
 		int day = date - 10000*year;
 		int month = day/100;
@@ -69,7 +73,9 @@ public final class DateUtils {
 	 */
 	@SuppressWarnings("deprecation")
 	public static int dateToInteger(Date date) {
-		if (date==null) return -1;
+		if (date==null) {
+			return -1;
+		}
 		return (date.getYear()+1900)*10000+(date.getMonth()+1)*100+date.getDate();
 	}
 	

@@ -15,7 +15,9 @@ import java.util.Set;
  * <BR>License : GPL v3
  */
 public final class CheckSum {
-	private CheckSum() {}
+	private CheckSum() {
+		// Nothing to do
+	}
 	
 	/** Gets a file's checksum.
 	 * @param file The file to scan.
@@ -63,7 +65,9 @@ public final class CheckSum {
 			Set<String> checkSums = new HashSet<String>();
 			for (File folder : versionFolders) {
 				File file = new File(folder, filePath);
-				if (file.exists()) checkSums.add(CheckSum.toString(CheckSum.getChecksum(file)));
+				if (file.exists()) {
+					checkSums.add(CheckSum.toString(CheckSum.getChecksum(file)));
+				}
 			}
 			return checkSums.toArray(new String[checkSums.size()]);
 	}
@@ -93,12 +97,16 @@ public final class CheckSum {
 	public static byte[] toBytes (String string) {
 		byte[] byteArray = new BigInteger(string, 16).toByteArray();
 		int nbDigits = string.length();
-		if (string.startsWith("-")) nbDigits--;
+		if (string.startsWith("-")) {
+			nbDigits--;
+		}
 		int resultSize = nbDigits/2;
 		if (nbDigits % 2 != 0) {
 			resultSize++;
 		}
-		if (byteArray.length==resultSize) return byteArray;
+		if (byteArray.length==resultSize) {
+			return byteArray;
+		}
 		byte[] result = new byte[resultSize];
 		if (byteArray.length<resultSize) {
 			System.arraycopy(byteArray, 0, result, resultSize-byteArray.length, byteArray.length);

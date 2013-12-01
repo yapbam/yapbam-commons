@@ -72,7 +72,9 @@ public class BalanceData extends DefaultListenable {
 	}
 
 	void updateBalance(double amount, boolean add) {
-		if (amount==0) return;
+		if (amount==0) {
+			return;
+		}
 		if (!add) {
 			amount = -amount;
 		}
