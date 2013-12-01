@@ -25,13 +25,13 @@ public class ArchiveTest {
 
 	@Test
 	public void test() {
-		GlobalData archive_data  = new GlobalData();
-		Account archive_account = new Account(ACCOUNT_1_NAME, 10.0);
-		archive_data.add(archive_account);
+		GlobalData archiveData  = new GlobalData();
+		Account archiveAccount1 = new Account(ACCOUNT_1_NAME, 40.0);
+		archiveData.add(archiveAccount1);
 		Mode archive_mode = new Mode(MODE_1, DateStepper.IMMEDIATE, null, false);
-		archive_account.add(archive_mode);
+		archiveAccount1.add(archive_mode);
 		Date date = new GregorianCalendar(2013, 10, 25).getTime();
-		archive_data.add(new Transaction(date, null, "Archived transaction", null, -10, archive_account,
+		archiveData.add(new Transaction(date, null, "Archived transaction", null, -10, archiveAccount1,
 				archive_mode, new Category(CATEGORY_1), date, null, null));
 		
 		GlobalData data  = new GlobalData();
@@ -61,36 +61,37 @@ public class ArchiveTest {
 		Transaction[] transactionsArray = transactions.toArray(new Transaction[transactions.size()]);
 		data.add(transactionsArray);
 		
-		System.out.println (Arrays.asList(transactionsArray));
-		System.out.println (archive_data);
-
-		Account account = archive_data.getAccount(ACCOUNT_1_NAME);
-		assertNotEquals(account.getBalanceData().getFinalBalance(),data.getAccount(ACCOUNT_1_NAME));
-		assertNull(archive_data.getAccount(ACCOUNT_2_NAME));
+		Account account = archiveData.getAccount(ACCOUNT_1_NAME);
+		double account1Diff = account.getBalanceData().getFinalBalance()- data.getAccount(ACCOUNT_1_NAME).getInitialBalance();
+		assertTrue(GlobalData.AMOUNT_COMPARATOR.compare(0.0, account1Diff)!=0);
+		assertNull(archiveData.getAccount(ACCOUNT_2_NAME));
 		assertEquals(4, data.getTransactionsNumber());
 		
-		Archiver.archive (archive_data, transactionsArray);
+		Archiver.archive (archiveData, transactionsArray);
 		
 		// There should be five statements in archive
-		assertEquals(5, archive_data.getTransactionsNumber());
+		assertEquals(5, archiveData.getTransactionsNumber());
 		// There should be two statements in account 1
-		assertEquals(2, Statement.getStatements(archive_account).length);
+		assertEquals(2, Statement.getStatements(archiveAccount1).length);
 		// Mode 1 must be changed
-		Mode archiveMode1 = archive_account.getMode(MODE_1);
+		Mode archiveMode1 = archiveAccount1.getMode(MODE_1);
 		assertEquals(DateStepper.IMMEDIATE, archiveMode1.getExpenseVdc());
 		assertTrue(archiveMode1.isUseCheckBook());
 		// Mode 2 should exists
-		assertNotNull(archive_account.getMode(MODE_2));
+		assertNotNull(archiveAccount1.getMode(MODE_2));
 		// Account 2 should exists
-		Account archive_account2 = archive_data.getAccount(ACCOUNT_2_NAME); 
+		Account archive_account2 = archiveData.getAccount(ACCOUNT_2_NAME); 
 		assertNotNull(archive_account2);
 		// Categorie 2 should exists
-		assertNotNull(archive_data.getCategory(CATEGORY_2));
+		assertNotNull(archiveData.getCategory(CATEGORY_2));
 		// Categorie 3 should exists
-		assertNotNull(archive_data.getCategory(CATEGORY_3));
+		assertNotNull(archiveData.getCategory(CATEGORY_3));
 
 		Archiver.remove (data, transactionsArray);
 		
+		// Difference between final archive balance and initial balance of common account should not change
+		double finalAccount1Diff = archiveData.getAccount(ACCOUNT_1_NAME).getBalanceData().getFinalBalance()-data.getAccount(ACCOUNT_1_NAME).getInitialBalance();
+		assertTrue(GlobalData.AMOUNT_COMPARATOR.compare(account1Diff,finalAccount1Diff)==0);
 		// There should be no more transactions in data
 		assertEquals(0, data.getTransactionsNumber());
 		// account 1 initial balance should have changed
