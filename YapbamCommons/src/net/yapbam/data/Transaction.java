@@ -110,7 +110,7 @@ public class Transaction extends AbstractTransaction implements Serializable {
 		}
 		List<SubTransaction> subTransactions = changeSubTransactions(oldCategory, newCategory);
 		return new Transaction(getDate(), getNumber(), getDescription(), getComment(), getAmount(), getAccount(), getMode(),
-				(getCategory().equals(oldCategory)?newCategory:getCategory()), getValueDate(), getStatement(), subTransactions);
+				getCategory().equals(oldCategory)?newCategory:getCategory(), getValueDate(), getStatement(), subTransactions);
 	}
 
 	Transaction change(Account account, Mode oldMode, Mode newMode) {

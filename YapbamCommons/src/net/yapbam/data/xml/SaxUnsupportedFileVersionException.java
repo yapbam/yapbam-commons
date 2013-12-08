@@ -5,7 +5,7 @@ import org.xml.sax.SAXParseException;
 
 class SaxUnsupportedFileVersionException extends SAXParseException {
 	private static final long serialVersionUID = 1L;
-	private int version;
+	private final int version;
 
 	SaxUnsupportedFileVersionException(Locator locator, int version) {
 		super ("File is of version "+version+". Expected "+XMLSerializer.CURRENT_VERSION+" or less", locator);

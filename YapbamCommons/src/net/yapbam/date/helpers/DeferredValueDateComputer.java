@@ -4,8 +4,12 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** This class allows to compute value date for a deferred operation */ 
 public class DeferredValueDateComputer extends DateStepper {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DeferredValueDateComputer.class);
 	private static final boolean DEBUG = false;
 
 	private int stopDay;
@@ -28,9 +32,9 @@ public class DeferredValueDateComputer extends DateStepper {
 	@Override
 	public Date getNextStep(Date date) {
 		if (DEBUG) {
-			System.out.println("date de l'opération : "+DateFormat.getDateInstance().format(date)); //$NON-NLS-1$
-			System.out.println("  date d'arrêt de compte : "+this.stopDay); //$NON-NLS-1$
-			System.out.println("  date de débit : "+this.debtDay); //$NON-NLS-1$
+			LOGGER.debug("Date: {}", DateFormat.getDateInstance().format(date)); //$NON-NLS-1$
+			LOGGER.debug("  StopDay: {}", this.stopDay); //$NON-NLS-1$
+			LOGGER.debug("  DebtDay: {}", this.debtDay); //$NON-NLS-1$
 		}
 		GregorianCalendar gc = new GregorianCalendar();
 		gc.setTime(date);
@@ -53,24 +57,24 @@ public class DeferredValueDateComputer extends DateStepper {
 		}
 		gc.set(year, month, 1);
 		if (DEBUG) {
-			System.out.println("  1 du mois du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+			LOGGER.debug(" First day of debt month: {}", DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
 		}
 		gc.add(GregorianCalendar.MONTH, 1);
 		if (DEBUG) {
-			System.out.println("  1 du mois suivant  : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+			LOGGER.debug(" First day of next month: {}", DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
 		}
 		gc.add(GregorianCalendar.DAY_OF_MONTH, -1);
 		if (DEBUG) {
-			System.out.println("  Dernier jour du mois du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+			LOGGER.debug(" Last day of debt month: {}", DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
 		}
 		if (debtDay<gc.get(GregorianCalendar.DAY_OF_MONTH)) {
 			gc.set(GregorianCalendar.DATE, debtDay);
 		} else if (DEBUG) {
-			 System.out.println ("  Le mois a moins de "+debtDay+" jours, on prend le dernier jour du mois"); //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.debug(" Month has less than {} days, we take last day of the month"); //$NON-NLS-1$
 		}
 		if (DEBUG) {
-			System.out.println("Jour du débit : "+DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
-			System.out.println("----------------------"); //$NON-NLS-1$
+			LOGGER.debug(" => Debt day: {}", DateFormat.getDateInstance().format(gc.getTime())); //$NON-NLS-1$
+			LOGGER.debug("----------------------"); //$NON-NLS-1$
 		}
 		return gc.getTime();
 	}

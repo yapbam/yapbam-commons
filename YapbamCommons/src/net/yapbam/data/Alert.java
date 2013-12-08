@@ -10,7 +10,9 @@ import net.yapbam.data.AlertThreshold;
  * This class represents an alert.
  */
 public class Alert {
-	public enum Kind {IS_LESS, IS_MORE};
+	public enum Kind {
+		IS_LESS, IS_MORE
+	}
 
 	private Date date;
 	private Account account;

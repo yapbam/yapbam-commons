@@ -5,6 +5,10 @@ import java.util.Comparator;
 import net.yapbam.util.NullUtils;
 
 abstract class TransactionComparator implements Comparator<Transaction> {
+	private TransactionComparator() {
+		// To prevent instance from being created
+	}
+	
 	static final TransactionComparator INSTANCE = new TransactionComparator() {
 		public int compare(Transaction o1, Transaction o2) {
 			int result = o1.getDateAsInteger()-o2.getDateAsInteger();

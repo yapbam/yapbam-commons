@@ -79,7 +79,7 @@ public class PeriodicalTransaction extends AbstractTransaction {
 		}
 		List<SubTransaction> subTransactions = changeSubTransactions(oldCategory, newCategory);
 		return new PeriodicalTransaction(getDescription(), getComment(), getAmount(), getAccount(), getMode(),
-				(getCategory().equals(oldCategory)?newCategory:getCategory()), subTransactions,
+				getCategory().equals(oldCategory)?newCategory:getCategory(), subTransactions,
 				getNextDate(), isEnabled(), getNextDateBuilder());
 	}
 
@@ -116,7 +116,7 @@ public class PeriodicalTransaction extends AbstractTransaction {
 				vdStepper = DateStepper.IMMEDIATE;
 			}
 			//Be aware, when the transaction has an "end date", and the date is after this "end date", tDate become null
-			for (Date tDate = getNextDate();((tDate!=null)&&(tDate.compareTo(date)<=0));tDate=getNextDateBuilder().getNextStep(tDate)) {
+			for (Date tDate = getNextDate();(tDate!=null)&&(tDate.compareTo(date)<=0);tDate=getNextDateBuilder().getNextStep(tDate)) {
 				result.add(new Transaction(tDate, null, getDescription(), getComment(), amount, getAccount(), mode, getCategory(),
 						vdStepper.getNextStep(tDate), null, Arrays.asList(getSubTransactions())));
 			}

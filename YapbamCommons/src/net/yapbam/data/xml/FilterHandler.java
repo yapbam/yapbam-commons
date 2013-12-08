@@ -12,11 +12,15 @@ import net.yapbam.util.DateUtils;
 import net.yapbam.util.TextMatcher;
 import net.yapbam.util.TextMatcher.Kind;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class FilterHandler extends DefaultHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.class);
+	
 	private GlobalData data;
 	private Filter filter;
 	private TextMatcher descriptionMatcher;
@@ -46,46 +50,51 @@ public class FilterHandler extends DefaultHandler {
 			String filterString = attributes.getValue(XMLSerializer.FILTER_ATTRIBUTE);
 			property = filterString==null?Filter.ALL:Integer.parseInt(filterString);
 			filter.setAmountFilter(property, amountFrom==null?0.0:Double.parseDouble(amountFrom), amountFrom==null?Double.POSITIVE_INFINITY:Double.parseDouble(amountTo));
-			{
-				String accountsString = attributes.getValue(XMLSerializer.ACCOUNT_ATTRIBUTE);
-				if (accountsString!= null) {
-					String[] names = ArrayUtils.parseStringArray(accountsString);
-					ArrayList<Account> accounts = new ArrayList<Account>();
-					for (String name: names) {
-						Account account = data.getAccount(name);
-						if (account != null) accounts.add(account);
-					}
-					if (!accounts.isEmpty()) {
-						filter.setValidAccounts(accounts);
+
+			String accountsString = attributes.getValue(XMLSerializer.ACCOUNT_ATTRIBUTE);
+			if (accountsString!= null) {
+				String[] names = ArrayUtils.parseStringArray(accountsString);
+				ArrayList<Account> accounts = new ArrayList<Account>();
+				for (String name: names) {
+					Account account = data.getAccount(name);
+					if (account != null) {
+						accounts.add(account);
 					}
 				}
-			} {
-				String categoriesString = attributes.getValue(XMLSerializer.CATEGORY_ATTRIBUTE);
-				if (categoriesString!= null) {
-					String[] names = ArrayUtils.parseStringArray(categoriesString);
-					ArrayList<Category> categories = new ArrayList<Category>();
-					for (String name: names) {
-						name = name.trim();
-						Category category = name.isEmpty()?Category.UNDEFINED:data.getCategory(name);
-						if (category != null) categories.add(category);
-					}
-					if (!categories.isEmpty() && (categories.size()!=data.getCategoriesNumber())) {
-						filter.setValidCategories(categories);
+				if (!accounts.isEmpty()) {
+					filter.setValidAccounts(accounts);
+				}
+			}
+
+			String categoriesString = attributes.getValue(XMLSerializer.CATEGORY_ATTRIBUTE);
+			if (categoriesString!= null) {
+				String[] names = ArrayUtils.parseStringArray(categoriesString);
+				ArrayList<Category> categories = new ArrayList<Category>();
+				for (String name: names) {
+					name = name.trim();
+					Category category = name.isEmpty()?Category.UNDEFINED:data.getCategory(name);
+					if (category != null) {
+						categories.add(category);
 					}
 				}
-			} {
-				String modesString = attributes.getValue(XMLSerializer.MODE_ATTRIBUTE);
-				if (modesString!= null) {
-					String[] names = ArrayUtils.parseStringArray(modesString);
-					Set<String> dataNames = getAllValidAccountsModeNames();
-					ArrayList<String> modes = new ArrayList<String>();
-					for (String name: names) {
-						name = name.trim();
-						if (dataNames.contains(name)) modes.add(name);
+				if (!categories.isEmpty() && (categories.size()!=data.getCategoriesNumber())) {
+					filter.setValidCategories(categories);
+				}
+			}
+
+			String modesString = attributes.getValue(XMLSerializer.MODE_ATTRIBUTE);
+			if (modesString!= null) {
+				String[] names = ArrayUtils.parseStringArray(modesString);
+				Set<String> dataNames = getAllValidAccountsModeNames();
+				ArrayList<String> modes = new ArrayList<String>();
+				for (String name: names) {
+					name = name.trim();
+					if (dataNames.contains(name)) {
+						modes.add(name);
 					}
-					if (!modes.isEmpty() && (modes.size()!=dataNames.size())) {
-						filter.setValidModes(modes);
-					}
+				}
+				if (!modes.isEmpty() && (modes.size()!=dataNames.size())) {
+					filter.setValidModes(modes);
 				}
 			}
 		} else if (qName.equals(XMLSerializer.TEXT_MATCHER_TAG)) {
@@ -115,7 +124,7 @@ public class FilterHandler extends DefaultHandler {
 				this.statementMatcher = textMatcher;
 			}
 		} else {
-			throw new IllegalArgumentException ("Unknown tag "+qName); //$NON-NLS-1$
+			LOGGER.warn("Unknown tag {}", qName); //$NON-NLS-1$
 		}
 	}
 	
@@ -145,8 +154,9 @@ public class FilterHandler extends DefaultHandler {
 			filter.setNumberMatcher(this.numberMatcher);
 			filter.setStatementFilter(property, this.statementMatcher);
 		} else if (qName.equals(XMLSerializer.TEXT_MATCHER_TAG)) {
+			// Nothing to do at the end of this tag.
 		} else {
-			System.err.println ("Unknown tag "+qName); //$NON-NLS-1$
+			// A tag is unknown. Do nothing (startElement has already log unknown tags) 
 		}
 	}
 
@@ -155,7 +165,7 @@ public class FilterHandler extends DefaultHandler {
 		String str = new String(ch, start, length);
 		str = str.trim();
 		if (str.length()!=0) {
-			System.err.println ("strange, characters is called : "+str); //$NON-NLS-1$
+			LOGGER.warn("Strange, characters is called on: {}",str); //$NON-NLS-1$
 		}
 	}
 

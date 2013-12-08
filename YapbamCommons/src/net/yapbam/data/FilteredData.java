@@ -200,7 +200,7 @@ public class FilteredData extends DefaultListenable {
 		boolean modeRenamed = (event instanceof ModePropertyChangedEvent) &&
 		((((ModePropertyChangedEvent)event).getChanges() & ModePropertyChangedEvent.NAME)!=0) &&
 		filter.isOk(((ModePropertyChangedEvent)event).getNewMode());
-		return (accountRenamed || categoryRenamed || modeRenamed);
+		return accountRenamed || categoryRenamed || modeRenamed;
 	}
 	
 	/** Gets the filter used in this filtered data.

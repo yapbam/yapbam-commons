@@ -9,12 +9,12 @@ import java.util.GregorianCalendar;
  * <BR>License : GPL v3
  */
 public final class DateUtils {
-	private final static long MILLIS_PER_DAY = 24 * 3600 * 1000;
+	private static final long MILLIS_PER_DAY = 24 * 3600 * 1000;
 	
 	// Be sure nobody will instantiate this class
 	private DateUtils(){
 		// Nothing to do
-	};
+	}
 	
 	/** Computes the number of months between two dates.
 	 * @param first The first date

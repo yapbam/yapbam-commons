@@ -16,6 +16,8 @@ import net.yapbam.date.helpers.DeferredValueDateComputer;
 import net.yapbam.date.helpers.MonthDateStepper;
 import net.yapbam.util.DateUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -23,6 +25,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 class GlobalDataHandler extends DefaultHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(GlobalDataHandler.class);
 	private static final String PARSING_WAS_CANCELLED = "Parsing was cancelled"; //$NON-NLS-1$
 	private static final boolean SLOW_READING = Boolean.getBoolean("slowDataReading"); //$NON-NLS-1$
 	
@@ -42,7 +45,7 @@ class GlobalDataHandler extends DefaultHandler {
 	// XML-data; here we save reference to current position in XML:
 	@Override
 	public void setDocumentLocator(Locator locator) {
-  	this.locator = locator;
+		this.locator = locator;
 	}
   
 	@Override
@@ -88,7 +91,7 @@ class GlobalDataHandler extends DefaultHandler {
 			}
 		}
 		this.currentTag = qName;
-		if (qName.equals(XMLSerializer.GLOBAL_DATA_TAG)) {
+		if (XMLSerializer.GLOBAL_DATA_TAG.equals(qName)) {
 			try {
 				if (SLOW_READING) {
 					Thread.sleep(1000);
@@ -177,7 +180,7 @@ class GlobalDataHandler extends DefaultHandler {
 			DateStepper[] vdcs = (DateStepper[]) this.tempData.peek();
 			int index = qName.equals(XMLSerializer.EXPENSE_VDC_TAG) ? 0 : 1;
 			if (vdcs[index]!=null) {
-				System.err.println("too much value date computer");//LOG  //$NON-NLS-1$
+				LOGGER.warn("Too much value date computer"); //$NON-NLS-1$
 			}
 			vdcs[index] = vdc;
 		} else if (qName.equals(XMLSerializer.TRANSACTION_TAG)) {
@@ -235,6 +238,7 @@ class GlobalDataHandler extends DefaultHandler {
 			}
 		} else {
 			// Simply ignore unknown tags (Maybe we're using a previous Yapbam version)
+			LOGGER.warn("Unknown tag {}", qName); //$NON-NLS-1$
 		}
 	}
 
@@ -256,7 +260,6 @@ class GlobalDataHandler extends DefaultHandler {
 				this.data.setComment(account, lastCData);
 				this.tagToCData.remove(qName);
 			}
-		} else if (qName.equals(XMLSerializer.CATEGORY_TAG)) {
 		} else if (qName.equals(XMLSerializer.MODE_TAG)) {
 			DateStepper[] vdcs = (DateStepper[]) this.tempData.pop();
 			boolean useCheckbook = (Boolean) this.tempData.pop();
@@ -275,10 +278,8 @@ class GlobalDataHandler extends DefaultHandler {
 			Checkbook book = (Checkbook) this.tempData.pop();
 			Account account = (Account) this.tempData.peek();
 			this.data.add(account, book);
-		} else if (qName.equals(XMLSerializer.EXPENSE_VDC_TAG)) {
-		} else if (qName.equals(XMLSerializer.RECEIPT_VDC_TAG)) {
 		} else if (qName.equals(XMLSerializer.TRANSACTION_TAG)) {
-			List<SubTransaction> lst = (ArrayList<SubTransaction>) this.tempData.pop();
+			List<SubTransaction> lst = (List<SubTransaction>) this.tempData.pop();
 			Map<String, String> attributes = (Map<String, String>) this.tempData.pop();
 			PartialTransaction p = new PartialTransaction(this.data, attributes);		
 			int date = XMLSerializer.toDate(attributes.get(XMLSerializer.DATE_ATTRIBUTE));
@@ -298,7 +299,6 @@ class GlobalDataHandler extends DefaultHandler {
 				} catch (InterruptedException e) {
 				}
 			}
-		} else if (qName.equals(XMLSerializer.SUBTRANSACTION_TAG)) {
 		} else if (qName.equals(XMLSerializer.PERIODICAL_TAG)) {
 			ArrayList<SubTransaction> lst = (ArrayList<SubTransaction>) this.tempData.pop();
 			DateStepper stepper = (DateStepper) this.tempData.pop();
@@ -320,10 +320,13 @@ class GlobalDataHandler extends DefaultHandler {
 				enabled = false;
 			}
 			this.data.add(new PeriodicalTransaction(p.description, p.comment, p.amount, p.account, p.mode, p.category, lst, nextDate, enabled, stepper));
-		} else if (qName.equals(XMLSerializer.DATE_STEPPER_TAG)) {
+		} else if (qName.equals(XMLSerializer.CATEGORY_TAG) || qName.equals(XMLSerializer.EXPENSE_VDC_TAG) ||
+				qName.equals(XMLSerializer.RECEIPT_VDC_TAG) || qName.equals(XMLSerializer.SUBTRANSACTION_TAG) ||
+				qName.equals(XMLSerializer.DATE_STEPPER_TAG)) {
+			// Nothing to do when closing these tags (evrything is done in startElement)
 		} else {
 			// Simply ignore unknown tags. Maybe we're using a previous Yapbam version
-			System.err.println ("Unknown tag "+qName); //$NON-NLS-1$
+			// The startElement method is in charge of logging these tags
 		}
 	}
 

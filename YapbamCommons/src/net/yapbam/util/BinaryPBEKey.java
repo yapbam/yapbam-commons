@@ -10,6 +10,7 @@ import javax.crypto.*;
  * @deprecated 
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class BinaryPBEKey implements SecretKey {
 	private final byte[] key;
 

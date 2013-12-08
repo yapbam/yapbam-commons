@@ -41,7 +41,9 @@ public abstract class AbstractSerializer<T> {
 		// This code verifies it is always true
 		int nb = 0;
 		for (byte c : PASSWORD_ENCODED_FILE_HEADER) {
-			if (c=='*') nb++;
+			if (c=='*') {
+				nb++;
+			}
 		}
 		try {
 			if ((V1.getBytes(Crypto.UTF8).length!=nb) || (V2.getBytes(Crypto.UTF8).length!=nb) || (nb==0)) {
@@ -80,7 +82,7 @@ public abstract class AbstractSerializer<T> {
 			PipedOutputStream compressorOutput = new PipedOutputStream();
 			PipedInputStream encoderInput = new PipedInputStream(compressorOutput);
 			
-			ExecutorService service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,0, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());;
+			ExecutorService service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,0, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
 
 			List<Future<? extends Object>> futures = new ArrayList<Future<? extends Object>>(3);
 			Callable<Void> c = new Callable<Void>() {
@@ -111,8 +113,11 @@ public abstract class AbstractSerializer<T> {
 				}
 			} catch (ExecutionException e) {
 				Throwable cause = e.getCause();
-				if (cause instanceof IOException) throw (IOException)cause;
-				throw new RuntimeException(cause);
+				if (cause instanceof IOException) {
+					throw (IOException)cause;
+				} else {
+					throw new RuntimeException(cause);
+				}
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
@@ -151,9 +156,13 @@ public abstract class AbstractSerializer<T> {
 		SerializationData serializationData = getSerializationData(in);
 		boolean encoded = serializationData.isPasswordRequired;
 		if (encoded) {
-			if (password==null) throw new AccessControlException("Stream is encoded but password is null"); //$NON-NLS-1$
+			if (password==null) {
+				throw new AccessControlException("Stream is encoded but password is null"); //$NON-NLS-1$
+			}
 			// Pass the header
-			for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) in.read();
+			for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) {
+				in.read();
+			}
 			
 			// Read the file content
 			if (! (serializationData.version.equals(V1) || serializationData.version.equals(V2))) {
@@ -188,9 +197,13 @@ public abstract class AbstractSerializer<T> {
 				return reader.get();
 			} catch (ExecutionException e) {
 				Throwable cause = e.getCause();
-				if (cause instanceof IOException) throw (IOException)cause;
-				if (cause instanceof AccessControlException) throw (AccessControlException)cause;
-				throw new RuntimeException(cause);
+				if (cause instanceof IOException) {
+					throw (IOException)cause;
+				} else if (cause instanceof AccessControlException) {
+					throw (AccessControlException)cause;
+				} else {
+					throw new RuntimeException(cause);
+				}
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
@@ -218,9 +231,13 @@ public abstract class AbstractSerializer<T> {
 			return password==null;
 		} else {
 			try {
-				if (password==null) return false;
+				if (password==null) {
+					return false;
+				}
 				// Pass the header
-				for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) in.read();
+				for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) {
+					in.read();
+				}
 				DecrypterTask.verifyPassword(in, password);
 				return true;
 			} catch (AccessControlException e) {
@@ -250,7 +267,9 @@ public abstract class AbstractSerializer<T> {
 	 * @throws IOException
 	 */
 	private static SerializationData getSerializationData(InputStream in) throws IOException {
-		if (in.markSupported()) in.mark(PASSWORD_ENCODED_FILE_HEADER.length);
+		if (in.markSupported()) {
+			in.mark(PASSWORD_ENCODED_FILE_HEADER.length);
+		}
 		boolean isEncoded = true;
 		StringBuilder encodingVersion = new StringBuilder();
 		for (int i = 0; i < PASSWORD_ENCODED_FILE_HEADER.length; i++) {
@@ -264,7 +283,9 @@ public abstract class AbstractSerializer<T> {
 				}
 			}
 		}
-		if (in.markSupported()) in.reset(); // Reset the stream (getSerializationData doesn't guarantee the position of the stream)
+		if (in.markSupported()) {
+			in.reset(); // Reset the stream (getSerializationData doesn't guarantee the position of the stream)
+		}
 		return new SerializationData(isEncoded, encodingVersion.toString());
 	}
 	
