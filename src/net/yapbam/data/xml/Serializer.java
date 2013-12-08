@@ -78,7 +78,9 @@ public class Serializer extends AbstractSerializer<GlobalData> {
 		if (isZipped) {
 			in = new ZipInputStream(in);
 			((ZipInputStream)in).getNextEntry();
-			if (!in.markSupported()) in = new BufferedInputStream(in);
+			if (!in.markSupported()) {
+				in = new BufferedInputStream(in);
+			}
 		}
 		return super.read(password, in, report);
 	}
@@ -94,7 +96,9 @@ public class Serializer extends AbstractSerializer<GlobalData> {
 		if (isZipped) {
 			in = new ZipInputStream(in);
 			((ZipInputStream)in).getNextEntry();
-			if (!in.markSupported()) in = new BufferedInputStream(in);
+			if (!in.markSupported()) {
+				in = new BufferedInputStream(in);
+			}
 		}
 
 		return super.isPasswordOk(in, password);

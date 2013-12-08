@@ -29,12 +29,7 @@ public class SubTransaction implements Serializable, Cloneable {
 	public Category getCategory() {
 		return category;
 	}
-	@Override
-	public Object clone() {
-		return new SubTransaction(amount, description, category);
-	}
 	
-	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
 		return "[{"+description+"}{"+category+"}{"+amount+"}]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

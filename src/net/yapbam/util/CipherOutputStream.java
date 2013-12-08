@@ -96,7 +96,7 @@ public class CipherOutputStream extends FilterOutputStream {
 		super(os);
 		output = os;
 		cipher = c;
-	};
+	}
 
 	/**
 	 * Writes the specified byte to this output stream.
@@ -114,7 +114,7 @@ public class CipherOutputStream extends FilterOutputStream {
 			output.write(obuffer);
 			obuffer = null;
 		}
-	};
+	}
 
 	/**
 	 * Writes <code>b.length</code> bytes from the specified byte array to this

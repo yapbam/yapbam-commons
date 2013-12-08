@@ -8,7 +8,11 @@ import java.lang.reflect.Method;
  * This class provides a unique end point to encode bytes in Base64.
  * @author Jean-Marc Astesana
  */
-public class Base64Encoder {
+public abstract class Base64Encoder {
+	private Base64Encoder() {
+		// To prevent instance from being created
+	}
+
 	/** Encodes bytes.
 	 * @param bytes The bytes to encode (If you try to encode strings, be aware that String.getBytes() does not return the same bytes on every platforms.
 	 * You should prefer the method String.getBytes(String) that allows you to specify the encoding.

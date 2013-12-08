@@ -4,9 +4,13 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.yapbam.util.DateUtils;
 
 public class DayDateStepper extends DateStepper {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DayDateStepper.class);
 	private static final boolean DEBUG = false;
 
 	private int nbDays;
@@ -26,18 +30,20 @@ public class DayDateStepper extends DateStepper {
 	@Override
 	public Date getNextStep(Date date) {
 		if (DEBUG) {
-			System.out.println("date de l'opération : "+DateFormat.getDateInstance().format(date)); //$NON-NLS-1$
-			System.out.println("  nombre de jours : "+this.nbDays); //$NON-NLS-1$
+			LOGGER.debug("Date: {}", DateFormat.getDateInstance().format(date)); //$NON-NLS-1$
+			LOGGER.debug("  Number of days: {}", this.nbDays); //$NON-NLS-1$
 		}
 		GregorianCalendar gc = new GregorianCalendar();
 		gc.setTime(date);
 		gc.add(GregorianCalendar.DAY_OF_MONTH, this.nbDays);
 		Date result = gc.getTime();
 		if (DEBUG) {
-			System.out.println("Jour du débit : "+DateFormat.getDateInstance().format(result)); //$NON-NLS-1$
-			System.out.println("----------------------"); //$NON-NLS-1$
+			LOGGER.debug(" => Debt day: {}", DateFormat.getDateInstance().format(result)); //$NON-NLS-1$
+			LOGGER.debug("----------------------"); //$NON-NLS-1$
 		}
-		if (DateUtils.dateToInteger(result)>this.lastDate) result = null;
+		if (DateUtils.dateToInteger(result)>this.lastDate) {
+			result = null;
+		}
 		return result;
 	}
 
@@ -53,7 +59,9 @@ public class DayDateStepper extends DateStepper {
 	@Override
 	public boolean equals(Object obj) {
 		boolean result = super.equals(obj);
-		if (result) result = (getStep()==((DayDateStepper)obj).getStep()) && (lastDate==((DayDateStepper)obj).lastDate);
+		if (result) {
+			result = (getStep()==((DayDateStepper)obj).getStep()) && (lastDate==((DayDateStepper)obj).lastDate);
+		}
 		return result;
 	}
 

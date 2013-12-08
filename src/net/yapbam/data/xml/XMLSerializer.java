@@ -226,7 +226,8 @@ public class XMLSerializer {
 				if (SLOW_WRITING) {
 					try {
 						Thread.sleep(1);
-					} catch (InterruptedException e) {}
+					} catch (InterruptedException e) {
+					}
 				}
 				serialize(data.getTransaction(i));
 				if (report!=null) {
@@ -326,14 +327,20 @@ public class XMLSerializer {
 		}
 		atts.addAttribute(EMPTY, EMPTY, KIND_ATTRIBUTE, CDATA, kind);
 		atts.addAttribute(EMPTY, EMPTY, FILTER_ATTRIBUTE, CDATA, encode(matcher.getFilter()));
-		if (matcher.isCaseSensitive()) atts.addAttribute(EMPTY, EMPTY, CASE_SENSITIVE_ATTRIBUTE, CDATA, TRUE);
-		if (matcher.isDiacriticalSensitive()) atts.addAttribute(EMPTY, EMPTY, DIACRITICAL_SENSITIVE_ATTRIBUTE, CDATA, TRUE);
+		if (matcher.isCaseSensitive()) {
+			atts.addAttribute(EMPTY, EMPTY, CASE_SENSITIVE_ATTRIBUTE, CDATA, TRUE);
+		}
+		if (matcher.isDiacriticalSensitive()) {
+			atts.addAttribute(EMPTY, EMPTY, DIACRITICAL_SENSITIVE_ATTRIBUTE, CDATA, TRUE);
+		}
 		hd.startElement(EMPTY,EMPTY,TEXT_MATCHER_TAG, atts);
 		hd.endElement(EMPTY,EMPTY,TEXT_MATCHER_TAG);
 	}
 	
 	static String encode(String string) {
-		if (string==null) return string;
+		if (string==null) {
+			return string;
+		}
 		try {
 			return URLEncoder.encode(string, UTF8);
 		} catch (UnsupportedEncodingException e) {
@@ -342,7 +349,9 @@ public class XMLSerializer {
 	}
 	
 	static String decode(String string) {
-		if (string==null) return string;
+		if (string==null) {
+			return string;
+		}
 		try {
 			return URLDecoder.decode(string, UTF8);
 		} catch (UnsupportedEncodingException e) {
@@ -557,7 +566,9 @@ public class XMLSerializer {
 			hd.startElement(EMPTY,EMPTY,DATE_STEPPER_TAG, atts);
 			hd.endElement(EMPTY,EMPTY,DATE_STEPPER_TAG);
 			atts.clear();
-		} else throw new IllegalArgumentException("This stepper class is not supported : "+stepper.getClass()); //$NON-NLS-1$
+		} else {
+			throw new IllegalArgumentException("This stepper class is not supported : "+stepper.getClass()); //$NON-NLS-1$
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -568,7 +579,9 @@ public class XMLSerializer {
 	}
 	
 	static int toDate(String value) {
-		if (value==null) return -1;
+		if (value==null) {
+			return -1;
+		}
 		StringTokenizer tokens = new StringTokenizer(value,DATE_DELIM);
 		int year = Integer.parseInt(tokens.nextToken());
 		int month = Integer.parseInt(tokens.nextToken());

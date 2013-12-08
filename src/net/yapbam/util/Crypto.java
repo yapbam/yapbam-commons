@@ -49,8 +49,7 @@ public final class Crypto {
 		try {
 			cipher = Cipher.getInstance("AES");
 			cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-			String original = new String(cipher.doFinal(CheckSum.toBytes(message)));
-			return original;
+			return new String(cipher.doFinal(CheckSum.toBytes(message)));
 		} catch (GeneralSecurityException e) {
 			throw new RuntimeException(e);
 		}
@@ -68,15 +67,14 @@ public final class Crypto {
 		try {
 			Cipher cipher = Cipher.getInstance("AES");
 			cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-			String encrypted = CheckSum.toString(cipher.doFinal(message.getBytes()));
-			return encrypted;
+			return CheckSum.toString(cipher.doFinal(message.getBytes()));
 		} catch (GeneralSecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
 	private static final byte[] SALT = new byte[]{ (byte)0xc7, (byte)0x23, (byte)0xa5, (byte)0xfc, (byte)0x7e, (byte)0x38, (byte)0xee, (byte)0x09};
-	private static final PBEParameterSpec pbeParamSpec = new PBEParameterSpec(SALT, 16);
+	private static final PBEParameterSpec PBE_PARAM_SPEC = new PBEParameterSpec(SALT, 16);
 
 	/** Encrypt an output stream.
 	 * <br>The returned stream is deflated and encrypted with the password accordingly to the PBEWithMD5AndDES algorithm.
@@ -91,7 +89,7 @@ public final class Crypto {
 		try {
 			SecretKey pbeKey = getSecretKey(password);
 			Cipher cipher = Cipher.getInstance(ALGORITHM);
-			cipher.init(Cipher.ENCRYPT_MODE, pbeKey, pbeParamSpec);
+			cipher.init(Cipher.ENCRYPT_MODE, pbeKey, PBE_PARAM_SPEC);
 			CipherOutputStream cstream = new CipherOutputStream(stream, cipher);
 			stream = new DeflaterOutputStream(cstream) {
 				/* (non-Javadoc)
@@ -127,6 +125,7 @@ public final class Crypto {
 	 * @throws GeneralSecurityException
 	 * @deprecated This implementation hangs on Android platform. It remains only for compatibility with previous releases
 	 */
+	@Deprecated
 	public static InputStream getOldPasswordProtectedInputStream (String password, InputStream stream) throws IOException, AccessControlException, GeneralSecurityException {
 		// This doesn't work on Android platform
 		SecretKey pbeKey = new BinaryPBEKey(password.getBytes(UTF8));
@@ -158,7 +157,7 @@ public final class Crypto {
 	private static InputStream getPasswordProtectedInputStream (String password, InputStream stream, SecretKey key) throws IOException, AccessControlException, GeneralSecurityException {
 		verifyPassword(stream, password);
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
-		cipher.init(Cipher.DECRYPT_MODE, key, pbeParamSpec);
+		cipher.init(Cipher.DECRYPT_MODE, key, PBE_PARAM_SPEC);
 		stream = new CipherInputStream(stream, cipher);
 		stream = new InflaterInputStream(stream);
 		return stream;
