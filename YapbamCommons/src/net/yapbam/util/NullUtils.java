@@ -35,9 +35,9 @@ public final class NullUtils {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static int compareTo(Comparable o1, Comparable o2, boolean nullIsLowest) {
 		if (o1!=null) {
-			return o2==null?(nullIsLowest?1:-1):o1.compareTo(o2);
+			return o2==null? nullIsLowest?1:-1 : o1.compareTo(o2);
 		} else {
-			return o2==null?0:(nullIsLowest?-1:1);
+			return o2==null?0 : nullIsLowest?-1:1;
 		}
 	}
 }
