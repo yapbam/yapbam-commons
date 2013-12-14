@@ -20,23 +20,13 @@ public abstract class Base64Encoder {
 	 */
 	public static String encode(byte[] bytes) {
 		try {
-			try { // Java desktop
+			try {
+				// Java desktop
 				Class<?> class1 = Class.forName("javax.xml.bind.DatatypeConverter");
 				Method method = class1.getMethod("printBase64Binary", new Class<?>[]{byte[].class});
 				return (String) method.invoke(null, bytes);
 			} catch (ClassNotFoundException e) { // NOSONAR No need to rethrow this exception, it simply denotes we are not on a java desktop machine
-				try { // Android
-					Class<?> class1 = Class.forName("android.util.Base64");
-					Method method = class1.getMethod("encode", new Class<?>[]{byte[].class, int.class});
-					int flags = class1.getField("NO_WRAP").getInt(null);
-					return new String((byte[])method.invoke(null, bytes, flags));
-				} catch (ClassNotFoundException e1) {
-					// Unable to perform the operation
-					throw new UnsupportedOperationException(e1);
-				} catch (NoSuchFieldException e1) {
-					// TODO Auto-generated catch block
-					throw new UnsupportedOperationException(e1);
-				}
+				return doAndroid(bytes);
 			}
 		} catch (NoSuchMethodException e) {
 			throw new UnsupportedOperationException(e);
@@ -44,6 +34,20 @@ public abstract class Base64Encoder {
 			throw new UnsupportedOperationException(e);
 		} catch (InvocationTargetException e) {
 			throw new UnsupportedOperationException(e);
+		}
+	}
+
+	private static String doAndroid(byte[] bytes) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		try {
+			Class<?> class1 = Class.forName("android.util.Base64");
+			Method method = class1.getMethod("encode", new Class<?>[]{byte[].class, int.class});
+			int flags = class1.getField("NO_WRAP").getInt(null);
+			return new String((byte[])method.invoke(null, bytes, flags));
+		} catch (ClassNotFoundException e1) {
+			// Unable to perform the operation
+			throw new UnsupportedOperationException(e1);
+		} catch (NoSuchFieldException e1) {
+			throw new UnsupportedOperationException(e1);
 		}
 	}
 }
