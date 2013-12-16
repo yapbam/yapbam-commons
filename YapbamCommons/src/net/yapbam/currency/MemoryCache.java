@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import net.yapbam.currency.CurrencyConverter.Cache;
+import net.yapbam.currency.AbstractCurrencyConverter.Cache;
 
 /** A fake cache class that stores data into memory.
  * @author Jean-Marc Astesana
