@@ -21,9 +21,8 @@ import java.util.*;
  * @version 1.2 2013-12-16
  * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</br>)
  */
-public class CurrencyConverter extends AbstractXMLCurrencyConverter {
+public class ECBCurrencyConverter extends AbstractXMLCurrencyConverter {
 	private static final String ECB_RATES_URL = "http://www.ecb.int/stats/eurofxref/eurofxref-daily.xml"; //$NON-NLS-1$
-	private static final String YAHOO_RATES_URL = "http://finance.yahoo.com/webservice/v1/symbols/allcurrencies/quote?format=xml"; //$NON-NLS-1$
 	
 	/**
 	 * Constructor.
@@ -32,7 +31,7 @@ public class CurrencyConverter extends AbstractXMLCurrencyConverter {
 	 * @throws IOException if an IOException occurs during the initialization.
 	 * @throws ParseException if data is corrupted
 	 */
-	public CurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
+	public ECBCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
 		super(proxy, cache);
 	}
 

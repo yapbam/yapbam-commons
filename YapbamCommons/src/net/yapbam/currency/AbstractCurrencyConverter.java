@@ -41,13 +41,15 @@ import java.util.*;
  */
 public abstract class AbstractCurrencyConverter {
 	/** A Cache.
-	 * <br>This converter use cache in order to preserve ECB resources, and to be able to work with no Internet connection.
+	 * <br>This converter use cache in order to preserve web server resources, and to be able to work with no Internet connection.
 	 * <br>To improve the cache robustness, the cache may have (this is not mandatory) two levels:<ol>
 	 * <li>A temporary cache that is used to store the data red from Internet.</li>
 	 * <li>A persistent cache that saved the temporary after it was validated by a successful parsing (see commit method).</li></ol>
 	 * @author Jean-Marc Astesana
 	 */
 	public interface Cache {
+//TODO		public boolean exists();
+		
 		/** Gets a writer to the temporary cache.
 		 * @return A writer.
 		 * @throws IOException if an error occurs while creating the writer. 
@@ -82,7 +84,7 @@ public abstract class AbstractCurrencyConverter {
 	 * @throws IOException if an IOException occurs during the initialization.
 	 * @throws ParseException if data is corrupted
 	 */
-	public AbstractCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
+	protected AbstractCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
 		this.proxy = proxy;
 		this.fxRates = new HashMap<String, Long>();
 		this.cache = cache==null?new MemoryCache():cache;
@@ -216,11 +218,7 @@ public abstract class AbstractCurrencyConverter {
 		return referenceDate;
 	}
 
-	/** Tests whether this converter is synchronized with ECB.
-	 * <br>When an error occurs while connecting to ECB, the converter is be created from cache data (if any exists).
-	 * This allows offline usage of the converter.
-	 * <br>Be aware that, in order to preserve ECB resources, update method does not call ECB if cache is not so old (see update method's comment).
-	 * In such a case, this method returns true.
+	/** Tests whether this converter is synchronized with web server.
 	 * @return true if the rates are up to date
 	 * @see #update()
 	 */
@@ -231,13 +229,14 @@ public abstract class AbstractCurrencyConverter {
 	/**
 	 * Makes the cache uptodate.
 	 * <br>If it is not, downloads again cache file and parse data into internal data structure.
-	 * @return true if the ECB was called. In order to preserve ECB resources, ECB is not called if cache is not so old (ECB refresh its rates never more
+	 * @return true if the web server was called. In order to preserve server resources, it is not called if cache is not so old (ECB refresh its rates never more
 	 * than 1 time per day, we don't call ECB again if data is younger than 24 hours. There's also special handling of week-ends). In such a case, this method returns false.
 	 * @throws IOException If cache file cannot be read/written or if URL cannot be opened.
 	 * @throws ParseException If an error occurs while parsing the XML cache file.
 	 */
 	public boolean update() throws IOException, ParseException {
-		boolean connect = cacheIsExpired();
+		//TODO Review method comment (remove references to ECB). Probably cacheIsExpired should be overridable.
+		boolean connect = isCacheExpired();
 		if (connect) {
 			forceUpdate();
 		}
@@ -270,7 +269,7 @@ public abstract class AbstractCurrencyConverter {
 	 * 
 	 * @return true if cache file needs to be updated, false otherwise.
 	 */
-	private boolean cacheIsExpired() {
+	private boolean isCacheExpired() {
 		if (referenceDate == null) {
 			return true;
 		}
@@ -326,7 +325,7 @@ public abstract class AbstractCurrencyConverter {
 				in.close();
 			}
 		} else {
-			throw new IOException("Http Error " + errorCode); //$NON-NLS-1$
+			throw new IOException(MessageFormat.format("Http Error {1} when opening {0}", getSourceURL(), errorCode)); //$NON-NLS-1$
 		}
 	}
 
