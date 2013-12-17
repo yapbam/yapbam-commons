@@ -17,6 +17,11 @@ public class CurrencyNames {
 	private CurrencyNames() {
 	}
 
+	/** Gets the wording of a currency.
+	 * <br>The wording is returned according the default locale. If there's no localized name known for the default locale, English wording is returned.
+	 * @param key The ISO-4217 currency code.
+	 * @return The currency name or null if the name is unknown.
+	 */
 	public static String get(String key) {
 		reset();
 		if (translatorMode) {
