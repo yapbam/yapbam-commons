@@ -40,6 +40,8 @@ import java.util.*;
  * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</br>)
  */
 public abstract class AbstractCurrencyConverter {
+	private static final String CURRENCY_IS_NOT_AVAILABLE = "{0} currency is not available."; //$NON-NLS-1$
+
 	/** A Cache.
 	 * <br>This converter use cache in order to preserve web server resources, and to be able to work with no Internet connection.
 	 * <br>To improve the cache robustness, the cache may have (this is not mandatory) two levels:<ol>
@@ -48,7 +50,7 @@ public abstract class AbstractCurrencyConverter {
 	 * @author Jean-Marc Astesana
 	 */
 	public interface Cache {
-//TODO		public boolean exists();
+		public boolean isEmpty();
 		
 		/** Gets a writer to the temporary cache.
 		 * @return A writer.
@@ -89,21 +91,38 @@ public abstract class AbstractCurrencyConverter {
 		this.fxRates = new HashMap<String, Long>();
 		this.cache = cache==null?new MemoryCache():cache;
 		this.referenceDate = null;
-		try {
-			// Try to read the cache file
-			parse(cache, false);
+		boolean cacheUnavailable = this.cache.isEmpty();
+		if (!cacheUnavailable) {
+			getLogger().trace("cache is available");
 			try {
-				update();
+				// Try to read the cache file
+				parse(cache, false);
 			} catch (Exception e) {
-				// Don't throw any exception if update fails as the instance is already initialized with the cache
-				// isSynchronized method will return false, indicating that this instance is not synchronized with Internet
-				getLogger().warn("Update failed", e);
+				// Cache parsing failed, maybe cache file is not present or is corrupted. 
+				// We will call update without try/catch clause to throw exceptions if data can't be red.
+				getLogger().warn("Parse failed", e);
+				cacheUnavailable = true;
 			}
-		} catch (Exception e) {
-			// Cache parsing failed, maybe cache file is not present or is corrupted. 
-			// We will call update without try/catch clause to throw exceptions if data can't be red.
+		} else {
+			getLogger().trace("cache is unavailable");
+		}
+		try {
+			// If cache was not read update it.
 			this.update();
-			getLogger().warn("Parse failed", e);
+		} catch (IOException e) {
+			processException(cacheUnavailable, e);
+		} catch (ParseException e) {
+			processException(cacheUnavailable, e);
+		}
+	}
+
+	private  <T extends Exception> void processException(boolean cacheUnavailable, T e) throws T {
+		if (cacheUnavailable) {
+			// Don't throw any exception if update fails as the instance is already initialized with the cache
+			// isSynchronized method will return false, indicating that this instance is not synchronized with Internet
+			getLogger().warn("Update failed", e);
+		} else {
+			throw e;
 		}
 	}
 
@@ -178,10 +197,10 @@ public abstract class AbstractCurrencyConverter {
 	 */
 	private boolean checkCurrencyArgs(String fromCurrency, String toCurrency) {
 		if (!fxRates.containsKey(fromCurrency)) {
-			throw new IllegalArgumentException(fromCurrency + " currency is not available."); //$NON-NLS-1$
+			throw new IllegalArgumentException(MessageFormat.format(CURRENCY_IS_NOT_AVAILABLE, fromCurrency));
 		}
 		if (!fxRates.containsKey(toCurrency)) {
-			throw new IllegalArgumentException(toCurrency + " currency is not available."); //$NON-NLS-1$
+			throw new IllegalArgumentException(MessageFormat.format(CURRENCY_IS_NOT_AVAILABLE, toCurrency));
 		}
 		return !fromCurrency.equals(toCurrency);
 	}
