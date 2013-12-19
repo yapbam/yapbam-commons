@@ -106,9 +106,8 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 				System.out.println (currency+" -> "+ CurrencyNames.get(currency));
 			}
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-*/
+/**/
 }

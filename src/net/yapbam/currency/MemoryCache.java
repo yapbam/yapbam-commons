@@ -2,6 +2,7 @@ package net.yapbam.currency;
 
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -18,21 +19,35 @@ public class MemoryCache implements Cache {
 
 	@Override
 	public Writer getWriter() throws IOException {
-		writer = new CharArrayWriter();
+		this.writer = new CharArrayWriter();
 		return writer;
 	}
 
 	@Override
 	public Reader getReader(boolean tmp) throws IOException {
-		if (charArrays==null) {
-			charArrays = writer==null?new char[0]:writer.toCharArray();
+		if (tmp) {
+			if (writer==null) {
+				throw new FileNotFoundException();
+			} else {
+				return new CharArrayReader(writer.toCharArray());
+			}
+		} else {
+			if (charArrays==null) {
+				throw new FileNotFoundException();
+			} else {
+				return new CharArrayReader(charArrays);
+			}
 		}
-		return new CharArrayReader(charArrays);
 	}
 
 	@Override
 	public void commit() {
 		// Force re-creation of the charArrays field
-		this.charArrays = null;
+		this.charArrays = writer.toCharArray();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return (charArrays == null) && (writer==null);
 	}
 }
