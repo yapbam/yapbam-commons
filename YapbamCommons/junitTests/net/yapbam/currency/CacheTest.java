@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
-import java.security.AccessControlException;
 
 import org.junit.Test;
 

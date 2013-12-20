@@ -40,8 +40,6 @@ import java.util.*;
  * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</br>)
  */
 public abstract class AbstractCurrencyConverter {
-	private static final String CURRENCY_IS_NOT_AVAILABLE = "{0} currency is not available."; //$NON-NLS-1$
-
 	/** A Cache.
 	 * <br>This converter use cache in order to preserve web server resources, and to be able to work with no Internet connection.
 	 * <br>To improve the cache robustness, the cache may have (this is not mandatory) two levels:<ol>
@@ -74,8 +72,7 @@ public abstract class AbstractCurrencyConverter {
 	private Logger logger;
 	private Proxy proxy;
 	private Cache cache;
-	private Map<String, Long> fxRates;
-	private Date referenceDate;
+	private CurrencyData data;
 	private long lastTryCacheRefresh;
 	private boolean isSynchronized;
 
@@ -88,15 +85,14 @@ public abstract class AbstractCurrencyConverter {
 	 */
 	protected AbstractCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
 		this.proxy = proxy;
-		this.fxRates = new HashMap<String, Long>();
+		this.data = null;
 		this.cache = cache==null?new MemoryCache():cache;
-		this.referenceDate = null;
 		boolean cacheUnavailable = this.cache.isEmpty();
 		if (!cacheUnavailable) {
 			getLogger().trace("cache is available");
 			try {
 				// Try to read the cache file
-				parse(cache, false);
+				this.data = parse(cache, false);
 			} catch (Exception e) {
 				// Cache parsing failed, maybe cache file is not present or is corrupted. 
 				// We will call update without try/catch clause to throw exceptions if data can't be red.
@@ -118,11 +114,11 @@ public abstract class AbstractCurrencyConverter {
 
 	private  <T extends Exception> void processException(boolean cacheUnavailable, T e) throws T {
 		if (cacheUnavailable) {
+			throw e;
+		} else {
 			// Don't throw any exception if update fails as the instance is already initialized with the cache
 			// isSynchronized method will return false, indicating that this instance is not synchronized with Internet
 			getLogger().warn("Update failed", e);
-		} else {
-			throw e;
 		}
 	}
 
@@ -152,11 +148,7 @@ public abstract class AbstractCurrencyConverter {
 	 *           If a wrong (non-existing) currency argument was supplied.
 	 */
 	public double convert(double amount, String fromCurrency, String toCurrency) {
-		if (checkCurrencyArgs(fromCurrency, toCurrency)) {
-			amount *= fxRates.get(toCurrency);
-			amount /= fxRates.get(fromCurrency);
-		}
-		return amount;
+		return this.data.convert(amount, fromCurrency, toCurrency);
 	}
 
 	/**
@@ -177,32 +169,7 @@ public abstract class AbstractCurrencyConverter {
 	 *           If a wrong (non-existing) currency argument was supplied.
 	 */
 	public long convert(long amount, String fromCurrency, String toCurrency) {
-		if (checkCurrencyArgs(fromCurrency, toCurrency)) {
-			amount *= fxRates.get(toCurrency);
-			amount /= fxRates.get(fromCurrency);
-		}
-		return amount;
-	}
-
-	/**
-	 * Check whether currency arguments are valid and not equal.
-	 * 
-	 * @param fromCurrency
-	 *          ISO 4217 source currency code.
-	 * @param toCurrency
-	 *          ISO 4217 target currency code.
-	 * @return true if both currency arguments are not equal.
-	 * @throws IllegalArgumentException
-	 *           If a wrong (non-existing) currency argument was supplied.
-	 */
-	private boolean checkCurrencyArgs(String fromCurrency, String toCurrency) {
-		if (!fxRates.containsKey(fromCurrency)) {
-			throw new IllegalArgumentException(MessageFormat.format(CURRENCY_IS_NOT_AVAILABLE, fromCurrency));
-		}
-		if (!fxRates.containsKey(toCurrency)) {
-			throw new IllegalArgumentException(MessageFormat.format(CURRENCY_IS_NOT_AVAILABLE, toCurrency));
-		}
-		return !fromCurrency.equals(toCurrency);
+		return this.data.convert(amount, fromCurrency, toCurrency);
 	}
 
 	/**
@@ -213,7 +180,7 @@ public abstract class AbstractCurrencyConverter {
 	 * @return True if exchange rate exists, false otherwise.
 	 */
 	public boolean isAvailable(String currency) {
-		return fxRates.containsKey(currency);
+		return this.data.isAvailable(currency);
 	}
 
 	/**
@@ -222,7 +189,7 @@ public abstract class AbstractCurrencyConverter {
 	 * @return String array with ISO 4217 currency codes.
 	 */
 	public String[] getCurrencies() {
-		return fxRates.keySet().toArray(new String[fxRates.size()]);
+		return this.data.getCurrencies();
 	}
 
 	/**
@@ -234,7 +201,7 @@ public abstract class AbstractCurrencyConverter {
 	 * 
 	 */
 	public Date getReferenceDate() {
-		return referenceDate;
+		return data==null ? null : this.data.getReferenceDate();
 	}
 
 	/** Tests whether this converter is synchronized with web server.
@@ -274,7 +241,7 @@ public abstract class AbstractCurrencyConverter {
 		refreshCacheFile();
 		getLogger().debug("refresh cache: {}ms",Long.toString(System.currentTimeMillis()-start));
 		start = System.currentTimeMillis();
-		parse(cache, true);
+		this.data = parse(cache, true);
 		getLogger().debug("parse: {}ms",Long.toString(System.currentTimeMillis()-start));
 		start = System.currentTimeMillis();
 		cache.commit();
@@ -289,7 +256,7 @@ public abstract class AbstractCurrencyConverter {
 	 * @return true if cache file needs to be updated, false otherwise.
 	 */
 	private boolean isCacheExpired() {
-		if (referenceDate == null) {
+		if (getReferenceDate() == null) {
 			return true;
 		}
 		// If we connect to ECB since less than one minute ... do nothing
@@ -301,8 +268,8 @@ public abstract class AbstractCurrencyConverter {
 		
 		final int tolerance = 12;
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
-		long hoursOld = (cal.getTimeInMillis() - referenceDate.getTime()) / (1000 * 60 * 60);
-		cal.setTime(referenceDate);
+		long hoursOld = (cal.getTimeInMillis() - getReferenceDate().getTime()) / (1000 * 60 * 60);
+		cal.setTime(getReferenceDate());
 		// hypothetical: rates are never published on Saturdays and Sunday
 		int hoursValid = 24 + tolerance;
 		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
@@ -325,27 +292,37 @@ public abstract class AbstractCurrencyConverter {
 	 */
 	private void refreshCacheFile() throws IOException {
 		lastTryCacheRefresh = System.currentTimeMillis();
-		getLogger().debug("Connecting to ECB");
-		HttpURLConnection ct = (HttpURLConnection) getSourceURL().openConnection(proxy);
-		int errorCode = ct.getResponseCode();
-		if (errorCode == HttpURLConnection.HTTP_OK) {
-			InputStream in = ct.getInputStream();
+		getLogger().trace("Connecting to {}", getSourceURL());
+		InputStream in = getSourceStream();
+		try {
+			Writer out = cache.getWriter();
 			try {
-				Writer out = cache.getWriter();
-				try {
-					for (int c=in.read() ; c!=-1; c=in.read()) {
-						out.write(c);
-					}
-				} finally {
-					out.flush();
-					out.close();
+				for (int c=in.read() ; c!=-1; c=in.read()) {
+					out.write(c);
 				}
 			} finally {
-				in.close();
+				out.flush();
+				out.close();
 			}
-		} else {
-			throw new IOException(MessageFormat.format("Http Error {1} when opening {0}", getSourceURL(), errorCode)); //$NON-NLS-1$
+		} finally {
+			in.close();
 		}
+	}
+
+	private InputStream getSourceStream() throws IOException {
+		URL url = getSourceURL();
+		if (url==null) {
+			throw new FileNotFoundException();
+		}
+		URLConnection connection = url.openConnection(proxy);
+		if (connection instanceof HttpURLConnection) {
+			HttpURLConnection ct = (HttpURLConnection) connection;
+			int errorCode = ct.getResponseCode();
+			if (errorCode != HttpURLConnection.HTTP_OK) {
+				throw new IOException(MessageFormat.format("Http Error {1} when opening {0}", url, errorCode)); //$NON-NLS-1$
+			}
+		}
+		return connection.getInputStream();
 	}
 
 	/**
@@ -385,21 +362,10 @@ public abstract class AbstractCurrencyConverter {
 	/**
 	 * Parses cache file and create internal data structures containing exchange rates.
 	 * @param tmp true to parse the tmp cache, false to parse the official cache
+	 * @return 
 	 * @throws ParseException If XML file cannot be parsed.
 	 * @throws IOException if connection to the URL or writing to cache file fails.
 	 * @see Cache
 	 */
-	protected abstract void parse(Cache cache, boolean tmp) throws ParseException, IOException;
-	
-	protected void setReferenceDate(Date date) {
-		this.referenceDate = date;
-	}
-	
-	protected void clearRates() {
-		fxRates.clear();
-	}
-
-	protected void setCurrencyRate(String isoCode, long rate) {
-		fxRates.put(isoCode, rate);
-	}
+	protected abstract CurrencyData parse(Cache cache, boolean tmp) throws ParseException, IOException;
 }

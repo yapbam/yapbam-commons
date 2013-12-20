@@ -4,7 +4,6 @@ import java.net.*;
 import java.io.*;
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
 
 import java.text.*;
 
@@ -23,7 +22,7 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 		CURRENCY, RATE
 	}
 	
-	private final class YahooHandler extends DefaultHandler {
+	private static final class YahooHandler extends CurrencyHandler {
 		private String currency;
 		private long rate;
 		private StringBuilder buffer;
@@ -47,7 +46,7 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			if ("resource".equals(qName) && (currency!=null) && (rate!=0)) { //$NON-NLS-1$
-				setCurrencyRate(currency, rate);
+				getData().setCurrencyRate(currency, rate);
 			} else if ("field".equals(qName) && (field!=null)) {
 				if (this.field.equals(Field.CURRENCY)) {
 					int index = this.buffer.indexOf("/");
@@ -92,7 +91,7 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 		}
 	}
 
-	protected DefaultHandler getXMLHandler() {
+	protected CurrencyHandler getXMLHandler() {
 		return new YahooHandler();
 	}
 /*	

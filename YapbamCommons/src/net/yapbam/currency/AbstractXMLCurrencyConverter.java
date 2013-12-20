@@ -6,7 +6,6 @@ import java.io.*;
 import net.yapbam.currency.AbstractCurrencyConverter.Cache;
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
 
 import java.text.*;
 
@@ -35,9 +34,8 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 	}
 	
 	@Override
-	protected void parse(Cache cache, boolean tmp) throws ParseException, IOException {
-		clearRates();
-		parseXML(cache, tmp);
+	protected CurrencyData parse(Cache cache, boolean tmp) throws ParseException, IOException {
+		return parseXML(cache, tmp);
 	}
 
 	/**
@@ -47,8 +45,8 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 	 * @throws IOException if connection to ECB or writing cache file fails.
 	 * @see Cache
 	 */
-	protected void parseXML(Cache cache, boolean tmp) throws ParseException, IOException {
-		DefaultHandler handler = getXMLHandler();
+	protected CurrencyData parseXML(Cache cache, boolean tmp) throws ParseException, IOException {
+		CurrencyHandler handler = getXMLHandler();
 		try {
 			XMLReader saxReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 			saxReader.setContentHandler(handler);
@@ -60,11 +58,14 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 				input.close();
 			}
 		} catch (SAXException e) {
-			throw new ParseException(e.toString(), 0);
+			ParseException x = new ParseException(e.toString(), 0);
+			x.initCause(e);
+			throw x;
 		} catch (ParserConfigurationException e) {
 			throw new ParseException(e.toString(), 0);
 		}
+		return handler.getData();
 	}
 
-	protected abstract DefaultHandler getXMLHandler();
+	protected abstract CurrencyHandler getXMLHandler();
 }
