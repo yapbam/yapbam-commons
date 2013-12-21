@@ -8,6 +8,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
 
+import net.yapbam.remote.MemoryCache;
+
 import org.junit.Test;
 
 public class CacheTest {

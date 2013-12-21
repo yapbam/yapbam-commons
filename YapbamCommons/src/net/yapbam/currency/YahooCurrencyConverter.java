@@ -3,10 +3,11 @@ package net.yapbam.currency;
 import java.net.*;
 import java.io.*;
 
+import net.yapbam.remote.Cache;
+
 import org.xml.sax.*;
 
 import java.text.*;
-import java.util.Date;
 
 /**
  * Currency converter based on Yahoo's foreign exchange rates.
@@ -18,6 +19,8 @@ import java.util.Date;
  */
 public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 	private static final String YAHOO_RATES_URL = "http://finance.yahoo.com/webservice/v1/symbols/allcurrencies/quote?format=xml"; //$NON-NLS-1$
+	private static final String NAME_ATTRIBUTE = "name"; //$NON-NLS-1$
+	private static final String FIELD_TAG = "field"; //$NON-NLS-1$
 	
 	private enum Field {
 		CURRENCY, RATE, TIME_STAMP
@@ -37,11 +40,11 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			if ("field".equals(qName) && "name".equals(attributes.getValue("name"))) {
+			if (FIELD_TAG.equals(qName) && "name".equals(attributes.getValue(NAME_ATTRIBUTE))) {
 				this.field = Field.CURRENCY;
-			} else if ("field".equals(qName) && "price".equals(attributes.getValue("name"))) {
+			} else if (FIELD_TAG.equals(qName) && "price".equals(attributes.getValue(NAME_ATTRIBUTE))) {
 				this.field = Field.RATE;
-			} else if ("field".equals(qName) && "ts".equals(attributes.getValue("name"))) {
+			} else if (FIELD_TAG.equals(qName) && "ts".equals(attributes.getValue(NAME_ATTRIBUTE))) {
 				this.field = Field.TIME_STAMP;
 			} else {
 				this.field = null;

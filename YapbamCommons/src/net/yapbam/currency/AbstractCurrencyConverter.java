@@ -21,6 +21,10 @@ package net.yapbam.currency;
 import java.net.*;
 import java.io.*;
 
+import net.yapbam.remote.AbstractRemoteResource;
+import net.yapbam.remote.Cache;
+import net.yapbam.remote.MemoryCache;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,42 +43,7 @@ import java.util.*;
  * @version 1.0 2013-12-16
  * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</br>)
  */
-public abstract class AbstractCurrencyConverter {
-	/** A Cache.
-	 * <br>This converter use cache in order to preserve web server resources, and to be able to work with no Internet connection.
-	 * <br>To improve the cache robustness, the cache may have (this is not mandatory) two levels:<ol>
-	 * <li>A temporary cache that is used to store the data red from Internet.</li>
-	 * <li>A persistent cache that saved the temporary after it was validated by a successful parsing (see commit method).</li></ol>
-	 * @author Jean-Marc Astesana
-	 */
-	public interface Cache {
-		public boolean isEmpty();
-		
-		/** Gets a writer to the temporary cache.
-		 * @return A writer.
-		 * @throws IOException if an error occurs while creating the writer. 
-		 */
-		public Writer getWriter() throws IOException;
-		
-		/** Gets a reader to the cache.
-		 * @param tmp true if the temporary cache is required
-		 * @return A reader.
-		 * @throws IOException if an error occurs while creating the reader. 
-		 */
-		public Reader getReader(boolean tmp) throws IOException;
-		
-		/** Commits the temporary cache.
-		 * <br>This method is called once temporary cache has been successfully red and parsed.
-		 */
-		public void commit();
-	}
-	
-	private Logger logger;
-	private Proxy proxy;
-	private Cache cache;
-	private CurrencyData data;
-	private long lastTryCacheRefresh;
-	private boolean isSynchronized;
+public abstract class AbstractCurrencyConverter extends AbstractRemoteResource<CurrencyData> {
 
 	/**
 	 * Constructor.
@@ -84,52 +53,7 @@ public abstract class AbstractCurrencyConverter {
 	 * @throws ParseException if data is corrupted
 	 */
 	protected AbstractCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
-		this.proxy = proxy;
-		this.data = null;
-		this.cache = cache==null?new MemoryCache():cache;
-		boolean cacheUnavailable = this.cache.isEmpty();
-		if (!cacheUnavailable) {
-			getLogger().trace("cache is available");
-			try {
-				// Try to read the cache file
-				this.data = parse(cache, false);
-			} catch (Exception e) {
-				// Cache parsing failed, maybe cache file is not present or is corrupted. 
-				// We will call update without try/catch clause to throw exceptions if data can't be red.
-				getLogger().warn("Parse failed", e);
-				cacheUnavailable = true;
-			}
-		} else {
-			getLogger().trace("cache is unavailable");
-		}
-		try {
-			// If cache was not read update it.
-			this.update();
-		} catch (IOException e) {
-			processException(cacheUnavailable, e);
-		} catch (ParseException e) {
-			processException(cacheUnavailable, e);
-		}
-	}
-
-	private  <T extends Exception> void processException(boolean cacheUnavailable, T e) throws T {
-		if (cacheUnavailable) {
-			throw e;
-		} else {
-			// Don't throw any exception if update fails as the instance is already initialized with the cache
-			// isSynchronized method will return false, indicating that this instance is not synchronized with Internet
-			getLogger().warn("Update failed", e);
-		}
-	}
-
-	/** Gets a logger.
-	 * <br>This logger is used by the class to log events.
-	 */
-	protected Logger getLogger() {
-		if (logger==null) {
-			logger = LoggerFactory.getLogger(getClass());
-		}
-		return logger;
+		super (proxy, cache);
 	}
 	
 	/**
@@ -148,7 +72,7 @@ public abstract class AbstractCurrencyConverter {
 	 *           If a wrong (non-existing) currency argument was supplied.
 	 */
 	public double convert(double amount, String fromCurrency, String toCurrency) {
-		return this.data.convert(amount, fromCurrency, toCurrency);
+		return getData().convert(amount, fromCurrency, toCurrency);
 	}
 
 	/**
@@ -169,7 +93,7 @@ public abstract class AbstractCurrencyConverter {
 	 *           If a wrong (non-existing) currency argument was supplied.
 	 */
 	public long convert(long amount, String fromCurrency, String toCurrency) {
-		return this.data.convert(amount, fromCurrency, toCurrency);
+		return getData().convert(amount, fromCurrency, toCurrency);
 	}
 
 	/**
@@ -180,7 +104,7 @@ public abstract class AbstractCurrencyConverter {
 	 * @return True if exchange rate exists, false otherwise.
 	 */
 	public boolean isAvailable(String currency) {
-		return this.data.isAvailable(currency);
+		return getData().isAvailable(currency);
 	}
 
 	/**
@@ -189,139 +113,9 @@ public abstract class AbstractCurrencyConverter {
 	 * @return String array with ISO 4217 currency codes.
 	 */
 	public String[] getCurrencies() {
-		return this.data.getCurrencies();
-	}
-
-	/**
-	 * Gets the reference date for the exchange rates as a Java Date.
-	 * @return Date until which currency exchange rates are valid, or null if the
-	 *         data structure has not yet been initialized.
-	 */
-	public Date getReferenceDate() {
-		return data==null ? null : new Date(this.data.getReferenceDate());
-	}
-
-	/** Tests whether this converter is synchronized with web server.
-	 * @return true if the rates are up to date
-	 * @see #update()
-	 */
-	public boolean isSynchronized() {
-		return this.isSynchronized;
-	}
-
-	/**
-	 * Makes the cache uptodate.
-	 * <br>If it is not, downloads again cache file and parse data into internal data structure.
-	 * @return true if the web server was called. In order to preserve server resources, it is not called if cache is not so old (ECB refresh its rates never more
-	 * than 1 time per day, we don't call ECB again if data is younger than 24 hours. There's also special handling of week-ends). In such a case, this method returns false.
-	 * @throws IOException If cache file cannot be read/written or if URL cannot be opened.
-	 * @throws ParseException If an error occurs while parsing the XML cache file.
-	 */
-	public boolean update() throws IOException, ParseException {
-		//TODO Review method comment (remove references to ECB). Probably cacheIsExpired should be overridable.
-		boolean connect = isCacheExpired();
-		if (connect) {
-			forceUpdate();
-		}
-		this.isSynchronized = true;
-		return connect;
+		return getData().getCurrencies();
 	}
 	
-	/**
-	 * Forces the cache to be refreshed.
-	 * <br>Always downloads again cache file and parse data into internal data structure.
-	 * @throws IOException If cache file cannot be read/written or if URL cannot be opened.
-	 * @throws ParseException If an error occurs while parsing the XML cache file.
-	 */
-	public void forceUpdate() throws IOException, ParseException {
-		long start = System.currentTimeMillis();
-		refreshCacheFile();
-		getLogger().debug("refresh cache: {}ms",Long.toString(System.currentTimeMillis()-start));
-		start = System.currentTimeMillis();
-		this.data = parse(cache, true);
-		getLogger().debug("parse: {}ms",Long.toString(System.currentTimeMillis()-start));
-		start = System.currentTimeMillis();
-		cache.commit();
-		getLogger().debug("commit: {}ms",Long.toString(System.currentTimeMillis()-start));
-	}
-
-	/**
-	 * Checks whether XML cache file needs to be updated. The cache file is up to
-	 * date for 24 hours after the reference date (plus a certain tolerance). On
-	 * weekends, it is 72 hours because no rates are published during weekends.
-	 * 
-	 * @return true if cache file needs to be updated, false otherwise.
-	 */
-	private boolean isCacheExpired() {
-		if (getReferenceDate() == null) {
-			return true;
-		}
-		// If we connect to ECB since less than one minute ... do nothing
-		// This could happen if ECB doesn't refresh its rates since the last time we
-		// updated the cache file (and more than the "standard" cache expiration time - see below)
-		if (System.currentTimeMillis() - lastTryCacheRefresh < 60000) {
-			return false;
-		}
-		
-		final int tolerance = 12;
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
-		long hoursOld = (cal.getTimeInMillis() - getReferenceDate().getTime()) / (1000 * 60 * 60);
-		cal.setTime(getReferenceDate());
-		// hypothetical: rates are never published on Saturdays and Sunday
-		int hoursValid = 24 + tolerance;
-		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-			hoursValid = 72;
-		} else if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-			hoursValid = 48; 
-		}
-
-		return hoursOld > hoursValid;
-	}
-	
-	protected abstract URL getSourceURL(); 
-
-	/**
-	 * (Re-) download the XML cache file and store it in a temporary location.
-	 * 
-	 * @throws IOException
-	 *           If (1) URL cannot be opened, or (2) if cache file cannot be
-	 *           opened, or (3) if a read/write error occurs.
-	 */
-	private void refreshCacheFile() throws IOException {
-		lastTryCacheRefresh = System.currentTimeMillis();
-		getLogger().trace("Connecting to {}", getSourceURL());
-		InputStream in = getSourceStream();
-		try {
-			Writer out = cache.getWriter();
-			try {
-				for (int c=in.read() ; c!=-1; c=in.read()) {
-					out.write(c);
-				}
-			} finally {
-				out.flush();
-				out.close();
-			}
-		} finally {
-			in.close();
-		}
-	}
-
-	private InputStream getSourceStream() throws IOException {
-		URL url = getSourceURL();
-		if (url==null) {
-			throw new FileNotFoundException();
-		}
-		URLConnection connection = url.openConnection(proxy);
-		if (connection instanceof HttpURLConnection) {
-			HttpURLConnection ct = (HttpURLConnection) connection;
-			int errorCode = ct.getResponseCode();
-			if (errorCode != HttpURLConnection.HTTP_OK) {
-				throw new IOException(MessageFormat.format("Http Error {1} when opening {0}", url, errorCode)); //$NON-NLS-1$
-			}
-		}
-		return connection.getInputStream();
-	}
-
 	/**
 	 * Convert a numeric string to a long value with a precision of four digits
 	 * after the decimal point without rounding. E.g. "123.456789" becomes

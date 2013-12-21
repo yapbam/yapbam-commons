@@ -3,7 +3,7 @@ package net.yapbam.currency;
 import java.net.*;
 import java.io.*;
 
-import net.yapbam.currency.AbstractCurrencyConverter.Cache;
+import net.yapbam.remote.Cache;
 
 import org.xml.sax.*;
 
