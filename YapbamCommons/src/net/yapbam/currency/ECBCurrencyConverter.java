@@ -33,7 +33,7 @@ public class ECBCurrencyConverter extends AbstractXMLCurrencyConverter {
 					try {
 						// A previous version used CET as time zone. Unfortunately this time zone was broken in Android 2.x
 						// See http://code.google.com/p/android/issues/detail?id=14963
-						getData().setReferenceDate(df.parse(date + " 13:15 GMT")); //$NON-NLS-1$
+						getData().setReferenceDate(df.parse(date + " 13:15 GMT").getTime()); //$NON-NLS-1$
 					} catch (ParseException e) {
 						System.out.println (java.util.Arrays.asList(ids));
 						throw new SAXException("Cannot parse reference date: " + date); //$NON-NLS-1$

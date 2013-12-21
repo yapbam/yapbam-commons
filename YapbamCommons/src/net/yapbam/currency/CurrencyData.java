@@ -1,15 +1,16 @@
 package net.yapbam.currency;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CurrencyData {
 	private static final String CURRENCY_IS_NOT_AVAILABLE = "{0} currency is not available."; //$NON-NLS-1$
 
-	private Date referenceDate;
+	private Long referenceDate;
 	private Map<String, Long> rates;
+	private boolean locked;
 	
 	public CurrencyData() {
 		super();
@@ -17,12 +18,20 @@ public class CurrencyData {
 		this.rates = new HashMap<String, Long>();
 	}
 
-	public void setReferenceDate(Date date) {
+	public void setReferenceDate(long date) {
+		if (locked) {
+			throw new UnsupportedOperationException();
+		}
 		this.referenceDate = date;
 	}
 
 	public void setCurrencyRate(String isoCode, long rate) {
 		rates.put(isoCode, rate);
+	}
+	
+	public void lock() {
+		this.rates = Collections.unmodifiableMap(this.rates);
+		this.locked = true;
 	}
 	
 	/**
@@ -114,7 +123,7 @@ public class CurrencyData {
 		return rates.keySet().toArray(new String[rates.size()]);
 	}
 
-	public Date getReferenceDate() {
+	public Long getReferenceDate() {
 		return this.referenceDate;
 	}
 }
