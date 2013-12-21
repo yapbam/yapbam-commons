@@ -193,15 +193,12 @@ public abstract class AbstractCurrencyConverter {
 	}
 
 	/**
-	 * Gets the reference date for the exchange rates as a Java Date. The time part
-	 * is always 14:15 Central European Time (CET).
-	 * 
-	 * @return Date for which currency exchange rates are valid, or null if the
+	 * Gets the reference date for the exchange rates as a Java Date.
+	 * @return Date until which currency exchange rates are valid, or null if the
 	 *         data structure has not yet been initialized.
-	 * 
 	 */
 	public Date getReferenceDate() {
-		return data==null ? null : this.data.getReferenceDate();
+		return data==null ? null : new Date(this.data.getReferenceDate());
 	}
 
 	/** Tests whether this converter is synchronized with web server.

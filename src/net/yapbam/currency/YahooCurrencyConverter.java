@@ -6,6 +6,7 @@ import java.io.*;
 import org.xml.sax.*;
 
 import java.text.*;
+import java.util.Date;
 
 /**
  * Currency converter based on Yahoo's foreign exchange rates.
@@ -19,7 +20,7 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 	private static final String YAHOO_RATES_URL = "http://finance.yahoo.com/webservice/v1/symbols/allcurrencies/quote?format=xml"; //$NON-NLS-1$
 	
 	private enum Field {
-		CURRENCY, RATE
+		CURRENCY, RATE, TIME_STAMP
 	}
 	
 	private static final class YahooHandler extends CurrencyHandler {
@@ -27,9 +28,11 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 		private long rate;
 		private StringBuilder buffer;
 		private Field field;
+		private long maxTStamp;
 		
 		private YahooHandler() {
 			this.buffer = new StringBuilder();
+			maxTStamp = 0;
 		}
 
 		@Override
@@ -38,6 +41,8 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 				this.field = Field.CURRENCY;
 			} else if ("field".equals(qName) && "price".equals(attributes.getValue("name"))) {
 				this.field = Field.RATE;
+			} else if ("field".equals(qName) && "ts".equals(attributes.getValue("name"))) {
+				this.field = Field.TIME_STAMP;
 			} else {
 				this.field = null;
 			}
@@ -57,6 +62,11 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 					}
 				} else if (this.field.equals(Field.RATE)) {
 					this.rate = stringToLong(this.buffer.toString());
+				} else if (this.field.equals(Field.TIME_STAMP) && (currency!=null) && (rate!=0)) {
+					long tstamp = Long.parseLong(this.buffer.toString())*1000;
+					if (tstamp>this.maxTStamp) {
+						this.maxTStamp = tstamp;
+					}
 				}
 				this.field = null;
 				this.buffer.delete(0, this.buffer.length());
@@ -69,6 +79,11 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 			}
 		}
 
+		@Override
+		public void endDocument() throws SAXException {
+			getData().setReferenceDate(maxTStamp);
+			super.endDocument();
+		}
 	}
 
 	/**
@@ -94,19 +109,4 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 	protected CurrencyHandler getXMLHandler() {
 		return new YahooHandler();
 	}
-/*	
-	public static void main(String[] args) {
-		try {
-			YahooCurrencyConverter cvt = new YahooCurrencyConverter(Proxy.NO_PROXY, null);
-			System.out.println (cvt.convert(1.0, "USD", "EUR"));
-			String[] currencies = cvt.getCurrencies();
-			System.out.println (currencies.length+" currencies found");
-			for (String currency : currencies) {
-				System.out.println (currency+" -> "+ CurrencyNames.get(currency));
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-/**/
 }
