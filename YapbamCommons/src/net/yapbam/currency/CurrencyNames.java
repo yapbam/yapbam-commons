@@ -12,7 +12,6 @@ public class CurrencyNames {
 
 	private static Properties RESOURCE_BUNDLE;
 	private static Locale resourceBundleLocale;
-	private static boolean translatorMode;
 
 	private CurrencyNames() {
 	}
@@ -24,15 +23,8 @@ public class CurrencyNames {
 	 */
 	public static String get(String key) {
 		reset();
-		if (translatorMode) {
-			return key;
-		} else {
-			try {
-				return (String) RESOURCE_BUNDLE.get(key);
-			} catch (MissingResourceException e) {
-				return key;
-			}
-		}
+		String wording = (String) RESOURCE_BUNDLE.get(key);
+		return wording==null ? key : wording;
 	}
 	
 	private static void reset() {
