@@ -5,16 +5,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CurrencyData {
+import net.yapbam.remote.RemoteData;
+
+public class CurrencyData implements RemoteData{
 	private static final String CURRENCY_IS_NOT_AVAILABLE = "{0} currency is not available."; //$NON-NLS-1$
 
-	private Long referenceDate;
+	private long timeStamp;
 	private Map<String, Long> rates;
 	private boolean locked;
 	
 	public CurrencyData() {
 		super();
-		this.referenceDate = null;
+		this.timeStamp = -1;
 		this.rates = new HashMap<String, Long>();
 	}
 
@@ -22,7 +24,7 @@ public class CurrencyData {
 		if (locked) {
 			throw new UnsupportedOperationException();
 		}
-		this.referenceDate = date;
+		this.timeStamp = date;
 	}
 
 	public void setCurrencyRate(String isoCode, long rate) {
@@ -123,7 +125,8 @@ public class CurrencyData {
 		return rates.keySet().toArray(new String[rates.size()]);
 	}
 
-	public Long getReferenceDate() {
-		return this.referenceDate;
+	@Override
+	public long getTimeStamp() {
+		return this.timeStamp;
 	}
 }
