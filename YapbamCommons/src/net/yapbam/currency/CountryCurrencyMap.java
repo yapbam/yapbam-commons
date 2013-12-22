@@ -47,7 +47,8 @@ public class CountryCurrencyMap {
 	}
 	
 	public Set<String> getCountries(String currencyCode) {
-		return Collections.unmodifiableSet(this.currencyToCountries.get(currencyCode));
+		Set<String> set = this.currencyToCountries.get(currencyCode);
+		return set==null ? set : Collections.unmodifiableSet(set);
 	}
 
 	public Set<String> getCountries() {
