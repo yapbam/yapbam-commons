@@ -23,13 +23,8 @@ import java.io.*;
 
 import net.yapbam.remote.AbstractRemoteResource;
 import net.yapbam.remote.Cache;
-import net.yapbam.remote.MemoryCache;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.*;
-import java.util.*;
 
 /**
  * Currency converter based on an Internet foreign exchange rates source.
