@@ -54,8 +54,12 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			if ("resource".equals(qName) && (currency!=null) && (rate!=0)) { //$NON-NLS-1$
-				getData().setCurrencyRate(currency, rate);
-			} else if ("field".equals(qName) && (field!=null)) {
+				if (CountryCurrencyMap.INSTANCE.getCountries(currency)!=null) {
+					// We ignore currencies that are used in no country.
+					// They are technical "currencies" like XDR (Special drawing rights) or obsolete currencies
+					getData().setCurrencyRate(currency, rate);
+				}
+			} else if (FIELD_TAG.equals(qName) && (field!=null)) {
 				if (this.field.equals(Field.CURRENCY)) {
 					int index = this.buffer.indexOf("/");
 					if ((index>=0) && (this.buffer.length()==index+4)) {
@@ -111,5 +115,21 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 
 	protected CurrencyHandler getXMLHandler() {
 		return new YahooHandler();
+	}
+
+	@Override
+	protected boolean isDataExpired() {
+		if (getTimeStamp() < 0) {
+			return true;
+		}
+		long now = System.currentTimeMillis();
+		// If we connect to server since less than one minute ... do nothing
+		// This could happen if server doesn't refresh its rates since the last time we
+		// updated the cache file (and more than the "standard" cache expiration time defined below)
+		if (now - getLastRefreshTimeStamp() < 60000) {
+			return false;
+		}
+		// Data is expired if older than 1 hour
+		return now-getTimeStamp()>3600000;
 	}
 }
