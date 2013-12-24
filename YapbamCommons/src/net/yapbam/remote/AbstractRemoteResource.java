@@ -105,15 +105,15 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 	}
 
 	/**
-	 * Makes the cache uptodate.
+	 * Makes the cache up to date.
 	 * <br>If it is not, downloads again cache file and parse data into internal data structure.
-	 * @return true if the web server was called. In order to preserve server resources, it is not called if cache is not so old (ECB refresh its rates never more
-	 * than 1 time per day, we don't call ECB again if data is younger than 24 hours. There's also special handling of week-ends). In such a case, this method returns false.
-	 * @throws IOException If cache file cannot be read/written or if URL cannot be opened.
+	 * <br>After this method is called, {@link #isSynchronized()} always return true (even if server has not been called).
+	 * @return true if the web server was called.
 	 * @throws ParseException If an error occurs while parsing the XML cache file.
+	 * @see #forceUpdate()
+	 * @see #isDataExpired()
 	 */
 	public boolean update() throws IOException, ParseException {
-		//TODO Review method comment (remove references to ECB). Probably cacheIsExpired should be overridable.
 		boolean connect = isDataExpired();
 		if (connect) {
 			forceUpdate();
@@ -127,6 +127,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 	 * <br>Always downloads again cache file and parse data into internal data structure.
 	 * @throws IOException If cache file cannot be read/written or if URL cannot be opened.
 	 * @throws ParseException If an error occurs while parsing the XML cache file.
+	 * @see #update()
 	 */
 	public void forceUpdate() throws IOException, ParseException {
 		long start = System.currentTimeMillis();
@@ -142,7 +143,15 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 
 	/**
 	 * Checks whether data needs to be updated.
-	 * <br>The default implementation suppose that 
+	 * <br>This method is called by {@link #update()} before calling the server. If this method returns false,
+	 * the server is not called. Please note that {@link #forceUpdate()} does not use this method and always calls the server.
+	 * <br>The default implementation suppose that data is published once a day except during week-end.
+	 * <br>You can override this method in order to change this behavior.
+	 * <br>Remember that:<ul>
+	 * <li>{@link #getTimeStamp()} can return a negative number. In such a case, that method should return true.</li>
+	 * <li>It is a good practice to use {@link #getLastRefreshTimeStamp()} in order to limit calls to the remote server.
+	 * <br>For example, you can return false if the last server call was less than a minute.</li>
+	 * </ul>
 	 * @return true if data needs to be updated, false otherwise.
 	 */
 	protected boolean isDataExpired() {
@@ -160,7 +169,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
 		long hoursOld = (cal.getTimeInMillis() - getTimeStamp()) / (1000 * 60 * 60);
 		cal.setTimeInMillis(getTimeStamp());
-		// hypothetical: rates are never published on Saturdays and Sunday
+		// hypothetical: data is never published on Saturday and Sunday
 		int hoursValid = 24 + tolerance;
 		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
 			hoursValid = 72;
@@ -169,6 +178,16 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 		}
 
 		return hoursOld > hoursValid;
+	}
+	
+	/**
+	 * Gets the last data refresh attempt time stamp as ms since January 1, 1970, 00:00:00 GMT.
+	 * <br>This is used by {@link #isDataExpired()} to determine if server should be asked for new data.
+	 * @return a positive long.
+	 * @see #isDataExpired()
+	 */
+	protected final long getLastRefreshTimeStamp() {
+		return lastTryCacheRefresh;
 	}
 	
 	protected abstract URL getSourceURL(); 

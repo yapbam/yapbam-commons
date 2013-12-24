@@ -11,10 +11,9 @@ import net.yapbam.currency.CountryCurrencyMap;
 import org.junit.Test;
 
 public class CountryCurrencyMapTest {
-
 	@Test
 	public void test() {
-		CountryCurrencyMap map = new CountryCurrencyMap();
+		CountryCurrencyMap map = CountryCurrencyMap.INSTANCE;
 		
 		String[] isoCountries = Locale.getISOCountries();
 		Set<String> countries = map.getCountries();
@@ -31,17 +30,17 @@ public class CountryCurrencyMapTest {
 
 	@Test (expected=UnsupportedOperationException.class)
 	public void testNoChangeAllowed1() {
-		new CountryCurrencyMap().getCountries().clear();
+		CountryCurrencyMap.INSTANCE.getCountries().clear();
 	}
 
 	@Test (expected=UnsupportedOperationException.class)
 	public void testNoChangeAllowed2() {
-		new CountryCurrencyMap().getCurrencies().clear();
+		CountryCurrencyMap.INSTANCE.getCurrencies().clear();
 	}
 
 	@Test (expected=UnsupportedOperationException.class)
 	public void testNoChangeAllowed3() {
-		CountryCurrencyMap map = new CountryCurrencyMap();
+		CountryCurrencyMap map = CountryCurrencyMap.INSTANCE;
 		String currency = map.getCurrencies().iterator().next();
 		map.getCountries(currency).clear();
 	}
