@@ -27,6 +27,8 @@ public class GlobalData extends DefaultListenable {
 	private List<Category> categories;
 	private List<PeriodicalTransaction> periodicals;
 	private List<Transaction> transactions;
+	private boolean archive;
+	private boolean locked;
 	private URI uri;
 	private String password;
 	private char subCategorySeparator;
@@ -80,6 +82,44 @@ public class GlobalData extends DefaultListenable {
 	public GlobalData() {
 		super();
 		this.clear();
+	}
+	
+	/** Sets the isArchive attribute of this data.
+	 * <br>This attribute indicates that this globalData contains transactions from archived statements.
+	 * @param isArchive true to lock the data, false to unlock.
+	 */
+	public void setArchive(boolean isArchive) {
+		if (isArchive!=this.archive) {
+			this.archive = isArchive;
+			this.fireEvent(new IsArchivedChangedEvent(this));
+			this.setChanged();
+		}
+	}
+	
+	/** Gets the isArchive attribute of this data.
+	 * @return true if the data is an archive.
+	 */
+	public boolean isArchive() {
+		return this.archive;
+	}
+
+	/** Sets the locked attribute of this data.
+	 * <br>Currently, this attribute is ignored, but in future releases this could change. 
+	 * @param locked true to lock the data, false to unlock.
+	 */
+	public void setLocked(boolean locked) {
+		if (locked!=this.locked) {
+			this.locked = locked;
+			fireEvent(new IsLockedChangedEvent(this));
+			this.setChanged();
+		}
+	}
+	
+	/** Gets the locked attribute of this data.
+	 * @return true if the data is locked.
+	 */
+	public boolean isLocked() {
+		return this.locked;
 	}
 	
 	/** Sets the currency to be used in Yapbam.
@@ -797,6 +837,8 @@ public class GlobalData extends DefaultListenable {
 	 * @param src The data that will be copied into this 
 	 */
 	public void copy(GlobalData src) {
+		archive = src.archive;
+		locked = src.isLocked();
 		accounts = src.accounts;
 		categories = src.categories;
 		subCategorySeparator = src.subCategorySeparator;

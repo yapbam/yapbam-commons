@@ -13,6 +13,8 @@ import net.yapbam.util.DateUtils;
  * A perfect sample is the monthly Internet connection fee.
  */
 public class PeriodicalTransaction extends AbstractTransaction {
+	private static final long serialVersionUID = 1L;
+
 	private int nextDate;
 	private boolean enabled;
 	private DateStepper nextDateBuilder;

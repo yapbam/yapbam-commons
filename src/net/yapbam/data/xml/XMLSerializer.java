@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import net.yapbam.data.*;
+import net.yapbam.data.event.IsLockedChangedEvent;
 import net.yapbam.date.helpers.DateStepper;
 import net.yapbam.date.helpers.DayDateStepper;
 import net.yapbam.date.helpers.DeferredValueDateComputer;
@@ -46,10 +47,13 @@ public class XMLSerializer {
 	private static final String TRUE = "true"; //$NON-NLS-1$
 	
 	/** The current Yapbam file format definition version.
-	 * <br>This version should be increment each time a change is made to the input format definition. 
+	 * <br>This version should be incremented each time a change is made to the input format definition. 
 	 */
 	static final int CURRENT_VERSION = 1;
 	static final String VERSION_ATTRIBUTE = "version"; //$NON-NLS-1$
+	
+	static final String LOCKED_ATTRIBUTE = "locked"; //$NON-NLS-1$
+	static final String ARCHIVE_ATTRIBUTE = "archive"; //$NON-NLS-1$
 
 	static final String SUBCATEGORY_SEPARATOR_ATTRIBUTE = "subCategorySeparator"; //$NON-NLS-1$
 	static final String NB_TRANSACTIONS_ATTRIBUTE = "nbTransactions"; //$NON-NLS-1$
@@ -204,6 +208,12 @@ public class XMLSerializer {
 			atts.addAttribute(EMPTY, EMPTY, SUBCATEGORY_SEPARATOR_ATTRIBUTE, CDATA, Character.toString(data.getSubCategorySeparator())); //$NON-NLS-1$
 			atts.addAttribute(EMPTY, EMPTY, "nbPeriodicalTransactions", CDATA, Integer.toString(data.getPeriodicalTransactionsNumber())); //$NON-NLS-1$
 			atts.addAttribute(EMPTY, EMPTY, NB_TRANSACTIONS_ATTRIBUTE, CDATA, Integer.toString(data.getTransactionsNumber()));
+			if (data.isLocked()) {
+				atts.addAttribute(EMPTY, EMPTY, LOCKED_ATTRIBUTE, CDATA, Boolean.toString(true));
+			}
+			if (data.isArchive()) {
+				atts.addAttribute(EMPTY, EMPTY, ARCHIVE_ATTRIBUTE, CDATA, Boolean.toString(true));
+			}
 			hd.startElement(EMPTY,EMPTY,GLOBAL_DATA_TAG,atts);
 			
 			// Accounts.

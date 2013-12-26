@@ -119,6 +119,14 @@ class GlobalDataHandler extends DefaultHandler {
 			if (attr!=null) {
 				data.setSubCategorySeparator(attr.charAt(0));
 			}
+			attr = attributes.getValue(XMLSerializer.LOCKED_ATTRIBUTE);
+			if (attr!=null) {
+				data.setLocked(true);
+			}
+			attr = attributes.getValue(XMLSerializer.ARCHIVE_ATTRIBUTE);
+			if (attr!=null) {
+				data.setArchive(true);
+			}
 		} else if (qName.equals(XMLSerializer.ACCOUNT_TAG)) {
 			String id = attributes.getValue(XMLSerializer.ID_ATTRIBUTE);
 			double balance = Double.parseDouble(attributes.getValue(XMLSerializer.INITIAL_BALANCE_ATTRIBUTE));

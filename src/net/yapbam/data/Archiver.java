@@ -25,8 +25,13 @@ public final class Archiver {
 	 * <br>Modified modes are modified in the archive.
 	 * @param archiveData The archive data.
 	 * @param transactions The transactions to move to the archive.
+	 * @throws IllegalArgumentException if archiveData.isArchive() is false
+	 * @see GlobalData#isArchive()
 	 */
 	public static void archive(GlobalData archiveData, Transaction[] transactions) {
+		if (!archiveData.isArchive()) {
+			throw new IllegalArgumentException();
+		}
 		archiveData.setEventsEnabled(false);
 		Transaction[] archiveTransactions = new Transaction[transactions.length];
 		for (int i = 0; i < archiveTransactions.length; i++) {
@@ -90,7 +95,10 @@ public final class Archiver {
 		return result;
 	}
 
-
+	/** Removes archived transactions from data.
+	 * @param data The data where to remove the transactions
+	 * @param transactions the transactions to remove
+	 */
 	public static void remove(GlobalData data, Transaction[] transactions) {
 		// Compute the initial balance of accounts after transactions deletion
 		Map<Account, Double> accountToInitialBalance = new HashMap<Account, Double>();
@@ -112,5 +120,4 @@ public final class Archiver {
 		data.remove(transactions);
 		data.setEventsEnabled(true);
 	}
-
 }

@@ -28,8 +28,6 @@ import net.yapbam.data.Transaction;
 
 import org.junit.Test;
 
-//import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 public class SerializerTest {
 	/** A fake output stream, that ouputs nothing but keep tracks of its closing. */
 	private static final class FakeOutputStream extends OutputStream {
@@ -53,12 +51,18 @@ public class SerializerTest {
 
 	private static final double doubleAccuracy = Math.pow(10, -Currency.getInstance(Locale.getDefault()).getDefaultFractionDigits())/2;
 	
-//	static {
-//    Security.insertProviderAt(new BouncyCastleProvider(), 1);
-//	}
+	@Test
+	public void testArchiveAndLock() throws IOException {
+		GlobalData data = new GlobalData();
+		data.setArchive(true);
+		data.setLocked(true);
+		GlobalData other = reread(data);
+		assertTrue(other.isArchive());
+		assertTrue(other.isLocked());
+	}
 
 	@Test
-	public void test() throws Exception {
+	public void test() throws IOException {
 		GlobalData data = new GlobalData();
 		Account account = new Account("toto", 50.24);
 		data.add(account);
@@ -88,7 +92,8 @@ public class SerializerTest {
 
 	private void testInstance(GlobalData data) throws IOException {
 		GlobalData other = reread(data);
-		
+		assertEquals(data.isArchive(), other.isArchive());
+		assertEquals(data.isLocked(), other.isLocked());
 		assertEquals(data.getCategoriesNumber(), other.getCategoriesNumber());
 		for (int i = 0; i < data.getCategoriesNumber(); i++) {
 			Category category = data.getCategory(i);
