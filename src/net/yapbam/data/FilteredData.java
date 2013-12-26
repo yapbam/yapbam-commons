@@ -172,7 +172,7 @@ public class FilteredData extends DefaultListenable {
 							fireEvent (event);
 						}
 					}
-				} else if (event instanceof NeedToBeSavedChangedEvent) {
+				} else if ((event instanceof NeedToBeSavedChangedEvent) || (event instanceof IsLockedChangedEvent) || (event instanceof IsArchivedChangedEvent)) {
 					fireEvent(event);
 				} else {
 					System.out.println ("Be aware "+event+" is not propagated by the fileredData");  //$NON-NLS-1$//$NON-NLS-2$
