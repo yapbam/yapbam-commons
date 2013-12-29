@@ -14,10 +14,18 @@ import java.io.OutputStream;
 public class MemoryCache implements Cache {
 	private ByteArrayOutputStream writer;
 	private byte[] byteArrays;
+	private long timeStamp;
+	private long tmpTimeStamp;
 
+	public MemoryCache() {
+		this.timeStamp = -1;
+		this.tmpTimeStamp = -1;
+	}
+	
 	@Override
 	public OutputStream getOutputStream() throws IOException {
 		this.writer = new ByteArrayOutputStream();
+		this.tmpTimeStamp = System.currentTimeMillis();
 		return writer;
 	}
 
@@ -41,10 +49,16 @@ public class MemoryCache implements Cache {
 	@Override
 	public void commit() {
 		this.byteArrays = writer.toByteArray();
+		this.timeStamp = this.tmpTimeStamp;
 	}
 
 	@Override
 	public boolean isEmpty() {
 		return (byteArrays == null) && (writer==null);
+	}
+
+	@Override
+	public long getTimeStamp() {
+		return this.timeStamp;
 	}
 }

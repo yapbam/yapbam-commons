@@ -10,6 +10,8 @@ import java.util.concurrent.Callable;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 
+import net.yapbam.util.StreamUtils;
+
 /** Decryption task.
  * <br>This task decrypts an input stream and output it to an output stream.
  */
@@ -60,10 +62,7 @@ public class DecrypterTask implements Callable<Void> {
 			Cipher cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password, compatibilityMode);
 			this.out = new CipherOutputStream(out, cipher);
 			byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
-			for (int bytesRead = in.read(buffer); bytesRead!=-1; bytesRead = in.read(buffer)) {
-				out.write(buffer, 0, bytesRead);
-			}
-			out.flush();
+			StreamUtils.copy(in, out, buffer);
 			return null;
 		} finally {
 			in.close();

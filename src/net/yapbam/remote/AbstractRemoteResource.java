@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 
 import net.yapbam.remote.Cache;
+import net.yapbam.util.StreamUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,21 +47,16 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 		this.proxy = proxy;
 		this.data = null;
 		this.cache = cache==null?new MemoryCache():cache;
-		boolean cacheUnavailable = this.cache.isEmpty();
-		if (!cacheUnavailable) {
-			getLogger().trace("cache is available");
-			try {
-				// Try to read the cache file
-				this.data = parse(cache, false);
-				this.isSynchronized = !isDataExpired();
-			} catch (Exception e) {
-				// Cache parsing failed, maybe cache file is not present or is corrupted. 
-				// We will call update without try/catch clause to throw exceptions if data can't be red.
-				getLogger().warn("Parse failed", e);
-			}
-		} else {
-			getLogger().trace("cache is unavailable");
+		try {
+			// Try to read the cache file
+			this.data = parse(cache, false);
+			this.isSynchronized = !isDataExpired();
+		} catch (Exception e) {
+			// Cache parsing failed, maybe cache file is not present or is corrupted. 
+			// We will call update without try/catch clause to throw exceptions if data can't be red.
+			getLogger().warn("Parse failed", e);
 		}
+		this.lastTryCacheRefresh = this.cache.getTimeStamp();
 	}
 
 	/** Gets a logger.
@@ -77,11 +73,22 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 	 * Gets the time stamp of the data as ms since January 1, 1970, 00:00:00 GMT.
 	 * <br>This is used by {@link #isDataExpired()} to determine if server should be asked for new data
 	 * @return a positive long or a negative number if the data structure has not yet been initialized.
+	 * @see #getRefreshTimeStamp()
 	 */
 	public long getTimeStamp() {
 		return data==null ? -1 : this.data.getTimeStamp();
 	}
-
+	
+	/** Gets the last successful refresh date as ms since January 1, 1970, 00:00:00 GMT.
+	 * <br>Note this can be different of {@link #getTimeStamp()}. For instance, last time we contact the server
+	 * (let say at 10 o'clock) it returned data that was updated some time ago (let say at 9 o'clock).
+	 * In such a case, this method will return 10 o'clock and {@link #getTimeStamp()} 9 o'clock.
+	 * @return
+	 */
+	public long getRefreshTimeStamp() {
+		return cache.getTimeStamp();
+	}
+	
 	/** Tests whether this converter is synchronized with web server.
 	 * @return true if the rates are up to date
 	 * @see #update()
@@ -192,9 +199,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 		try {
 			OutputStream out = cache.getOutputStream();
 			try {
-				for (int c=in.read() ; c!=-1; c=in.read()) {
-					out.write(c);
-				}
+				StreamUtils.copy(in, out, new byte[10024]);
 			} finally {
 				out.flush();
 				out.close();
@@ -222,6 +227,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 	
 	/**
 	 * Parses cache file and create internal data structures containing exchange rates.
+	 * <br>Be aware that cache may be empty. In such a case, parse should return an empty T instance
 	 * @param tmp true to parse the tmp cache, false to parse the official cache
 	 * @return 
 	 * @throws ParseException If XML file cannot be parsed.

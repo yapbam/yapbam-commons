@@ -1,8 +1,11 @@
 package net.yapbam.data.xml.task;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
+
+import net.yapbam.util.StreamUtils;
 
 abstract class FilterTask implements Callable<Void> {
 	static final int BUFFER_SIZE = 1024;
@@ -23,23 +26,16 @@ abstract class FilterTask implements Callable<Void> {
 	public abstract OutputStream buildFilteredOutputStream(OutputStream out);
 
 	@Override
-	public Void call() throws Exception {
+	public Void call() throws IOException {
 		if (TRACE) {
 			System.out.println ("Start "+getClass().getName());
 		}
 		byte[] buffer = new byte[BUFFER_SIZE];
 		try {
-			for (;;) {
-				int bytesRead = in.read(buffer);
-				if (bytesRead == -1) {
-					break;
-				}
-				po.write(buffer, 0, bytesRead);
-			}
+			StreamUtils.copy(in, po, buffer);
 			return null;
 		} finally {
 			in.close();
-			po.flush(); //TODO Could be removed ?
 			po.close();
 			if (TRACE) {
 				System.out.println ("Stop "+getClass().getName());

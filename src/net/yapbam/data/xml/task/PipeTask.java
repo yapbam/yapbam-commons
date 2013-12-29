@@ -1,12 +1,14 @@
 package net.yapbam.data.xml.task;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
+import net.yapbam.util.StreamUtils;
+
 /** A task that reads the content of an input stream and outputs it to an output stream.
  */
 public class PipeTask implements Callable<Void> {
-	private static boolean TRACE = false;
 	private InputStream in;
 	private OutputStream out;
 
@@ -20,25 +22,13 @@ public class PipeTask implements Callable<Void> {
 	}
 
 	@Override
-	public Void call() throws Exception {
-		if (TRACE) {
-			System.out.println ("Start "+getClass().getName());
-		}
+	public Void call() throws IOException {
 		try {
 			byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
-			for (;;) {
-				int bytesRead = in.read(buffer);
-				if (bytesRead == -1) {
-					break;
-				}
-				out.write(buffer, 0, bytesRead);
-			}
+			StreamUtils.copy(in, out, buffer);
 			return null;
 		} finally {
 			in.close();
-			if (TRACE) {
-				System.out.println ("Stop "+getClass().getName());
-			}
 		}
 	}
 }

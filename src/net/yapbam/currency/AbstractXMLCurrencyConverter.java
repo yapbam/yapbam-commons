@@ -33,7 +33,11 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 	
 	@Override
 	protected CurrencyData parse(Cache cache, boolean tmp) throws ParseException, IOException {
-		return parseXML(cache, tmp);
+		if (!tmp && cache.isEmpty()) {
+			return new CurrencyData();
+		} else {
+			return parseXML(cache, tmp);
+		}
 	}
 
 	/**
