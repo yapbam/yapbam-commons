@@ -37,4 +37,9 @@ public interface Cache {
 	 * @throws IOException 
 	 */
 	public void commit() throws IOException;
+	
+	/** Gets Gives when the cache persist has been updated (ms since 1/1/1970).
+	 * @return a long (-1 is no persistent cache is available)
+	 */
+	public long getTimeStamp();
 }

@@ -1,4 +1,4 @@
-package net.yapbam.currency;
+package net.yapbam.remote;
 
 import static org.junit.Assert.*;
 
@@ -22,10 +22,13 @@ public class CacheTest {
 	public void test() throws IOException {
 		MemoryCache cache = new MemoryCache();
 		assertTrue(cache.isEmpty());
+		assertTrue(cache.getTimeStamp()<0);
 		setCache(cache, FIRST);
+		assertTrue(cache.getTimeStamp()<0);
 		assertFalse(cache.isEmpty());
 		assertEquals(FIRST, getCacheContent(cache, true));
 		cache.commit();
+		assertTrue(cache.getTimeStamp()>0);
 		assertFalse(cache.isEmpty());
 		assertEquals(FIRST, getCacheContent(cache, false));
 		setCache(cache, SECOND);

@@ -17,6 +17,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import net.yapbam.util.Base64Encoder;
+import net.yapbam.util.StreamUtils;
 
 /** Encoding task.
  * <br>This task encodes an input stream and output it to an output stream.
@@ -104,13 +105,7 @@ public class EncrypterTask implements Callable<Void> {
 		Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, password, compatibilityMode);
 		CipherOutputStream po = new CipherOutputStream(out, cipher);
 		try {
-			for (;;) {
-				int bytesRead = in.read(buffer);
-				if (bytesRead == -1) {
-					break;
-				}
-				po.write(buffer, 0, bytesRead);
-			}
+			StreamUtils.copy(in, po, buffer);
 			return null;
 		} finally {
 			in.close();

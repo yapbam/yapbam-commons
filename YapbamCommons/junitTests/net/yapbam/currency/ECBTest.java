@@ -34,7 +34,14 @@ public class ECBTest {
 		path = "ecb.xml";
 		Cache cache = new MemoryCache();
 		AbstractCurrencyConverter cvt = new ECBTestConverter(cache);
+		assertTrue(cvt.getRefreshTimeStamp()<0);
+		assertTrue(cvt.getTimeStamp()<0);
+		assertFalse(cvt.isSynchronized());
+		assertEquals(0, cvt.getCurrencies().length);
 		cvt.update();
+		assertTrue(cvt.getRefreshTimeStamp()>0);
+		assertTrue(cvt.getTimeStamp()>0);
+		assertTrue(cvt.isSynchronized());
 		assertTrue(cvt.isAvailable("USD"));
 		assertTrue(cvt.isAvailable("JPY"));
 		assertTrue(cvt.isAvailable("EUR"));
