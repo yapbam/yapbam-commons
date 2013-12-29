@@ -47,7 +47,7 @@ public abstract class AbstractCurrencyConverter extends AbstractRemoteResource<C
 	 * @throws IOException if an IOException occurs during the initialization.
 	 * @throws ParseException if data is corrupted
 	 */
-	protected AbstractCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
+	protected AbstractCurrencyConverter(Proxy proxy, Cache cache) {
 		super (proxy, cache);
 	}
 	

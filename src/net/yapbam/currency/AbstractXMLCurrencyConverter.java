@@ -26,10 +26,8 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 	 * Constructor.
 	 * @param proxy The proxy to use to get the data (Proxy.NoProxy to not use any proxy)
 	 * @param cache A cache instance, or null to use no cache
-	 * @throws IOException if an IOException occurs during the initialization.
-	 * @throws ParseException if data is corrupted
 	 */
-	protected AbstractXMLCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
+	protected AbstractXMLCurrencyConverter(Proxy proxy, Cache cache) {
 		super(proxy, cache);
 	}
 	
@@ -51,7 +49,7 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 			XMLReader saxReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 			saxReader.setContentHandler(handler);
 			saxReader.setErrorHandler(handler);
-			Reader input = cache.getReader(tmp);
+			InputStream input = cache.getInputStream(tmp);
 			try {
 				saxReader.parse(new InputSource(input));
 			} finally {
@@ -66,6 +64,13 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 		}
 		return handler.getData();
 	}
+
+//	/** Gets the remote source encoding.
+//	 * @return By default, this method returns "UTF-8". You can override this method to specify another encoding. 
+//	 */
+//	protected String getEncoding() {
+//		return "UTF-8";
+//	}
 
 	protected abstract CurrencyHandler getXMLHandler();
 }

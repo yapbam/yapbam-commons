@@ -34,6 +34,7 @@ public class YahooTest {
 		path = "yahoo.xml";
 		Cache cache = new MemoryCache();
 		YahooCurrencyConverter cvt = new YahooTestConverter(cache);
+		cvt.update();
 		assertFalse(cvt.isAvailable("ARG"));
 		assertTrue(cvt.isAvailable("USD"));
 		assertTrue(cvt.isAvailable("VND"));
@@ -54,13 +55,14 @@ public class YahooTest {
 	@Test (expected = ParseException.class)
 	public void testBad1() throws IOException, ParseException {
 		path = "bad_yahoo.xml";
-		new YahooTestConverter(new MemoryCache());
+		new YahooTestConverter(new MemoryCache()).update();
 	}
 
 	@Test (expected = IllegalArgumentException.class)
 	public void testBadArgs1() throws IOException, ParseException {
 		path = "yahoo.xml";
 		YahooCurrencyConverter cvt = new YahooTestConverter(new MemoryCache());
+		cvt.update();
 		cvt.convert(1.0, "XXX", "USD");
 	}
 
@@ -69,12 +71,13 @@ public class YahooTest {
 	public void testBadArgs2() throws IOException, ParseException {
 		path = "yahoo.xml";
 		YahooCurrencyConverter cvt = new YahooTestConverter(new MemoryCache());
+		cvt.update();
 		cvt.convert(1.0, "USD", "XXX");
 	}
 	
 	@Test (expected = IOException.class)
 	public void testUnknown() throws IOException, ParseException {
 		path = "unknown.xml";
-		new YahooTestConverter(new MemoryCache());
+		new YahooTestConverter(new MemoryCache()).update();
 	}
 }

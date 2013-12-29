@@ -65,9 +65,10 @@ import javax.crypto.IllegalBlockSizeException;
  * @see javax.crypto.CipherInputStream
  * 
  * @since 1.4
+ * @deprecated
  */
-
-public class CipherOutputStream extends FilterOutputStream {
+@Deprecated
+class CipherOutputStream extends FilterOutputStream { //NOSONAR
 
 	// the cipher engine to use to process stream data
 	private Cipher cipher;

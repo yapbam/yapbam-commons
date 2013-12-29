@@ -34,6 +34,7 @@ public class ECBTest {
 		path = "ecb.xml";
 		Cache cache = new MemoryCache();
 		AbstractCurrencyConverter cvt = new ECBTestConverter(cache);
+		cvt.update();
 		assertTrue(cvt.isAvailable("USD"));
 		assertTrue(cvt.isAvailable("JPY"));
 		assertTrue(cvt.isAvailable("EUR"));
@@ -54,13 +55,14 @@ public class ECBTest {
 	@Test(expected = ParseException.class)
 	public void testBad1() throws IOException, ParseException {
 		path = "bad_ecb.xml";
-		new ECBTestConverter(new MemoryCache());
+		new ECBTestConverter(new MemoryCache()).update();
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testBadArgs1() throws IOException, ParseException {
 		path = "ecb.xml";
 		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
+		cvt.update();
 		cvt.convert(1.0, "XXX", "USD");
 	}
 
@@ -68,12 +70,13 @@ public class ECBTest {
 	public void testBadArgs2() throws IOException, ParseException {
 		path = "yahoo.xml";
 		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
+		cvt.update();
 		cvt.convert(1.0, "USD", "XXX");
 	}
 
 	@Test(expected = IOException.class)
 	public void testUnknown() throws IOException, ParseException {
 		path = "unknown.xml";
-		new ECBTestConverter(new MemoryCache());
+		new ECBTestConverter(new MemoryCache()).update();
 	}
 }
