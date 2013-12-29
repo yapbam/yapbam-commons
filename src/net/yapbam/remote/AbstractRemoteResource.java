@@ -49,7 +49,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 		this.cache = cache==null?new MemoryCache():cache;
 		try {
 			// Try to read the cache file
-			this.data = parse(cache, false);
+			this.data = parse(this.cache, false);
 			this.isSynchronized = !isDataExpired();
 		} catch (Exception e) {
 			// Cache parsing failed, maybe cache file is not present or is corrupted. 

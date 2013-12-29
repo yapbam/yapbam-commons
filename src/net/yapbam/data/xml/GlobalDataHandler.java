@@ -194,7 +194,8 @@ class GlobalDataHandler extends DefaultHandler {
 		} else if (qName.equals(XMLSerializer.TRANSACTION_TAG)) {
 			//We can't directly push the attributes because SAX may reuse the same instance to store next element's attributes.
 			this.tempData.push(buildMap(attributes));
-			this.tempData.push(null); // This place in the stack will contains a list of subtransactions, if any exists, or null.
+			// Put a null in the stack. This place will contains a list of subtransactions, if any exists, or null.
+			this.tempData.push(null);
 		} else if (qName.equals(XMLSerializer.SUBTRANSACTION_TAG)) {
 			double amount = Double.parseDouble(attributes.getValue(XMLSerializer.AMOUNT_ATTRIBUTE));
 			String description = attributes.getValue(XMLSerializer.DESCRIPTION_ATTRIBUTE);
@@ -215,7 +216,8 @@ class GlobalDataHandler extends DefaultHandler {
 		} else if (qName.equals(XMLSerializer.PERIODICAL_TAG)) {
 			//We can't directly push the attributes because SAX may reuse the same instance to store next element's attributes.
 			this.tempData.push(buildMap(attributes));
-			this.tempData.push(null); //To store the date stepper
+			// Reserve a place in the stack to store the date stepper
+			this.tempData.push(null);
 			this.tempData.push(new ArrayList<SubTransaction>());
 		} else if (qName.equals(XMLSerializer.DATE_STEPPER_TAG)) {
 			String kind = attributes.getValue(XMLSerializer.KIND_ATTRIBUTE);
@@ -237,12 +239,14 @@ class GlobalDataHandler extends DefaultHandler {
 			} else {
 				throw new IllegalArgumentException("Unknown date stepper : "+kind); //$NON-NLS-1$
 			}
-			Object obj = this.tempData.pop(); // The subtransaction list, will be returned in the stack in a few lines
+			// The subtransaction list, will be returned in the stack in a few lines
+			Object obj = this.tempData.pop();
 			Object old = this.tempData.pop();
 			this.tempData.push(stepper);
 			this.tempData.push(obj);
 			if (old!=null) {
-				throw new IllegalStateException("Two date steppers found"); // Hu ! there are two date steppers !!!  //$NON-NLS-1$
+				// Hu ! there are two date steppers !!!
+				throw new IllegalStateException("Two date steppers found"); //$NON-NLS-1$
 			}
 		} else {
 			// Simply ignore unknown tags (Maybe we're using a previous Yapbam version)
@@ -262,7 +266,8 @@ class GlobalDataHandler extends DefaultHandler {
 			// Be aware that further modifications in the following method wause make the prblem to occur again.
 			this.data.add(this.transactions.toArray(new Transaction[this.transactions.size()]));
 		} else if (qName.equals(XMLSerializer.ACCOUNT_TAG)) {
-			Account account = (Account) this.tempData.pop(); // remove the tag we added in the stack
+			// remove the tag we added in the stack
+			Account account = (Account) this.tempData.pop();
 			String lastCData = this.tagToCData.get(qName);
 			if (lastCData!=null) {
 				this.data.setComment(account, lastCData);
@@ -300,11 +305,12 @@ class GlobalDataHandler extends DefaultHandler {
 					this.currentProgress++;
 					report.reportProgress(currentProgress);
 				}
-				try {
-					if (SLOW_READING) {
+				if (SLOW_READING) {
+					try {
 						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						// Do nothing
 					}
-				} catch (InterruptedException e) {
 				}
 			}
 		} else if (qName.equals(XMLSerializer.PERIODICAL_TAG)) {
@@ -319,7 +325,8 @@ class GlobalDataHandler extends DefaultHandler {
 			if (nextDate!=null) {
 				if ((stepper!=null) && (stepper.getLastDate()!=null) && (stepper.getLastDate().compareTo(nextDate)<0)) {
 					// If next date is after end
-					nextDate = null; // Set the next date to "no next date"
+					// Set the next date to "no next date"
+					nextDate = null;
 				}
 			}
 			// In previous Yapbam versions, next date could also be null on enabled periodical transactions

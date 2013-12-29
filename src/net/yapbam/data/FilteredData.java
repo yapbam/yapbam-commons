@@ -2,6 +2,9 @@ package net.yapbam.data;
 
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.yapbam.data.event.*;
 import net.yapbam.util.NullUtils;
 
@@ -21,6 +24,7 @@ public class FilteredData extends DefaultListenable {
 	private BalanceData balanceData;
 	private Filter filter;
 	private Observer filterObserver;
+	private Logger logger;
 	
 	/** Constructor.
 	 * @param data The data that is filtered
@@ -42,7 +46,8 @@ public class FilteredData extends DefaultListenable {
 					Collections.sort(transactions, comparator);
 				}
 				if (event instanceof EverythingChangedEvent) {
-					filter.clear(); // If everything changed, reset the filter
+					// If everything changed, reset the filter
+					filter.clear();
 					filter();
 				} else if (event instanceof AccountRemovedEvent) {
 					Account account = ((AccountRemovedEvent)event).getRemoved();
@@ -68,13 +73,15 @@ public class FilteredData extends DefaultListenable {
 					Collection<Transaction> okTransactions = new ArrayList<Transaction>(ts.length);
 					double addedAmount = 0.0;
 					for (Transaction transaction : ts) {
-						if (filter.isOk(transaction.getAccount())) { // If the added transaction match with the account filter
+						if (filter.isOk(transaction.getAccount())) {
+							// If the added transaction match with the account filter
 							Date valueDate = transaction.getValueDate();
 							if (NullUtils.compareTo(valueDate, filter.getValueDateFrom(),true)<0) {
 								addedAmount += transaction.getAmount();
 							} else {
 								accountOkTransactions.add(transaction);
-								if (isOk(transaction)) { // If the added transaction matches with the whole filter
+								if (isOk(transaction)) {
+									// If the added transaction matches with the whole filter
 									okTransactions.add(transaction);
 									int index = -Collections.binarySearch(transactions, transaction, comparator)-1;
 									transactions.add(index, transaction);
@@ -175,12 +182,19 @@ public class FilteredData extends DefaultListenable {
 				} else if ((event instanceof NeedToBeSavedChangedEvent) || (event instanceof IsLockedChangedEvent) || (event instanceof IsArchivedChangedEvent)) {
 					fireEvent(event);
 				} else {
-					System.out.println ("Be aware "+event+" is not propagated by the fileredData");  //$NON-NLS-1$//$NON-NLS-2$
+					getLogger().debug("Be aware {} is not propagated by the fileredData", event);  //$NON-NLS-1$
 				}
 			}
 		});
 		this.balanceData = new BalanceData();
 		this.filter();
+	}
+	
+	private Logger getLogger() {
+		if (this.logger==null) {
+			this.logger = LoggerFactory.getLogger(getClass());
+		}
+		return this.logger;
 	}
 	
 	/** Returns the balance data.

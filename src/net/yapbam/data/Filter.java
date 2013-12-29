@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.yapbam.util.NullUtils;
 import net.yapbam.util.TextMatcher;
 
@@ -37,18 +40,26 @@ public class Filter extends Observable {
 	private TextMatcher statementMatcher;
 	
 	private boolean suspended;
+	private Logger logger;
 
 	/** Constructor. */
 	public Filter() {
 		init();
 		this.suspended = false;
 	}
+	
+	private Logger getLogger() {
+		if (this.logger==null) {
+			this.logger = LoggerFactory.getLogger(getClass());
+		}
+		return this.logger;
+	}
 
 	public boolean isOk(int property) {
 		if (DEBUG) {
-			System.out.println("---------- isOK("+Integer.toBinaryString(property)+") ----------"); //$NON-NLS-1$ //$NON-NLS-2$
-			System.out.println("filter  : "+Integer.toBinaryString(this.filter)); //$NON-NLS-1$
-			System.out.println("result  : "+Integer.toBinaryString(property & this.filter)); //$NON-NLS-1$
+			getLogger().trace("---------- isOK({}) ----------",Integer.toBinaryString(property)); //$NON-NLS-1$
+			getLogger().trace("filter: {}",Integer.toBinaryString(this.filter)); //$NON-NLS-1$
+			getLogger().trace("result: {}",Integer.toBinaryString(property & this.filter)); //$NON-NLS-1$
 		}
 		return (property & this.filter) != 0;
 	}
@@ -297,7 +308,7 @@ public class Filter extends Observable {
 			this.maxAmount = maxAmount;
 			filter = (filter & ~mask) | (property & mask);
 			if (DEBUG) {
-				System.out.println("-> filter : "+filter); //$NON-NLS-1$
+				getLogger().trace("-> filter: {}",filter); //$NON-NLS-1$
 			}
 			this.setChanged();
 		}
@@ -398,7 +409,7 @@ public class Filter extends Observable {
 			this.statementMatcher = statementFilter;
 			filter = (filter & ~mask) | (property & mask);
 			if (DEBUG) {
-				System.out.println("-> filter : "+filter); //$NON-NLS-1$
+				getLogger().trace("-> filter: {}",filter); //$NON-NLS-1$
 			}
 			this.setChanged();
 		}

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import net.yapbam.data.*;
-import net.yapbam.data.event.IsLockedChangedEvent;
 import net.yapbam.date.helpers.DateStepper;
 import net.yapbam.date.helpers.DayDateStepper;
 import net.yapbam.date.helpers.DeferredValueDateComputer;
@@ -237,6 +236,7 @@ public class XMLSerializer {
 					try {
 						Thread.sleep(1);
 					} catch (InterruptedException e) {
+						// Nothing to do
 					}
 				}
 				serialize(data.getTransaction(i));

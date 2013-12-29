@@ -284,7 +284,8 @@ public abstract class AbstractSerializer<T> {
 			}
 		}
 		if (in.markSupported()) {
-			in.reset(); // Reset the stream (getSerializationData doesn't guarantee the position of the stream)
+			// Reset the stream (getSerializationData doesn't guarantee the position of the stream)
+			in.reset();
 		}
 		return new SerializationData(isEncoded, encodingVersion.toString());
 	}
