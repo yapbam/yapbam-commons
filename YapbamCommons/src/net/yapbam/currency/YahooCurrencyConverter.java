@@ -1,13 +1,10 @@
 package net.yapbam.currency;
 
 import java.net.*;
-import java.io.*;
 
 import net.yapbam.remote.Cache;
 
 import org.xml.sax.*;
-
-import java.text.*;
 
 /**
  * Currency converter based on Yahoo's foreign exchange rates.
@@ -97,10 +94,8 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 	 * Constructor.
 	 * @param proxy The proxy to use to get the data (Proxy.NoProxy to not use any proxy)
 	 * @param cache A cache instance, or null to use no cache
-	 * @throws IOException if an IOException occurs during the initialization.
-	 * @throws ParseException if data is corrupted
 	 */
-	public YahooCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
+	public YahooCurrencyConverter(Proxy proxy, Cache cache) {
 		super(proxy, cache);
 	}
 

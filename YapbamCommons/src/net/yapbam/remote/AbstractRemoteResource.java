@@ -33,12 +33,16 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 
 	/**
 	 * Constructor.
+	 * <br>The instance is initialized using the cached data, no remote access is done.
+	 * This guarantees a (relatively) short execution time and allows it to be executed on the UI thread.
+	 * <br>Once initialized this instance should be update with the {@link #update()} method 
+	 * (on a background thread in a gui context).
+	 * <br>If access to cache fails or if cache is corrupted, the instance is created as if there is no cache.
 	 * @param proxy The proxy to use to get the data (Proxy.NoProxy to not use any proxy)
 	 * @param cache A cache instance, or null to use no cache
-	 * @throws IOException if an IOException occurs during the initialization.
-	 * @throws ParseException if data is corrupted
+	 * @see #update()
 	 */
-	protected AbstractRemoteResource(Proxy proxy, Cache cache) throws IOException, ParseException {
+	protected AbstractRemoteResource(Proxy proxy, Cache cache) {
 		this.proxy = proxy;
 		this.data = null;
 		this.cache = cache==null?new MemoryCache():cache;
@@ -48,32 +52,14 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 			try {
 				// Try to read the cache file
 				this.data = parse(cache, false);
+				this.isSynchronized = !isDataExpired();
 			} catch (Exception e) {
 				// Cache parsing failed, maybe cache file is not present or is corrupted. 
 				// We will call update without try/catch clause to throw exceptions if data can't be red.
 				getLogger().warn("Parse failed", e);
-				cacheUnavailable = true;
 			}
 		} else {
 			getLogger().trace("cache is unavailable");
-		}
-		try {
-			// If cache was not read update it.
-			this.update();
-		} catch (IOException e) {
-			processException(cacheUnavailable, e);
-		} catch (ParseException e) {
-			processException(cacheUnavailable, e);
-		}
-	}
-
-	private  <V extends Exception> void processException(boolean cacheUnavailable, V e) throws V {
-		if (cacheUnavailable) {
-			throw e;
-		} else {
-			// Don't throw any exception if update fails as the instance is already initialized with the cache
-			// isSynchronized method will return false, indicating that this instance is not synchronized with Internet
-			getLogger().warn("Update failed", e);
 		}
 	}
 
@@ -204,7 +190,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 		getLogger().trace("Connecting to {}", getSourceURL());
 		InputStream in = getSourceStream();
 		try {
-			Writer out = cache.getWriter();
+			OutputStream out = cache.getOutputStream();
 			try {
 				for (int c=in.read() ; c!=-1; c=in.read()) {
 					out.write(c);

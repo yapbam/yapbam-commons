@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
@@ -34,31 +36,31 @@ public class CacheTest {
 	@Test (expected = FileNotFoundException.class)
 	public void testNoTmp() throws IOException {
 		MemoryCache cache = new MemoryCache();
-		cache.getReader(true);
+		cache.getInputStream(true);
 	}
 
 	@Test (expected = FileNotFoundException.class)
 	public void testNoCommited1() throws IOException {
 		MemoryCache cache = new MemoryCache();
-		cache.getReader(false);
+		cache.getInputStream(false);
 	}
 
 	@Test (expected = FileNotFoundException.class)
 	public void testNoCommited2() throws IOException {
 		MemoryCache cache = new MemoryCache();
 		setCache(cache, FIRST);
-		cache.getReader(false);
+		cache.getInputStream(false);
 	}
 
 	private void setCache(MemoryCache cache, CharSequence content) throws IOException {
-		Writer writer = cache.getWriter();
+		Writer writer = new OutputStreamWriter(cache.getOutputStream());
 		writer.append(content);
 		writer.close();
 	}
 
 	private CharSequence getCacheContent(MemoryCache cache, boolean tmp) throws IOException {
 		CharBuffer buffer = CharBuffer.allocate(1024);
-		Reader reader = cache.getReader(tmp);
+		Reader reader = new InputStreamReader(cache.getInputStream(tmp));
 		for (int nb = reader.read(buffer); nb<0; nb = reader.read(buffer)) {
 			// Read the buffer
 		}

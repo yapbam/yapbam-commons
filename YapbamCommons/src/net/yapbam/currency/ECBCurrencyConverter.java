@@ -60,10 +60,8 @@ public class ECBCurrencyConverter extends AbstractXMLCurrencyConverter {
 	 * Constructor.
 	 * @param proxy The proxy to use to get the data (Proxy.NoProxy to not use any proxy)
 	 * @param cache A cache instance, or null to use no cache
-	 * @throws IOException if an IOException occurs during the initialization.
-	 * @throws ParseException if data is corrupted
 	 */
-	public ECBCurrencyConverter(Proxy proxy, Cache cache) throws IOException, ParseException {
+	public ECBCurrencyConverter(Proxy proxy, Cache cache) {
 		super(proxy, cache);
 	}
 
