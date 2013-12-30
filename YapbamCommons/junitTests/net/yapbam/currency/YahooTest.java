@@ -38,7 +38,10 @@ public class YahooTest {
 		assertTrue(cvt.getTimeStamp()<0);
 		assertFalse(cvt.isSynchronized());
 		assertEquals(0, cvt.getCurrencies().length);
+		SpyObserver observer = new SpyObserver();
+		cvt.addObserver(observer);
 		cvt.update();
+		assertTrue(observer.wasCalled());
 		assertTrue(cvt.getRefreshTimeStamp()>0);
 		assertTrue(cvt.getTimeStamp()>0);
 		assertTrue(cvt.isSynchronized());

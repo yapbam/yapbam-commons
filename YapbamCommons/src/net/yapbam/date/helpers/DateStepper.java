@@ -7,20 +7,14 @@ import java.util.Date;
  * the next date of a periodical transaction
  */
 public abstract class DateStepper {
+	
 	/** A trivial value date computer, that returns the transaction date as value date.*/
 	public static final DateStepper IMMEDIATE = new DateStepper() {
 		@Override
 		public Date getNextStep(Date date) {
 			return date;
 		}
-		@Override
-		public boolean equals(Object obj) {
-			return (obj!=null) && getClass().equals(obj.getClass());
-		}
-		@Override
-		public int hashCode() {
-			return 0;
-		}
+
 		@Override
 		public Date getLastDate() {
 			return null;
@@ -37,14 +31,4 @@ public abstract class DateStepper {
 	 * @return the last date, or null if the stepper has no time limit.
 	 */
 	public abstract Date getLastDate();
-
-	@Override
-	/** Tests whether this instance is equals to another instance.
-	 * This method only test if instance classes are equals. Subclasses may need to override this method in order to test the attributes equivalence.
-	 * @param obj The object with which to compare 
-	 * @returns true if this is from the same class than obj.
-	 */
-	public boolean equals(Object obj) {
-		return (obj!=null) && this.getClass().equals(obj.getClass());
-	}
 }

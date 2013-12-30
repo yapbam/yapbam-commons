@@ -8,8 +8,7 @@ import java.util.concurrent.Callable;
 import net.yapbam.util.StreamUtils;
 
 abstract class FilterTask implements Callable<Void> {
-	static final int BUFFER_SIZE = 1024;
-	private static boolean TRACE = false;
+	static final int BUFFER_SIZE = 10240;
 
 	protected InputStream in;
 	protected OutputStream po;
@@ -27,19 +26,12 @@ abstract class FilterTask implements Callable<Void> {
 
 	@Override
 	public Void call() throws IOException {
-		if (TRACE) {
-			System.out.println ("Start "+getClass().getName());
-		}
-		byte[] buffer = new byte[BUFFER_SIZE];
 		try {
-			StreamUtils.copy(in, po, buffer);
+			StreamUtils.copy(in, po, new byte[BUFFER_SIZE]);
 			return null;
 		} finally {
 			in.close();
 			po.close();
-			if (TRACE) {
-				System.out.println ("Stop "+getClass().getName());
-			}
 		}
 	}
 }

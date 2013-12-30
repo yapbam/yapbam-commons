@@ -16,8 +16,6 @@ import net.yapbam.util.StreamUtils;
  * <br>This task decrypts an input stream and output it to an output stream.
  */
 public class DecrypterTask implements Callable<Void> {
-	private static boolean TRACE = false;
-
 	private InputStream in;
 	private OutputStream out;
 	private boolean compatibilityMode;
@@ -54,22 +52,15 @@ public class DecrypterTask implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
-		if (TRACE) {
-			System.out.println ("Start "+getClass().getName());
-		}
 		try {
 			verifyPassword(in, password);
 			Cipher cipher = EncrypterTask.getCipher(Cipher.DECRYPT_MODE, password, compatibilityMode);
 			this.out = new CipherOutputStream(out, cipher);
-			byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
-			StreamUtils.copy(in, out, buffer);
+			StreamUtils.copy(in, out, new byte[FilterTask.BUFFER_SIZE]);
 			return null;
 		} finally {
 			in.close();
 			out.close();
-			if (TRACE) {
-				System.out.println ("Stop "+getClass().getName());
-			}
 		}
 	}
 }

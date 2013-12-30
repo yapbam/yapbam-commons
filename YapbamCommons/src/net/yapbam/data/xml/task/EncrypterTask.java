@@ -23,7 +23,6 @@ import net.yapbam.util.StreamUtils;
  * <br>This task encodes an input stream and output it to an output stream.
  */
 public class EncrypterTask implements Callable<Void> {
-	private static boolean TRACE = false;
 	public static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 
 	private static final byte[] SALT = new byte[]{ (byte)0xc7, (byte)0x23, (byte)0xa5, (byte)0xfc, (byte)0x7e, (byte)0x38, (byte)0xee, (byte)0x09};
@@ -96,25 +95,18 @@ public class EncrypterTask implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
-		if (TRACE) {
-			System.out.println ("Start "+getClass().getName());
-		}
-		byte[] buffer = new byte[FilterTask.BUFFER_SIZE];
 		// output password digest
 		out.write(getDigest(password));
 		Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, password, compatibilityMode);
 		CipherOutputStream po = new CipherOutputStream(out, cipher);
 		try {
-			StreamUtils.copy(in, po, buffer);
+			StreamUtils.copy(in, po, new byte[FilterTask.BUFFER_SIZE]);
 			return null;
 		} finally {
 			in.close();
 			po.close();
 			out.flush();
 			out.close();
-			if (TRACE) {
-				System.out.println ("Stop "+getClass().getName());
-			}
 		}
 	}
 }

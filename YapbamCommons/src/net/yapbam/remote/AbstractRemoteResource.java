@@ -13,18 +13,15 @@ import java.text.*;
 import java.util.*;
 
 /**
- * Currency converter based on an Internet foreign exchange rates source.
- * <br>
- * <br>The <b>convert()</b> methods perform currency conversions using either double values or 64-bit long integer values.
- * <br>Long values should be preferred in order to avoid problems associated with floating point arithmetics.
+ * An abstract resource synchronized with an Internet data source.
  * <br><br>A local cache file is used for storing exchange rates to reduce network latency and allow offline mode.
- * <br>
- * <br>This converter is compatible with Java Desktop and Android.
- *  
- * @version 1.0 2013-12-16
- * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</br>)
+ * <br>Instance observers are notified of every data change. 
+ * <br>This class is compatible with Java Desktop and Android.
+ * @param <T> the data type managed by this class.
+ * @version 1.01 2013-12-30
+ * @author Jean-Marc Astesana (based on an original Currency converter code from <b>Thomas Knierim</b>)
  */
-public abstract class AbstractRemoteResource <T extends RemoteData> {
+public abstract class AbstractRemoteResource <T extends RemoteData> extends Observable {
 	private Logger logger;
 	private Proxy proxy;
 	private Cache cache;
@@ -127,11 +124,15 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 		refreshCacheFile();
 		getLogger().debug("refresh cache: {}ms",Long.toString(System.currentTimeMillis()-start));
 		start = System.currentTimeMillis();
-		this.data = parse(cache, true);
+		T parsedData = parse(cache, true);
 		getLogger().debug("parse: {}ms",Long.toString(System.currentTimeMillis()-start));
 		start = System.currentTimeMillis();
 		cache.commit();
 		getLogger().debug("commit: {}ms",Long.toString(System.currentTimeMillis()-start));
+		// If everything goes right, update the data and inform observers 
+		this.data = parsedData;
+		setChanged();
+		notifyObservers();
 	}
 
 	/**
