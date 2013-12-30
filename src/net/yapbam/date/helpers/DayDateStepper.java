@@ -58,11 +58,10 @@ public class DayDateStepper extends DateStepper {
 
 	@Override
 	public boolean equals(Object obj) {
-		boolean result = super.equals(obj);
-		if (result) {
-			result = (getStep()==((DayDateStepper)obj).getStep()) && (lastDate==((DayDateStepper)obj).lastDate);
+		if ((obj==null) || !(obj instanceof DayDateStepper)) {
+			return false;
 		}
-		return result;
+		return (getStep()==((DayDateStepper)obj).getStep()) && (lastDate==((DayDateStepper)obj).lastDate);
 	}
 
 	@Override

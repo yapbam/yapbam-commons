@@ -81,13 +81,12 @@ public class MonthDateStepper extends  DateStepper {
 	
 	@Override
 	public boolean equals(Object obj) {
-		boolean result = super.equals(obj);
-		if (result) {
-			result = (period==((MonthDateStepper)obj).period) &&
+		if ((obj==null) || !(obj instanceof MonthDateStepper)) {
+			return false;
+		}
+		return (period==((MonthDateStepper)obj).period) &&
 				(day==((MonthDateStepper)obj).day) &&
 				(lastDate==((MonthDateStepper)obj).lastDate);
-		}
-		return result;
 	}
 
 	@Override
