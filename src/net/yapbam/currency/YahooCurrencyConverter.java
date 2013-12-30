@@ -1,6 +1,10 @@
 package net.yapbam.currency;
 
 import java.net.*;
+import java.util.Calendar;
+import java.util.TimeZone;
+
+import javax.swing.text.html.MinimalHTMLWriter;
 
 import net.yapbam.remote.Cache;
 
@@ -118,13 +122,42 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 			return true;
 		}
 		long now = System.currentTimeMillis();
+		long dataTimeStamp = getTimeStamp();
+		if (now - dataTimeStamp < 360000) {
+			// If data is less than one hour old, data is ok
+			return false;
+		}
 		// If we connect to server since less than one minute ... do nothing
 		// This could happen if server doesn't refresh its rates since the last time we
 		// updated the cache file (and more than the "standard" cache expiration time defined below)
 		if (now - getLastRefreshTimeStamp() < 60000) {
 			return false;
 		}
-		// Data is expired if older than 1 hour
-		return now-getTimeStamp()>3600000;
+		if (isWeekEnd(now)) {
+			// Rates are not published during week-end
+			// data is expired if it's last successful request is older than the beginning of the week-end
+			// this is tested by not in week-end or 3 days old or more
+			return (now-dataTimeStamp>(1000*60*60*24*3)) || !isWeekEnd(getRefreshTimeStamp()); 
+		} else {
+			return true;
+		}
+	}
+	
+	/** Tests whether a time is inside Yahoo's "week-end" (since Saturday 12:30 to Sunday 19:00 (GMT)).
+	 * @param time time in ms since 1970
+	 * @return true if it is week-end
+	 */
+	private boolean isWeekEnd(long time) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
+		cal.setTimeInMillis(time);
+		int day = cal.get(Calendar.DAY_OF_WEEK);
+		int hour = cal.get(Calendar.HOUR_OF_DAY);
+		if (day==Calendar.SATURDAY) {
+			return (hour>=12) && (cal.get(Calendar.MINUTE)>=30);
+		} else if (day==Calendar.SUNDAY) {
+			return hour < 19;
+		} else {
+			return false;
+		}
 	}
 }

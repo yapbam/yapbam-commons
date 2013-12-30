@@ -178,6 +178,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 	 * <br>This is used by {@link #isDataExpired()} to determine if server should be asked for new data.
 	 * @return a positive long.
 	 * @see #isDataExpired()
+	 * @see #getRefreshTimeStamp()
 	 */
 	protected final long getLastRefreshTimeStamp() {
 		return lastTryCacheRefresh;
