@@ -187,23 +187,22 @@ public abstract class AbstractRemoteResource <T extends RemoteData> {
 	protected abstract URL getSourceURL(); 
 
 	/**
-	 * (Re-) download the XML cache file and store it in a temporary location.
-	 * 
-	 * @throws IOException
-	 *           If (1) URL cannot be opened, or (2) if cache file cannot be
-	 *           opened, or (3) if a read/write error occurs.
+	 * (Re-)Downloads the data to the temporary cache.
+	 * @throws IOException If URL cannot be opened, or if a read/write error occurs.
 	 */
 	private void refreshCacheFile() throws IOException {
 		lastTryCacheRefresh = System.currentTimeMillis();
 		getLogger().trace("Connecting to {}", getSourceURL());
 		InputStream in = getSourceStream();
 		try {
-			OutputStream out = cache.getOutputStream();
-			try {
-				StreamUtils.copy(in, out, new byte[10024]);
-			} finally {
-				out.flush();
-				out.close();
+			synchronized (cache) {
+				OutputStream out = cache.getOutputStream();
+				try {
+					StreamUtils.copy(in, out, new byte[10240]);
+				} finally {
+					out.flush();
+					out.close();
+				}
 			}
 		} finally {
 			in.close();
