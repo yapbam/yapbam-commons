@@ -100,13 +100,13 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 	 * <br>After this method is called, {@link #isSynchronized()} always return true (even if server has not been called).
 	 * @return true if the web server was called.
 	 * @throws ParseException If an error occurs while parsing the XML cache file.
-	 * @see #forceUpdate()
+	 * @see #forcedUpdate()
 	 * @see #isDataExpired()
 	 */
 	public boolean update() throws IOException, ParseException {
 		boolean connect = isDataExpired();
 		if (connect) {
-			forceUpdate();
+			forcedUpdate();
 		}
 		this.isSynchronized = true;
 		return connect;
@@ -119,7 +119,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 	 * @throws ParseException If an error occurs while parsing the XML cache file.
 	 * @see #update()
 	 */
-	public void forceUpdate() throws IOException, ParseException {
+	public void forcedUpdate() throws IOException, ParseException {
 		long start = System.currentTimeMillis();
 		refreshCacheFile();
 		getLogger().debug("refresh cache: {}ms",Long.toString(System.currentTimeMillis()-start));
@@ -138,7 +138,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 	/**
 	 * Checks whether data needs to be updated.
 	 * <br>This method is called by {@link #update()} before calling the server. If this method returns false,
-	 * the server is not called. Please note that {@link #forceUpdate()} does not use this method and always calls the server.
+	 * the server is not called. Please note that {@link #forcedUpdate()} does not use this method and always calls the server.
 	 * <br>The default implementation suppose that data is published once a day except during week-end.
 	 * <br>You can override this method in order to change this behavior.
 	 * <br>Remember that:<ul>
