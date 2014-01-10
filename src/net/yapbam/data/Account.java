@@ -225,6 +225,11 @@ public class Account implements Serializable {
 		}
 	}
 
+	/** Gets the first alert on this account between to dates.
+	 * @param from first date or null if the time interval starts at the beginning of times.
+	 * @param to first date or null if the time interval ends at the end of times.
+	 * @return An alert or null if there is no alert on this account in that time frame.
+	 */
 	public Alert getFirstAlert(Date from, Date to) {
 		BalanceHistory balanceHistory = getBalanceData().getBalanceHistory();
 		long firstAlertDate = balanceHistory.getFirstAlertDate(from, to, getAlertThreshold());
