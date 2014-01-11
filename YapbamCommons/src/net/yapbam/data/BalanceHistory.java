@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.yapbam.util.DateUtils;
 import net.yapbam.util.NullUtils;
 
 /** A balance history.
@@ -209,7 +210,7 @@ public class BalanceHistory implements Serializable {
 	}
 
 	/** Removes a transaction from the history.
-	 * @param transaction the transactio to be removed
+	 * @param transaction the transaction to be removed
 	 */
 	void remove(Transaction transaction) {
 		this.add(-transaction.getAmount(), transaction.getValueDate());
@@ -236,5 +237,42 @@ public class BalanceHistory implements Serializable {
 
 	public int find(Transaction transaction) {
 		return transactions.indexOf(transaction);
+	}
+	
+	/** Gets the index of the first transaction with the the argument value date.
+	 * @param valueDate The transaction's date in its integer representation.
+	 * @return the transaction's index or a negative number if no transaction has this value date.
+	 * @see DateUtils#dateToInteger(Date)
+	 */
+	public int getFirstIndexOf(int valueDate) {
+		if (transactions.isEmpty()) {
+			return -1;
+		}
+		int first = 0;
+		int last = transactions.size()-1;
+		while (first!=last) {
+			if (valueDate<transactions.get(first).getValueDateAsInteger() || valueDate>transactions.get(last).getValueDateAsInteger()) {
+				return -1;
+			}
+			if (last-first==1) {
+				if (valueDate==transactions.get(first).getValueDateAsInteger()) {
+					return first;
+				} else if (valueDate==transactions.get(last).getValueDateAsInteger()) {
+					return last;
+				} else {
+					return -1;
+				}
+			}
+			int middle = (first+last)/2;
+			if (valueDate<=transactions.get(middle).getValueDateAsInteger()) {
+				last = middle;
+			} else {
+				first = middle;
+			}
+		}
+		return first;
+//		Transaction fake = new Transaction(Integer.MIN_VALUE, null, "", null, 0.0, transactions.get(0).getAccount(), Mode.UNDEFINED, Category.UNDEFINED, valueDate, null, null);
+//		int index = Collections.binarySearch(transactions, fake, TransactionComparator.VALUE_DATE_COMPARATOR);
+//		return -1;
 	}
 }
