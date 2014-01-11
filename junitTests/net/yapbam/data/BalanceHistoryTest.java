@@ -6,6 +6,7 @@ import java.util.Date;
 
 import net.yapbam.data.BalanceHistory;
 import net.yapbam.data.BalanceHistoryElement;
+import net.yapbam.util.DateUtils;
 
 import org.junit.Test;
 
@@ -72,5 +73,24 @@ public class BalanceHistoryTest {
 		// Test if a date before unix start of times is before BalanceHistoryElement start of times or not
 		element = new BalanceHistoryElement(0, null, new Date(111,0,1));
 		assertEquals(0,element.getRelativePosition(dBeforeUnix));
+	}
+	
+	@Test
+	public void testGetFirstIndexOf () {
+		BalanceHistory bh = new BalanceHistory(0);
+		Account account = new Account("test",0);
+		int today = DateUtils.dateToInteger(new Date());
+		assertTrue(bh.getFirstIndexOf(today)<0);
+		bh.add(new Transaction(today-2, null, "1", null, 50, account, Mode.UNDEFINED, Category.UNDEFINED, today-2, null, null));
+		bh.add(new Transaction(today, null, "2", null, -10, account, Mode.UNDEFINED, Category.UNDEFINED, today, null, null));
+		bh.add(new Transaction(today-1, null, "3", null, -10, account, Mode.UNDEFINED, Category.UNDEFINED, today, null, null));
+		bh.add(new Transaction(today+4, null, "1", null, -20, account, Mode.UNDEFINED, Category.UNDEFINED, today+6, null, null));
+		assertTrue(bh.getFirstIndexOf(today-4)<0);
+		assertEquals(0, bh.getFirstIndexOf(today-2));
+		assertTrue(bh.getFirstIndexOf(today-1)<0);
+		assertEquals(1, bh.getFirstIndexOf(today));
+		assertTrue(bh.getFirstIndexOf(today+4)<0);
+		assertEquals(3, bh.getFirstIndexOf(today+6));
+		assertTrue(bh.getFirstIndexOf(today+8)<0);
 	}
 }
