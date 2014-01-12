@@ -275,8 +275,22 @@ public class BalanceHistory implements Serializable {
 	
 	public List<Transaction> getTransactions(int index) {
 		List<Transaction> result = new ArrayList<Transaction>();
-		//FIXME Not yet implemented
-		if (!transactions.isEmpty()) result.add(getTransaction(0));
+		if (transactions.isEmpty()) {
+			return result;
+		}
+		BalanceHistoryElement element = get(index);
+		Date from = element.getFrom();
+		int first = from==null ? 0 : getFirstIndexOf(DateUtils.dateToInteger(from));
+		Date to = element.getTo();
+		int lastDate = to==null ? Integer.MAX_VALUE : DateUtils.dateToInteger(to);
+		for (int i=first;i<transactions.size()-1;i++) {
+			Transaction t = getTransaction(i);
+			if (t.getValueDateAsInteger()<lastDate) {
+				result.add(t);
+			} else {
+				break;
+			}
+		}
 		return result;
 	}
 }
