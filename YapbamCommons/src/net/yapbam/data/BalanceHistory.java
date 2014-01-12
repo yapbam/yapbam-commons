@@ -271,8 +271,12 @@ public class BalanceHistory implements Serializable {
 			}
 		}
 		return first;
-//		Transaction fake = new Transaction(Integer.MIN_VALUE, null, "", null, 0.0, transactions.get(0).getAccount(), Mode.UNDEFINED, Category.UNDEFINED, valueDate, null, null);
-//		int index = Collections.binarySearch(transactions, fake, TransactionComparator.VALUE_DATE_COMPARATOR);
-//		return -1;
+	}
+	
+	public List<Transaction> getTransactions(int index) {
+		List<Transaction> result = new ArrayList<Transaction>();
+		//FIXME Not yet implemented
+		if (!transactions.isEmpty()) result.add(getTransaction(0));
+		return result;
 	}
 }
