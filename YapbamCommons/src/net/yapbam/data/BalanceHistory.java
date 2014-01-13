@@ -244,7 +244,7 @@ public class BalanceHistory implements Serializable {
 	 * @return the transaction's index or a negative number if no transaction has this value date.
 	 * @see DateUtils#dateToInteger(Date)
 	 */
-	public int getFirstIndexOf(int valueDate) {
+	private int getFirstIndexOf(int valueDate) {
 		if (transactions.isEmpty()) {
 			return -1;
 		}
@@ -273,17 +273,19 @@ public class BalanceHistory implements Serializable {
 		return first;
 	}
 	
+	/** Gets the transactions of a balance history element by its index.
+	 * @param index The element's index as in method {@link #get(int)}
+	 * @return a transactions list
+	 * @throws IndexOutOfBoundsException if the index has no balance history element.
+	 */
 	public List<Transaction> getTransactions(int index) {
-		List<Transaction> result = new ArrayList<Transaction>();
-		if (transactions.isEmpty()) {
-			return result;
-		}
 		BalanceHistoryElement element = get(index);
+		List<Transaction> result = new ArrayList<Transaction>();
 		Date from = element.getFrom();
 		int first = from==null ? 0 : getFirstIndexOf(DateUtils.dateToInteger(from));
 		Date to = element.getTo();
 		int lastDate = to==null ? Integer.MAX_VALUE : DateUtils.dateToInteger(to);
-		for (int i=first;i<transactions.size()-1;i++) {
+		for (int i=first;i<transactions.size();i++) {
 			Transaction t = getTransaction(i);
 			if (t.getValueDateAsInteger()<lastDate) {
 				result.add(t);
