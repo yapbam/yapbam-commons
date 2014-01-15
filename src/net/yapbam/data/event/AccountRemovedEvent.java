@@ -13,8 +13,8 @@ public class AccountRemovedEvent extends DataEvent {
 	}
 
 	/**
-	 * Get index were the removed element was in the source. 
-	 * @return index were the removed element was (be careful, the element isn't in the source anymore).
+	 * Get index where the removed element was in the source. 
+	 * @return index where the removed element was (be careful, the element isn't in the source anymore).
 	 */
 	public int getIndex() {
 		return index;
