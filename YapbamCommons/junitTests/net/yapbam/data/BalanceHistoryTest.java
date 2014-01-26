@@ -7,6 +7,7 @@ import java.util.List;
 
 import net.yapbam.data.BalanceHistory;
 import net.yapbam.data.BalanceHistoryElement;
+import net.yapbam.date.helpers.DayDateStepper;
 import net.yapbam.util.DateUtils;
 
 import org.junit.Test;
@@ -76,52 +77,58 @@ public class BalanceHistoryTest {
 		assertEquals(0,element.getRelativePosition(dBeforeUnix));
 	}
 	
+	private int getDate(Date ref, int step) {
+		return DateUtils.dateToInteger(new DayDateStepper(step, null).getNextStep(ref));
+	}
+
 	@Test
 	public void testGetTransactions () {
 		BalanceHistory bh = new BalanceHistory(0);
-		Account account = new Account("test",0);
-		int today = DateUtils.dateToInteger(new Date());
+		// An empty balance history has one element
 		assertEquals(1, bh.size());
-//		assertTrue(bh.getFirstIndexOf(today)<0);
-		bh.add(new Transaction(today-2, null, "1", null, 50, account, Mode.UNDEFINED, Category.UNDEFINED, today-2, null, null));
+		
+		Account account = new Account("test",0);
+		Date now = new Date();
+		int today = DateUtils.dateToInteger(now);
+		int yesterday = getDate(now, -1);
+		int twoDaysBefore = getDate(now, -2);
+		int fourDaysAfter = getDate(now, 4);
+		int sixDaysAfter = getDate(now, 6);
+		bh.add(new Transaction(twoDaysBefore, null, "1", null, 50, account, Mode.UNDEFINED, Category.UNDEFINED, twoDaysBefore, null, null));
 		bh.add(new Transaction(today, null, "2", null, -10, account, Mode.UNDEFINED, Category.UNDEFINED, today, null, null));
-		bh.add(new Transaction(today-1, null, "3", null, -10, account, Mode.UNDEFINED, Category.UNDEFINED, today, null, null));
-		bh.add(new Transaction(today+4, null, "1", null, -20, account, Mode.UNDEFINED, Category.UNDEFINED, today+6, null, null));
-//		assertTrue(bh.getFirstIndexOf(today-4)<0);
-//		assertEquals(0, bh.getFirstIndexOf(today-2));
-//		assertTrue(bh.getFirstIndexOf(today-1)<0);
-//		assertEquals(1, bh.getFirstIndexOf(today));
-//		assertTrue(bh.getFirstIndexOf(today+4)<0);
-//		assertEquals(3, bh.getFirstIndexOf(today+6));
-//		assertTrue(bh.getFirstIndexOf(today+8)<0);
+		bh.add(new Transaction(yesterday, null, "3", null, -10, account, Mode.UNDEFINED, Category.UNDEFINED, today, null, null));
+		bh.add(new Transaction(fourDaysAfter, null, "4", null, -20, account, Mode.UNDEFINED, Category.UNDEFINED, sixDaysAfter, null, null));
+		
+//		display(bh);
 		assertEquals(4, bh.size());
 		
 		int total = 0;
-		List<Transaction> transactions = getTransactions(bh, 0);
+		List<Transaction> transactions = bh.getTransactions(0);
 		total += transactions.size();
 		assertEquals(0, transactions.size());
 		
-		transactions = getTransactions(bh, 1);
+		transactions = bh.getTransactions(1);
 		total += transactions.size();
 		assertEquals(1, transactions.size());
 		
-		transactions = getTransactions(bh, 2);
+		transactions = bh.getTransactions(2);
 		total += transactions.size();
 		assertEquals(2, transactions.size());
 		
-		transactions = getTransactions(bh, 3);
+		transactions = bh.getTransactions(3);
 		total += transactions.size();
 		assertEquals(1, transactions.size());
 		
 		assertEquals(bh.getTransactionsNumber(), total);
 	}
-
-	private List<Transaction> getTransactions(BalanceHistory bh, int index) {
-		List<Transaction> transactions = bh.getTransactions(index);
-//		System.out.println (bh.get(index));
-//		for (Transaction transaction : transactions) {
-//			System.out.println ("  "+transaction);
-//		}
-		return transactions;
+	
+	private void display(BalanceHistory bh) {
+		for (int i=0; i<bh.size() ; i++) {
+			System.out.println (bh.get(i));
+			List<Transaction> transactions = bh.getTransactions(i);
+			for (Transaction transaction : transactions) {
+				System.out.println ("  "+transaction);
+			}
+		}
 	}
 }

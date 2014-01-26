@@ -63,7 +63,7 @@ public class Serializer extends AbstractSerializer<GlobalData> {
 	 * @param in The input stream containing the data (if the stream is a stream on a zipped file, for instance created by write(GlobalData, ZipOutputStream, String, ProgressReport)
 	 * the data is automatically unzipped from the first entry).
 	 * @param report A progress report to observe the progress, or null
-	 * @return The data red.
+	 * @return The read data or null if reading was cancelled (using report.cancel()).
 	 * @throws IOException If something goes wrong while reading
 	 * @throws AccessControlException If the password is wrong. Note that if data is not password protected, password argument is ignored
 	 * @throws UnsupportedFormatException If the format of data in the input stream is not supported
@@ -87,7 +87,9 @@ public class Serializer extends AbstractSerializer<GlobalData> {
 	
 	public GlobalData directRead(String password, InputStream in, ProgressReport report) throws IOException {
 		GlobalData result = XMLSerializer.read(in, report);
-		result.setPassword(password);
+		if (result!=null) {
+			result.setPassword(password);
+		}
 		return result;
 	}
 	

@@ -50,7 +50,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 			this.isSynchronized = !isDataExpired();
 		} catch (Exception e) {
 			// Cache parsing failed, maybe cache file is not present or is corrupted. 
-			// We will call update without try/catch clause to throw exceptions if data can't be red.
+			// We will call update without try/catch clause to throw exceptions if data can't be read.
 			getLogger().warn("Parse failed", e);
 		}
 		this.lastTryCacheRefresh = this.cache.getTimeStamp();
