@@ -147,7 +147,7 @@ public abstract class AbstractSerializer<T> {
 	 * @param in The input stream containing the data (if the stream is a stream on a zipped file, for instance created by write(GlobalData, ZipOutputStream, String, ProgressReport)
 	 * the data is automatically unzipped from the first entry).
 	 * @param report A progress report to observe the progress, or null
-	 * @return The data red.
+	 * @return The read data.
 	 * @throws IOException If something goes wrong while reading
 	 * @throws AccessControlException If the password is wrong. Note that if data is not password protected, password argument is ignored
 	 * @throws UnsupportedFormatException If the format of data in the input stream is not supported
@@ -213,6 +213,13 @@ public abstract class AbstractSerializer<T> {
 		}
 	}
 	
+	/** Reads the data contained in a stream.
+	 * @param password The stream password
+	 * @param in The input stream where to read data
+	 * @param report A progress report.
+	 * @return The read data, or null if the operation is cancelled (by calling report.cancel() on another thread).
+	 * @throws IOException if something goes wrong
+	 */
 	public abstract T directRead(String password, InputStream in, ProgressReport report) throws IOException;
 	
 	/** Tests whether a password is the right one for an input stream.
@@ -259,7 +266,7 @@ public abstract class AbstractSerializer<T> {
 //	}
 	
 	/** Gets the data about a stream (what is its version, is it encoded or not, etc...).
-	 * <br><b>WARNING:</b> This method leaves the stream with a non determinate number of red bytes if it
+	 * <br><b>WARNING:</b> This method leaves the stream with a non determinate number of read bytes if it
 	 * does not support mark/reset methods. If it supports these methods (like BufferedInputStream), the stream remains
 	 * unchanged.
 	 * @param in the stream.

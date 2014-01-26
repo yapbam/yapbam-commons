@@ -1,6 +1,7 @@
 package net.yapbam.data;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -88,10 +89,9 @@ public class Transaction extends AbstractTransaction implements Serializable {
 		return statementId;
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "["+this.getAccount()+"|"+this.date+"|"+this.getDescription()+"|"+this.getAmount()+"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		return MessageFormat.format("({0} \"{1}\" {2,date,short}->{3,date,short}: {4,number,currency})", getAccount(), getDescription(), getDate(), getValueDate(), getAmount()); //$NON-NLS-1$
 	}
 
 	public boolean isChecked() {

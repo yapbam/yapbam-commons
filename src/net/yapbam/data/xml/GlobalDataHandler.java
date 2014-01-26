@@ -26,7 +26,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 class GlobalDataHandler extends DefaultHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GlobalDataHandler.class);
-	private static final String PARSING_WAS_CANCELLED = "Parsing was cancelled"; //$NON-NLS-1$
 	private static final boolean SLOW_READING = Boolean.getBoolean("slowDataReading"); //$NON-NLS-1$
 	
 	private GlobalData data;
@@ -77,7 +76,7 @@ class GlobalDataHandler extends DefaultHandler {
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if ((report!=null) && report.isCancelled()) {
-			throw new SAXException(PARSING_WAS_CANCELLED);
+			throw new ParsingCancelledException();
 		}
 		if (!this.schemaValidation) {
 			// A very basic alternative to schema validation. We just verify root tag is GLOBAL_DATA_TAG and is not duplicated
@@ -257,7 +256,7 @@ class GlobalDataHandler extends DefaultHandler {
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		if ((report!=null) && report.isCancelled()) {
-			throw new SAXException(PARSING_WAS_CANCELLED);
+			throw new ParsingCancelledException();
 		}
 		if (qName.equals(XMLSerializer.GLOBAL_DATA_TAG)) {
 			// NOTE: The following line took a very long time before being greatly optimized.

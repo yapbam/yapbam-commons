@@ -7,7 +7,7 @@ import java.io.OutputStream;
 /** A Cache.
  * <br>This converter use cache in order to preserve web server resources, and to be able to work with no Internet connection.
  * <br>To improve the cache robustness, the cache may have two levels:<ol>
- * <li>A temporary cache that is used to store the data red from Internet.</li>
+ * <li>A temporary cache that is used to store the data read from Internet.</li>
  * <li>A persistent cache that saved the temporary one after it was validated by a successful parsing (see {@link #commit()}).</li></ol>
  * @author Jean-Marc Astesana
  */

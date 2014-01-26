@@ -29,7 +29,7 @@ import net.yapbam.data.Transaction;
 import org.junit.Test;
 
 public class SerializerTest {
-	/** A fake output stream, that ouputs nothing but keep tracks of its closing. */
+	/** A fake output stream, that outputs nothing but keeps track of its closing. */
 	private static final class FakeOutputStream extends OutputStream {
 		private boolean closed = false;
 

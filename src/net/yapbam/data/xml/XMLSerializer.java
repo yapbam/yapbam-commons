@@ -163,7 +163,7 @@ public class XMLSerializer {
 	/** Reads global data.
 	 * @param in The input stream containing the data
 	 * @param report A progress report to observe the progress, or null
-	 * @return The data red.
+	 * @return The read data, null if reading was cancelled.
 	 * @throws IOException If something goes wrong while reading
 	 * @throws UnsupportedFormatException If the format of data in the input stream is not supported
 	 */
@@ -184,6 +184,8 @@ public class XMLSerializer {
 				} else {
 					throw new UnsupportedFormatException(e);
 				}
+			} catch (ParsingCancelledException e) {
+				return null;
 			}
 		} catch (SaxUnsupportedFileVersionException e) {
 			throw new UnsupportedFileVersionException(Integer.toString(e.getVersion()));
