@@ -9,8 +9,6 @@ import java.util.GregorianCalendar;
  * <BR>License : GPL v3
  */
 public final class DateUtils {
-	private static final long MILLIS_PER_DAY = 24 * 3600 * 1000;
-	
 	// Be sure nobody will instantiate this class
 	private DateUtils(){
 		// Nothing to do
@@ -25,20 +23,6 @@ public final class DateUtils {
 	 */
 	public static int getMonthlyDistance (Calendar first, Calendar last) {
 		return last.get(Calendar.YEAR)*12+last.get(Calendar.MONTH) - (first.get(Calendar.YEAR)*12+first.get(Calendar.MONTH));
-	}
-	
-	/** Computes the number of days between two dates.
-	 * @param first The first date
-	 * @param last The last date
-	 * @return the number of days between the dates. The time fields are ignored
-	 * (2010/01/01 00:00:00 is one day after 2009/12/31 23:59:59). If last is before first, the integer returned
-	 * is negative.
-	 */
-	public static int getDailyDistance (Calendar first, Calendar last) {
-		first = new GregorianCalendar(first.get(Calendar.YEAR), first.get(Calendar.MONTH), first.get(Calendar.DAY_OF_MONTH));
-		last = new GregorianCalendar(last.get(Calendar.YEAR), last.get(Calendar.MONTH), last.get(Calendar.DAY_OF_MONTH));
-		long msDiff= last.getTime().getTime() - first.getTime().getTime();
-		return (int) Math.round(msDiff / ((double)MILLIS_PER_DAY));
 	}
 
 	/** Converts an integer into a date
