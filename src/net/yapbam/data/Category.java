@@ -79,5 +79,4 @@ public class Category implements Serializable, Comparable<Category> {
 			return this;
 		}
 	}
-
 }
