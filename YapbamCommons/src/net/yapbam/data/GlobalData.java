@@ -144,7 +144,7 @@ public class GlobalData extends DefaultListenable {
 	 * @return true if the data is empty
 	 */
 	public boolean isEmpty() {
-		return this.accounts.size()==0;
+		return this.accounts.isEmpty();
 	}
 	
 	/** Tests if the data needs to be saved.
