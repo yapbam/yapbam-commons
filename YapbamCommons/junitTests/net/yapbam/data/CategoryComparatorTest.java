@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import net.yapbam.data.comparator.CategoryComparator;
+
 import org.junit.Test;
 
 public class CategoryComparatorTest {
