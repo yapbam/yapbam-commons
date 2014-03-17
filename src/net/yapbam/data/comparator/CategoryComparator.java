@@ -1,8 +1,12 @@
-package net.yapbam.data;
+package net.yapbam.data.comparator;
 
 import java.text.Collator;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
+
+import net.yapbam.data.Category;
+import net.yapbam.data.GlobalData;
 
 public class CategoryComparator implements Comparator<Category> {
 	private Collator nameComparator;
@@ -52,5 +56,14 @@ public class CategoryComparator implements Comparator<Category> {
 			}
 		}
 		return 0;
+	}
+	
+	public static Category[] getSortedCategories(GlobalData data, Locale locale) {
+		Category[] categories = new Category[data.getCategoriesNumber()];
+		for (int i = 0; i < data.getCategoriesNumber(); i++) {
+			categories[i] = data.getCategory(i);
+		}
+		Arrays.sort(categories, new CategoryComparator(locale, data.getSubCategorySeparator()));
+		return categories;
 	}
 }
