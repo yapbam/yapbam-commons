@@ -55,6 +55,14 @@ public class Mode implements Serializable {
 	public boolean isUseCheckBook() {
 		return useCheckBook;
 	}
+	
+	public boolean isUsableForReceipt() {
+		return this.receiptVDC!=null;
+	}
+
+	public boolean isUsableForExpense() {
+		return this.expenseVDC!=null;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
