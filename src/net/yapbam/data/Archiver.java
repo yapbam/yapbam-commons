@@ -18,6 +18,7 @@ import net.yapbam.util.NullUtils;
  */
 public final class Archiver {
 	private Archiver() {
+		super();
 	}
 
 	/** Moves some transactions to an archive.
