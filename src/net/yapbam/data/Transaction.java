@@ -56,7 +56,7 @@ public class Transaction extends AbstractTransaction implements Serializable {
 	 * @param mode The transaction's payment mode 
 	 * @param category The transaction's category
 	 * @param valueDate The transaction's value date
-	 * @param statementId The transaction's the statement id (null if the transaction doesn't blong to a statement)
+	 * @param statementId The transaction's the statement id (null if the transaction doesn't belong to a statement)
 	 * @param subTransactions the subtransactions of the transaction (an empty List or null if the transaction has no subtransaction)
 	 */
 	public Transaction(Date date, String number, String description, String comment, double amount,
@@ -85,6 +85,9 @@ public class Transaction extends AbstractTransaction implements Serializable {
 		return this.valueDate;
 	}
 
+	/** Gets this transaction's statement.
+	 * @return This transaction's statement or null if the transaction doesn't belong to any statement. 
+	 */
 	public String getStatement() {
 		return statementId;
 	}
@@ -94,6 +97,9 @@ public class Transaction extends AbstractTransaction implements Serializable {
 		return MessageFormat.format("({0} \"{1}\" {2,date,short}->{3,date,short}: {4,number,currency})", getAccount(), getDescription(), getDate(), getValueDate(), getAmount()); //$NON-NLS-1$
 	}
 
+	/** Tests whether this transaction's is checked.
+	 * @return true if this transaction is checked, false if not (the transaction doesn't belong to any statement). 
+	 */
 	public boolean isChecked() {
 		return this.statementId!=null;
 	}

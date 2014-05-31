@@ -1,6 +1,7 @@
 package net.yapbam.data;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +15,7 @@ public class Account implements Serializable {
 	private List<Mode> modes;
 	private List<Checkbook> checkbooks;
 	private int transactionNumber;
+	private int unCheckedTransactionNumber;
 	private BalanceData balanceData;
 	private AlertThreshold alertThreshold;
 	private String comment;
@@ -119,11 +121,24 @@ public class Account implements Serializable {
 		return transactionNumber;
 	}
 
+	/** Gets the number of unchecked transactions in this account.
+	 * <br>An unchecked transaction is a transaction assigned to no Statement.
+	 * @return the number of unchecked transactions in this account.
+	 */
+	public int getUncheckedTransactionsNumber() {
+		return unCheckedTransactionNumber;
+	}
+
 	/** Adds transactions to the account.
 	 * @param transactions the transaction to add
 	 */
 	void add(Transaction[] transactions) {
 		transactionNumber += transactions.length;
+		for (Transaction transaction : transactions) {
+			if (!transaction.isChecked()) {
+				this.unCheckedTransactionNumber++;
+			}
+		}
 		this.balanceData.updateBalance(transactions, true);
 	}
 	
@@ -132,6 +147,11 @@ public class Account implements Serializable {
 	 */
 	void remove(Transaction[] transactions) {
 		transactionNumber = transactionNumber - transactions.length;
+		for (Transaction transaction : transactions) {
+			if (!transaction.isChecked()) {
+				this.unCheckedTransactionNumber--;
+			}
+		}
 		this.balanceData.updateBalance(transactions, false);
 	}
 
@@ -154,7 +174,7 @@ public class Account implements Serializable {
 
 	@Override
 	public String toString() {
-		return this.getName()+"["+this.initialBalance+"]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return MessageFormat.format("{0}[{1,number,currency}]",this.getName(),this.initialBalance); //$NON-NLS-1$
 	}
 	
 	/** Gets this account's total number of payment modes (expense and receipt modes).
