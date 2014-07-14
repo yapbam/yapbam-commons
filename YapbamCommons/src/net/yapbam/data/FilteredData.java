@@ -246,7 +246,8 @@ public class FilteredData extends DefaultListenable {
 	 */
 	public boolean isOk(Transaction transaction) {
 		if (!filter.isOk(transaction.getAccount()) || !filter.isOk(transaction.getMode()) ||
-				!filter.isStatementOk(transaction.getStatement()) || !filter.isNumberOk(transaction.getNumber())) {
+				!filter.isStatementOk(transaction.getStatement()) || !filter.isNumberOk(transaction.getNumber()) ||
+				!filter.isCommentOk(transaction.getComment())) {
 			return false;
 		}
 		if ((filter.getDateFrom()!=null) && (transaction.getDate().compareTo(filter.getDateFrom())<0)) {
@@ -262,7 +263,7 @@ public class FilteredData extends DefaultListenable {
 			return false;
 		}
 		if (filter.isOk(transaction.getCategory()) && filter.isAmountOk(transaction.getAmount()) &&
-				filter.isDescriptionOk(transaction.getDescription()) && filter.isCommentOk(transaction.getComment())) {
+				filter.isDescriptionOk(transaction.getDescription())) {
 			return true;
 		}
 		// The transaction may also be valid if one of its subtransactions is valid 
@@ -284,13 +285,14 @@ public class FilteredData extends DefaultListenable {
 	 * @see #isOk(Transaction)
 	 */
 	public boolean isOk(SubTransaction subtransaction) {
-		return filter.isOk(subtransaction.getCategory()) && filter.isAmountOk(subtransaction.getAmount()) && filter.isDescriptionOk(subtransaction.getDescription());
+		return filter.isOk(subtransaction.getCategory()) && filter.isAmountOk(subtransaction.getAmount()) &&
+				filter.isDescriptionOk(subtransaction.getDescription());
 	}
 	
 	/** Gets a transaction complement validity.
 	 * @param transaction the transaction to test
 	 * @return true if the transaction complement is valid according to this filter.
-	 * Be aware that the complement is considered as a subtransaction. So the behaviour is the same
+	 * Be aware that the complement is considered as a subtransaction. So the behavior is the same
 	 * than in isOk(Subtransaction) method. No specific fields of the transaction are tested, so the complement
 	 * may be valid even if the whole transaction is not (for instance if its payment mode is not ok).
 	 * So, usually, you'll have to also test the transaction.
