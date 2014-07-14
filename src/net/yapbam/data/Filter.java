@@ -446,6 +446,7 @@ public class Filter extends Observable {
 		this.setValidModes(null);
 		this.setAmountFilter(EXPENSES+RECEIPTS, 0.0, Double.POSITIVE_INFINITY);
 		this.setDescriptionMatcher(null);
+		this.setCommentMatcher(null);
 		this.setNumberMatcher(null);
 		this.setStatementFilter(CHECKED+NOT_CHECKED, null);
 		this.setValidAccounts(null);
@@ -459,6 +460,6 @@ public class Filter extends Observable {
 		return (filter!=ALL) || (getDateFrom()!=null) || (getDateTo() != null) || (getValueDateFrom()!=null) || (getValueDateTo() != null) ||
 			(getValidCategories() !=null) || (getValidModes() != null) || (getValidAccounts()!=null) ||
 			(getMinAmount()!=0.0) || (getMaxAmount()!=Double.POSITIVE_INFINITY) ||
-			(getDescriptionMatcher()!=null) || (getNumberMatcher()!=null) || (getStatementMatcher()!=null);
+			(getDescriptionMatcher()!=null) || (getCommentMatcher()!=null) || (getNumberMatcher()!=null) || (getStatementMatcher()!=null);
 	}
 }
