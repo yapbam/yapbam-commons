@@ -169,12 +169,12 @@ public class GlobalData extends DefaultListenable {
 	}
 
 	/** Sets the URI attached to the data.
-	 * @param uri The new URI.
+	 * @param uri The new URI (null to clear current URI).
 	 */
 	public void setURI(URI uri) {
 		URI old = this.uri;
 		this.uri = uri;
-		if (!this.uri.equals(old)) {
+		if (!NullUtils.areEquals(this.uri,old)) {
 			fireEvent(new URIChangedEvent(this));
 		}
 	}
