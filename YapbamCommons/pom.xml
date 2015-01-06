@@ -8,7 +8,7 @@
 	</parent>
 
 	<artifactId>yapbam-commons</artifactId>
-	<version>1.4.2</version>
+	<version>1.4.3</version>
 
 	<scm>
 		<url>http://svn.code.sf.net/p/yapbam/code/</url>
