@@ -1,6 +1,6 @@
 package net.yapbam.data.event;
 
-import net.yapbam.data.Account;;
+import net.yapbam.data.Account;
 
 public class AccountRemovedEvent extends DataEvent {
 	private Account removed;

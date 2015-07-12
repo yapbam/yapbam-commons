@@ -69,12 +69,5 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 		return handler.getData();
 	}
 
-//	/** Gets the remote source encoding.
-//	 * @return By default, this method returns "UTF-8". You can override this method to specify another encoding. 
-//	 */
-//	protected String getEncoding() {
-//		return "UTF-8";
-//	}
-
 	protected abstract CurrencyHandler getXMLHandler();
 }
