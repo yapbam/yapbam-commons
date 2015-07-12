@@ -4,11 +4,11 @@
 	<parent>
 		<artifactId>parent-pom</artifactId>
 		<groupId>com.fathzer</groupId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 
 	<artifactId>yapbam-commons</artifactId>
-	<version>1.4.4</version>
+	<version>1.4.5</version>
 
 	<scm>
 		<url>http://svn.code.sf.net/p/yapbam/code/</url>

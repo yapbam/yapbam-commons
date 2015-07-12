@@ -4,8 +4,6 @@ import java.net.*;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import javax.swing.text.html.MinimalHTMLWriter;
-
 import net.yapbam.remote.Cache;
 
 import org.xml.sax.*;
@@ -15,7 +13,7 @@ import org.xml.sax.*;
  * <br>
  * <br>This converter is compatible with Java Desktop and Android.
  *  
- * @version 1.0 2013-12-17
+ * @version 1.01 2015-07-12
  * @author Jean-Marc Astesana
  */
 public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
@@ -41,7 +39,7 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			if (FIELD_TAG.equals(qName) && "name".equals(attributes.getValue(NAME_ATTRIBUTE))) {
+			if (FIELD_TAG.equals(qName) && "symbol".equals(attributes.getValue(NAME_ATTRIBUTE))) {
 				this.field = Field.CURRENCY;
 			} else if (FIELD_TAG.equals(qName) && "price".equals(attributes.getValue(NAME_ATTRIBUTE))) {
 				this.field = Field.RATE;
@@ -62,12 +60,7 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 				}
 			} else if (FIELD_TAG.equals(qName) && (field!=null)) {
 				if (this.field.equals(Field.CURRENCY)) {
-					int index = this.buffer.indexOf("/");
-					if ((index>=0) && (this.buffer.length()==index+4)) {
-						currency = this.buffer.substring(index+1);
-					} else {
-						currency = null;
-					}
+					currency = this.buffer.substring(0, 3);
 				} else if (this.field.equals(Field.RATE)) {
 					this.rate = stringToLong(this.buffer.toString());
 				} else if (this.field.equals(Field.TIME_STAMP) && (currency!=null) && (rate!=0)) {
