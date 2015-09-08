@@ -196,9 +196,9 @@ public class FilteredData extends DefaultListenable {
 		}
 		return this.logger;
 	}
-	
-	/** Returns the balance data.
-	 * The balance data ignores all filters except the one on the accounts.
+
+	/** Gets the balance data.
+	 * <br>The balance data ignores all filters except the one on the accounts.
 	 * @return the balance data.
 	 */
 	public BalanceData getBalanceData() {
