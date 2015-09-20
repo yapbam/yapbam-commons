@@ -37,6 +37,8 @@ public class EncrypterTask implements Callable<Void> {
 	/** Constructor.
 	 * @param in The input stream to encode
 	 * @param out An output stream where to output the encoded stream
+	 * @param password The password to use to encrypt the data
+	 * @param compatibilityMode true to use the compatibility mode
 	 */
 	public EncrypterTask(InputStream in, OutputStream out, String password, boolean compatibilityMode) {
 		this.in = in;

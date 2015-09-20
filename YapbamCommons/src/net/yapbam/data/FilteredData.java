@@ -9,10 +9,10 @@ import net.yapbam.data.event.*;
 import net.yapbam.util.NullUtils;
 
 /** The filtered Data (the global data viewed through a filter).
- * </BR>A filter is based on all the attributes of a transaction (amount, category, account, ...).
- * </BR>Please note that a transaction is ok for a filter when, of course, the transaction itself is ok,
+ * <BR>A filter is based on all the attributes of a transaction (amount, category, account, ...).
+ * <BR>Please note that a transaction is ok for a filter when, of course, the transaction itself is ok,
  * but also when one of its subtransactions is ok.
- * </BR>For instance if your filter is set to display only receipts of the category x, and you have
+ * <BR>For instance if your filter is set to display only receipts of the category x, and you have
  * an expense transaction and category y with an expense subtransaction of category x, the whole
  * transaction would be considered as ok.
  * @see GlobalData
@@ -99,7 +99,7 @@ public class FilteredData extends DefaultListenable {
 						fireEvent(new TransactionsAddedEvent(FilteredData.this, okTransactions.toArray(new Transaction[okTransactions.size()])));
 					}
 				} else if (event instanceof TransactionsRemovedEvent) {
-					Transaction[] ts = ((TransactionsRemovedEvent)event).getRemoved();
+					Transaction[] ts = ((TransactionsRemovedEvent)event).getTransactions();
 					Collection<Transaction> accountOkTransactions = new ArrayList<Transaction>(ts.length);
 					Collection<Transaction> okTransactions = new ArrayList<Transaction>(ts.length);
 					double addedAmount = 0.0;
@@ -359,6 +359,13 @@ public class FilteredData extends DefaultListenable {
 	 */
 	public Transaction getTransaction(int index) {
 		return this.transactions.get(index);
+	}
+	
+	/** Gets a an unmodifiable list of the transactions that match the filter.
+	 * @return an unmodifiable list of transactions
+	 */
+	public List<Transaction> getTransactions() {
+		return Collections.unmodifiableList(this.transactions);
 	}
 	
 	/** Find the index of a transaction that matches the filter.

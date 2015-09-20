@@ -67,6 +67,7 @@ public abstract class AbstractTransactionWizard<T> {
 	
 	/** Gets the key in a map with the highest value.
 	 * @param map A map
+	 * @param <V> The type of the map keys
 	 * @return the key with the highest value.
 	 */
 	public static <V> V getHeaviest(Map<V, Double> map) {

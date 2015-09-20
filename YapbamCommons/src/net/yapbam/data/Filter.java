@@ -294,7 +294,7 @@ public class Filter extends Observable {
 	 * Any other integer codes (for instance CHECKED) are ignored.
 	 * @param minAmount The minimum amount (a positive or null double).
 	 * @param maxAmount The maximum amount (Double.POSITIVE_INFINITY to set no high limit).
-	 * @throws IllegalArgumentException if minAmount > maxAmount or if minimum amount is negative
+	 * @throws IllegalArgumentException if minAmount &gt; maxAmount or if minimum amount is negative
 	 */
 	public void setAmountFilter(int property, double minAmount, double maxAmount) {
 		if ((minAmount>maxAmount) || (minAmount<0)) {

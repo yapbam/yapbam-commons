@@ -51,7 +51,7 @@ public class YahooTest {
 		assertTrue(cvt.isAvailable("EUR"));
 		assertEquals(1.0, cvt.convert(1.0, "USD", "USD"), 0.0);
 		assertEquals(0.730903, cvt.convert(1.0, "USD", "EUR"), 0.0001);
-		assertEquals(1387557000000L, cvt.getTimeStamp());
+		assertEquals(1387592587000L, cvt.getTimeStamp());
 		path = "bad_yahoo.xml";
 		YahooCurrencyConverter x = new YahooTestConverter(cache);
 		Set<String> currencies = new HashSet<String>(Arrays.asList(x.getCurrencies()));

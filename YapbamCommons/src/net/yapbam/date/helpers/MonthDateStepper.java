@@ -19,6 +19,8 @@ public class MonthDateStepper extends  DateStepper {
 	
 	/**
 	 * Constructor.
+	 * @param nb Number of months between two dates
+	 * @param day day of month (1-&gt;31)
 	 * The time limit is the end of times. 
 	 * @see #MonthDateStepper(int, int, Date)
 	 */
@@ -29,7 +31,7 @@ public class MonthDateStepper extends  DateStepper {
 	/**
 	 * Constructor
 	 * @param nb Number of months between two dates
-	 * @param day day of month (1->31)
+	 * @param day day of month (1-&gt;31)
 	 * If the day is 31 and, for instance, the month of next date would be February,
 	 * the day would automatically set to the last day of the month 
 	 * @param timeLimit timeLimit or null if there is no time limit
