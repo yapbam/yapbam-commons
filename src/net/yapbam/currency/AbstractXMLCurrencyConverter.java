@@ -42,7 +42,9 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 
 	/**
 	 * Parses XML cache file and create internal data structures containing exchange rates.
+	 * @param cache The cache in which to read data
 	 * @param tmp true to parse the tmp cache, false to parse the official cache
+	 * @return The CurrencyData
 	 * @throws ParseException If XML file cannot be parsed.
 	 * @throws IOException if connection to ECB or writing cache file fails.
 	 * @see Cache

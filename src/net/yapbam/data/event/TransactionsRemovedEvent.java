@@ -19,7 +19,7 @@ public class TransactionsRemovedEvent extends DataEvent {
 	/** Gets the removed transactions.
 	 * @return a transaction array.
 	 */
-	public Transaction[] getRemoved() {
+	public Transaction[] getTransactions() {
 		return removed;
 	}
 }

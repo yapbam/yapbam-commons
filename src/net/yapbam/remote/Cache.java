@@ -14,7 +14,7 @@ import java.io.OutputStream;
 public interface Cache {
 	/** Tests whether the cache is empty or not.
 	 * <br>The cache is empty if both temporary and saved cache are not available.
-	 * @return
+	 * @return true if the cache is empty.
 	 */
 	public boolean isEmpty();
 	
@@ -33,8 +33,7 @@ public interface Cache {
 	
 	/** Commits the temporary cache.
 	 * <br>This method is called once temporary cache has been successfully parsed.
-	 * @exception IOException if the commit fails
-	 * @throws IOException 
+	 * @throws IOException if the commit fails
 	 */
 	public void commit() throws IOException;
 	

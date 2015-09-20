@@ -22,7 +22,7 @@ public final class CheckSum {
 	/** Gets a file's checksum.
 	 * @param file The file to scan.
 	 * @return The file's MD5 checksum
-	 * @throws IOException
+	 * @throws IOException If an error occurs while reading the file
 	 */
   public static byte[] getChecksum(File file) throws IOException {
   	InputStream is =  new FileInputStream(file);
@@ -59,7 +59,7 @@ public final class CheckSum {
 	 * @param filePath The path of the file we want to get the checksums. This argument contains path relative to each version folder. 
 	 * @return The different checksums of the versions of the file. If a versionFolder doesn't contain the file, it is ignored.
 	 * All checksums in the returned table are different.
-	 * @throws IOException 
+	 * @throws IOException if an error occurs while reading the files 
 	 */
 	public static String[] getCheckSums(File[] versionFolders, String filePath) throws IOException {
 			Set<String> checkSums = new HashSet<String>();

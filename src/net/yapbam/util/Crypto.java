@@ -57,7 +57,7 @@ public final class Crypto {
 
 	/** Encrypt a text.
 	 * <BR>It uses a symmetric AES algorithm.
-	 * @param key The secret key used for the encryption (secret key is the hexadecimal representation of a (128 bits long key = 8 bytes => 16 characters between 0 and F))
+	 * @param key The secret key used for the encryption (secret key is the hexadecimal representation of a (128 bits long key = 8 bytes =&gt; 16 characters between 0 and F))
 	 * @param message The message we want to encrypt
 	 * @return the encrypted message
 	 * @see #decrypt(String, String)
@@ -82,7 +82,7 @@ public final class Crypto {
 	 * @param stream The stream to encrypt.
 	 * @return A new stream that encrypt data written to it.
 	 * @see #getPasswordProtectedInputStream(String, InputStream)
-	 * @throws IOException
+	 * @throws IOException If an error occurs
 	 */
 	public static OutputStream getPasswordProtectedOutputStream (String password, OutputStream stream) throws IOException {
 		stream.write(getDigest(password));
@@ -121,8 +121,8 @@ public final class Crypto {
 	 * @param stream The stream on the encrypted data
 	 * @return a new InputStream, data read from this stream is decrypted.
 	 * @see #getPasswordProtectedOutputStream(String, OutputStream)
-	 * @throws IOException
-	 * @throws GeneralSecurityException
+	 * @throws IOException If an errors occurs while creating the stream
+	 * @throws GeneralSecurityException if the password is invalid
 	 * @deprecated This implementation hangs on Android platform. It remains only for compatibility with previous releases
 	 */
 	@Deprecated
@@ -138,8 +138,8 @@ public final class Crypto {
 	 * @param stream The stream on the encrypted data
 	 * @return a new InputStream, data read from this stream is decrypted.
 	 * @see #getPasswordProtectedOutputStream(String, OutputStream)
-	 * @throws IOException
-	 * @throws GeneralSecurityException
+	 * @throws IOException If an errors occurs while creating the stream
+	 * @throws GeneralSecurityException if the password is invalid
 	 */
 	public static InputStream getPasswordProtectedInputStream (String password, InputStream stream) throws IOException, AccessControlException, GeneralSecurityException {
 		return getPasswordProtectedInputStream(password, stream, getSecretKey(password));
@@ -163,11 +163,11 @@ public final class Crypto {
 		return stream;
 	}
 
-	/** Checks if the input stream contains a password digest.
-	 * @param stream
-	 * @param password
-	 * @throws IOException
-	 * @throws AccessControlException
+	/** Checks if the input stream is protected with a password.
+	 * @param stream The password protected stream
+	 * @param password The password to check
+	 * @throws IOException If an errors occurs while reading the stream
+	 * @throws AccessControlException if the password is wrong
 	 */
 	public static void verifyPassword(InputStream stream, String password) throws IOException, AccessControlException {
 		byte[] digest = getDigest(password);

@@ -58,6 +58,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 
 	/** Gets a logger.
 	 * <br>This logger is used by the class to log events.
+	 * @return a Logger
 	 */
 	protected Logger getLogger() {
 		if (logger==null) {
@@ -80,7 +81,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 	 * <br>Note this can be different of {@link #getTimeStamp()}. For instance, last time we contact the server
 	 * (let say at 10 o'clock) it returned data that was updated some time ago (let say at 9 o'clock).
 	 * In such a case, this method will return 10 o'clock and {@link #getTimeStamp()} 9 o'clock.
-	 * @return
+	 * @return a positive long
 	 */
 	public long getRefreshTimeStamp() {
 		return cache.getTimeStamp();
@@ -99,6 +100,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 	 * <br>If it is not, downloads again cache file and parse data into internal data structure.
 	 * <br>After this method is called, {@link #isSynchronized()} always return true (even if server has not been called).
 	 * @return true if the web server was called.
+	 * @throws IOException if an error occurs while querying the server
 	 * @throws ParseException If an error occurs while parsing the XML cache file.
 	 * @see #forcedUpdate()
 	 * @see #isDataExpired()
@@ -229,8 +231,9 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 	/**
 	 * Parses cache file and create internal data structures containing exchange rates.
 	 * <br>Be aware that cache may be empty. In such a case, parse should return an empty T instance
+	 * @param cache The cache the parser will read. 
 	 * @param tmp true to parse the tmp cache, false to parse the official cache
-	 * @return 
+	 * @return the parsed RemoteData
 	 * @throws ParseException If XML file cannot be parsed.
 	 * @throws IOException if connection to the URL or writing to cache file fails.
 	 * @see Cache

@@ -1,7 +1,6 @@
 package net.yapbam.currency;
 
 import java.net.*;
-import java.io.*;
 
 import net.yapbam.remote.Cache;
 
@@ -20,7 +19,7 @@ import java.util.*;
  * <br>This converter is compatible with Java Desktop and Android.
  *  
  * @version 1.2 2013-12-16
- * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</br>)
+ * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</b>)
  */
 public class ECBCurrencyConverter extends AbstractXMLCurrencyConverter {
 	private static final class ECBHandler extends CurrencyHandler {

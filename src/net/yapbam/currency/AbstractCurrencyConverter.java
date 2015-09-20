@@ -36,7 +36,7 @@ import java.text.*;
  * <br>This converter is compatible with Java Desktop and Android.
  *  
  * @version 1.0 2013-12-16
- * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</br>)
+ * @author Jean-Marc Astesana (based on an original code from <b>Thomas Knierim</b>)
  */
 public abstract class AbstractCurrencyConverter extends AbstractRemoteResource<CurrencyData> {
 
@@ -44,8 +44,6 @@ public abstract class AbstractCurrencyConverter extends AbstractRemoteResource<C
 	 * Constructor.
 	 * @param proxy The proxy to use to get the data (Proxy.NoProxy to not use any proxy)
 	 * @param cache A cache instance, or null to use no cache
-	 * @throws IOException if an IOException occurs during the initialization.
-	 * @throws ParseException if data is corrupted
 	 */
 	protected AbstractCurrencyConverter(Proxy proxy, Cache cache) {
 		super (proxy, cache);
@@ -148,7 +146,7 @@ public abstract class AbstractCurrencyConverter extends AbstractRemoteResource<C
 	/**
 	 * Parses cache file and create internal data structures containing exchange rates.
 	 * @param tmp true to parse the tmp cache, false to parse the official cache
-	 * @return 
+	 * @return The converter data
 	 * @throws ParseException If XML file cannot be parsed.
 	 * @throws IOException if connection to the URL or writing to cache file fails.
 	 * @see Cache

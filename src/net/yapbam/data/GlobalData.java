@@ -425,8 +425,8 @@ public class GlobalData extends DefaultListenable {
 	}
 	
 	/** Gets the index of a category.
-	 * @param category
-	 * @return a integer (<0 if the category is unknown)
+	 * @param category a category
+	 * @return a integer (&lt;0 if the category is unknown)
 	 */
 	public int indexOf(Category category) {
 		return Collections.binarySearch(categories, category);
@@ -710,7 +710,7 @@ public class GlobalData extends DefaultListenable {
 
 	/** Removes a category from the data.
 	 * All the transactions and the subtransactions attached to the deleted category are moved to the "undefined" category.
-	 * @param category
+	 * @param category The category to remove
 	 */
 	public void remove(Category category) {
 		int index = this.categories.indexOf(category);

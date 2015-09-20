@@ -12,9 +12,10 @@ public abstract class HtmlUtils {
 
 	private HtmlUtils() {
 		// To prevent instantiation
+		super();
 	}
 	
-	/** Removes the &lt;html> and &lt;/html> tag respectively at the beginning and the end of a string.
+	/** Removes the &lt;html&gt; and &lt;/html&gt; tag respectively at the beginning and the end of a string.
 	 * @param text The string to process
 	 * @return the string without the html tags, or the trimmed string if it doesn't not contains the tags.
 	 */

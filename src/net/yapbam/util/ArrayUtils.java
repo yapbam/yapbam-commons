@@ -140,6 +140,7 @@ public final class ArrayUtils {
 	
 	/** Tests whether an array contains only null references.
 	 * @param array The array to test
+	 * @param <T> The type if array's elements.
 	 * @return true if all elements of the array are null are if the array is empty.
 	 */
 	public static <T> boolean isAllNull(T[] array) {

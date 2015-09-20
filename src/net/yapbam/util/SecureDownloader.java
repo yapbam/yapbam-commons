@@ -81,7 +81,7 @@ public class SecureDownloader {
 	 * @param in The input stream
 	 * @param out The output stream, or null to simply compute checksum without copying it.
 	 * @return the check and length of the content of the input stream or null if the copy was cancelled
-	 * @throws IOException
+	 * @throws IOException If an error occurs while copying
 	 */
 	public synchronized DownloadInfo copy(InputStream in, OutputStream out) throws IOException {
 		long length = 0;
