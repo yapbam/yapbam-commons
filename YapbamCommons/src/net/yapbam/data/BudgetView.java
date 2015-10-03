@@ -251,12 +251,12 @@ public class BudgetView extends DefaultListenable {
 			Date date = getNormalizedDate(transaction.getDate());
 			for (int j = 0; j < transaction.getSubTransactionSize(); j++) {
 				SubTransaction subTransaction = transaction.getSubTransaction(j);
-				if (this.data.isOk(subTransaction)) {
+				if (this.data.getFilter().isOk(subTransaction)) {
 					add (new Key(date, catMap.get(subTransaction.getCategory())), subTransaction.getAmount());
 					this.sum = this.sum + subTransaction.getAmount();
 				}
 			}
-			if (this.data.isComplementOk(transaction)) {
+			if (this.data.getFilter().isComplementOk(transaction)) {
 				add (new Key(date, catMap.get(transaction.getCategory())), transaction.getComplement());
 				this.sum = this.sum + transaction.getComplement();
 			}
