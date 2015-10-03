@@ -80,7 +80,7 @@ public class FilteredData extends DefaultListenable {
 								addedAmount += transaction.getAmount();
 							} else {
 								accountOkTransactions.add(transaction);
-								if (isOk(transaction)) {
+								if (filter.isOk(transaction)) {
 									// If the added transaction matches with the whole filter
 									okTransactions.add(transaction);
 									int index = -Collections.binarySearch(transactions, transaction, comparator)-1;
@@ -110,7 +110,7 @@ public class FilteredData extends DefaultListenable {
 								addedAmount -= transaction.getAmount();
 							} else {
 								accountOkTransactions.add(transaction);
-								if (isOk(transaction)) { // If the added transaction matches with the whole filter
+								if (filter.isOk(transaction)) { // If the added transaction matches with the whole filter
 									okTransactions.add(transaction);
 									int index = Collections.binarySearch(transactions, transaction, comparator);
 									transactions.remove(index);
@@ -224,88 +224,6 @@ public class FilteredData extends DefaultListenable {
 		return this.filter;
 	}
 	
-	/** Sets the filter used in this filtered data.
-	 * @param filter the new filter
-	 */
-	public void setFilter(Filter filter) {
-		if (!filter.equals(this.filter)) {
-			// if the instance as really changed
-			// Stop looking for changes on the old instance
-			this.filter.deleteObserver(this.filterObserver);
-			this.filter = filter;
-			this.filter.addObserver(this.filterObserver);
-			this.filter();
-		}
-	}
-	
-	/** Gets a transaction's validity.
-	 * Note about subtransactions : A transaction is also valid if one of its subtransactions,
-	 *  considered as transaction (completed with transactions's date, statement, etc ...), is valid. 
-	 * @param transaction The transaction to test.
-	 * @return true if the transaction is valid.
-	 */
-	public boolean isOk(Transaction transaction) {
-		if (!filter.isOk(transaction.getAccount()) || !filter.isOk(transaction.getMode()) ||
-				!filter.isStatementOk(transaction.getStatement()) || !filter.isNumberOk(transaction.getNumber()) ||
-				!filter.isCommentOk(transaction.getComment())) {
-			return false;
-		}
-		if ((filter.getDateFrom()!=null) && (transaction.getDate().compareTo(filter.getDateFrom())<0)) {
-			return false;
-		}
-		if ((filter.getDateTo()!=null) && (transaction.getDate().compareTo(filter.getDateTo())>0)) {
-			return false;
-		}
-		if ((filter.getValueDateFrom()!=null) && (transaction.getValueDate().compareTo(filter.getValueDateFrom())<0)) {
-			return false;
-		}
-		if ((filter.getValueDateTo()!=null) && (transaction.getValueDate().compareTo(filter.getValueDateTo())>0)) {
-			return false;
-		}
-		if (filter.isOk(transaction.getCategory()) && filter.isAmountOk(transaction.getAmount()) &&
-				filter.isDescriptionOk(transaction.getDescription())) {
-			return true;
-		}
-		// The transaction may also be valid if one of its subtransactions is valid 
-		for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
-			if (isOk(transaction.getSubTransaction(i))) {
-				return true;
-			}
-		}
-		// The transaction may also be valid if its subtransactions complement is valid 
-		return isComplementOk(transaction);
-	}
-	
-	/** Gets a subtransaction validity.
-	 * @param subtransaction the subtransaction to test
-	 * @return true if the subtransaction is valid according to this filter.
-	 * Be aware that no specific fields of the transaction are tested, so the subtransaction may be valid
-	 * even if its transaction is not (for instance if its payment mode is not ok). So, usually, you'll have
-	 * to also test the transaction.
-	 * @see #isOk(Transaction)
-	 */
-	public boolean isOk(SubTransaction subtransaction) {
-		return filter.isOk(subtransaction.getCategory()) && filter.isAmountOk(subtransaction.getAmount()) &&
-				filter.isDescriptionOk(subtransaction.getDescription());
-	}
-	
-	/** Gets a transaction complement validity.
-	 * @param transaction the transaction to test
-	 * @return true if the transaction complement is valid according to this filter.
-	 * Be aware that the complement is considered as a subtransaction. So the behavior is the same
-	 * than in isOk(Subtransaction) method. No specific fields of the transaction are tested, so the complement
-	 * may be valid even if the whole transaction is not (for instance if its payment mode is not ok).
-	 * So, usually, you'll have to also test the transaction.
-	 * @see #isOk(Transaction)
-	 */
-	public boolean isComplementOk(Transaction transaction) {
-		double amount = transaction.getComplement();
-		if ((transaction.getSubTransactionSize()!=0) && (GlobalData.AMOUNT_COMPARATOR.compare(amount,0.0)==0)) {
-			return false;
-		}
-		return filter.isOk(transaction.getCategory()) && filter.isAmountOk(amount) && filter.isDescriptionOk(transaction.getDescription()) && filter.isCommentOk(transaction.getComment());
-	}
-	
 	private void filter() {
 		double initialBalance = 0;
 		for (int i = 0; i < this.getGlobalData().getAccountsNumber(); i++) {
@@ -333,7 +251,7 @@ public class FilteredData extends DefaultListenable {
 					// Especially, if the end date is before today, the current balance will be false and be displayed false in the transactions panel. 
 					// Uncomment the test to implement the second one.
 					/*if (NullUtils.compareTo(valueDate, getValueDateTo(), false)<=0)*/ balanceTransactions.add(transaction);
-					if (isOk(transaction)) {
+					if (filter.isOk(transaction)) {
 						int index = -Collections.binarySearch(transactions, transaction, comparator)-1;
 						transactions.add(index, transaction);
 					}

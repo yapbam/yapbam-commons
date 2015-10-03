@@ -40,26 +40,19 @@ public class Filter extends Observable {
 	private TextMatcher statementMatcher;
 	
 	private boolean suspended;
-	private Logger logger;
+	private static final Logger LOGGER = LoggerFactory.getLogger(Filter.class);
 
 	/** Constructor. */
 	public Filter() {
 		init();
 		this.suspended = false;
 	}
-	
-	private Logger getLogger() {
-		if (this.logger==null) {
-			this.logger = LoggerFactory.getLogger(getClass());
-		}
-		return this.logger;
-	}
 
 	public boolean isOk(int property) {
 		if (DEBUG) {
-			getLogger().trace("---------- isOK({}) ----------",Integer.toBinaryString(property)); //$NON-NLS-1$
-			getLogger().trace("filter: {}",Integer.toBinaryString(this.filter)); //$NON-NLS-1$
-			getLogger().trace("result: {}",Integer.toBinaryString(property & this.filter)); //$NON-NLS-1$
+			LOGGER.trace("---------- isOK({}) ----------",Integer.toBinaryString(property)); //$NON-NLS-1$
+			LOGGER.trace("filter: {}",Integer.toBinaryString(this.filter)); //$NON-NLS-1$
+			LOGGER.trace("result: {}",Integer.toBinaryString(property & this.filter)); //$NON-NLS-1$
 		}
 		return (property & this.filter) != 0;
 	}
@@ -308,7 +301,7 @@ public class Filter extends Observable {
 			this.maxAmount = maxAmount;
 			filter = (filter & ~mask) | (property & mask);
 			if (DEBUG) {
-				getLogger().trace("-> filter: {}",filter); //$NON-NLS-1$
+				LOGGER.trace("-> filter: {}",filter); //$NON-NLS-1$
 			}
 			this.setChanged();
 		}
@@ -409,7 +402,7 @@ public class Filter extends Observable {
 			this.statementMatcher = statementFilter;
 			filter = (filter & ~mask) | (property & mask);
 			if (DEBUG) {
-				getLogger().trace("-> filter: {}",filter); //$NON-NLS-1$
+				LOGGER.trace("-> filter: {}",filter); //$NON-NLS-1$
 			}
 			this.setChanged();
 		}
@@ -462,4 +455,117 @@ public class Filter extends Observable {
 			(getMinAmount()!=0.0) || (getMaxAmount()!=Double.POSITIVE_INFINITY) ||
 			(getDescriptionMatcher()!=null) || (getCommentMatcher()!=null) || (getNumberMatcher()!=null) || (getStatementMatcher()!=null);
 	}
+	
+	/** Gets a transaction's validity.
+	 * Note about subtransactions : A transaction is also valid if one of its subtransactions,
+	 *  considered as transaction (completed with transactions's date, statement, etc ...), is valid. 
+	 * @param transaction The transaction to test.
+	 * @return true if the transaction is valid.
+	 */
+	public boolean isOk(Transaction transaction) {
+		if (!isOk(transaction.getAccount()) || !isOk(transaction.getMode()) ||
+				!isStatementOk(transaction.getStatement()) || !isNumberOk(transaction.getNumber()) ||
+				!isCommentOk(transaction.getComment())) {
+			return false;
+		}
+		if ((getDateFrom()!=null) && (transaction.getDate().compareTo(getDateFrom())<0)) {
+			return false;
+		}
+		if ((getDateTo()!=null) && (transaction.getDate().compareTo(getDateTo())>0)) {
+			return false;
+		}
+		if ((getValueDateFrom()!=null) && (transaction.getValueDate().compareTo(getValueDateFrom())<0)) {
+			return false;
+		}
+		if ((getValueDateTo()!=null) && (transaction.getValueDate().compareTo(getValueDateTo())>0)) {
+			return false;
+		}
+		if (isOk(transaction.getCategory()) && isAmountOk(transaction.getAmount()) &&
+				isDescriptionOk(transaction.getDescription())) {
+			return true;
+		}
+		// The transaction may also be valid if one of its subtransactions is valid 
+		for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
+			if (isOk(transaction.getSubTransaction(i))) {
+				return true;
+			}
+		}
+		// The transaction may also be valid if its subtransactions complement is valid 
+		return isComplementOk(transaction);
+	}
+
+	/** Gets a periodical transaction's validity.
+	 * Note about subtransactions : A transaction is also valid if one of its subtransactions,
+	 *  considered as transaction (completed with transactions's date, statement, etc ...), is valid. 
+	 * @param transaction The periodical transaction to test.
+	 * @return true if the transaction is valid.
+	 */
+	public boolean isOk(PeriodicalTransaction transaction) {
+		if (!isOk(transaction.getAccount()) || !isOk(transaction.getMode()) || !isCommentOk(transaction.getComment())) {
+			return false;
+		}
+		if (isOk(transaction.getCategory()) && isAmountOk(transaction.getAmount()) &&
+				isDescriptionOk(transaction.getDescription())) {
+			return true;
+		}
+		// The transaction may also be valid if one of its subtransactions is valid 
+		for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
+			if (isOk(transaction.getSubTransaction(i))) {
+				return true;
+			}
+		}
+		// The transaction may also be valid if its subtransactions complement is valid 
+		return isComplementOk(transaction);
+	}
+
+	/** Gets a subtransaction validity.
+	 * @param subtransaction the subtransaction to test
+	 * @return true if the subtransaction is valid according to this filter.
+	 * Be aware that no specific fields of the transaction are tested, so the subtransaction may be valid
+	 * even if its transaction is not (for instance if its payment mode is not ok). So, usually, you'll have
+	 * to also test the transaction.
+	 * @see #isOk(Transaction)
+	 */
+	public boolean isOk(SubTransaction subtransaction) {
+		return isOk(subtransaction.getCategory()) && isAmountOk(subtransaction.getAmount()) &&
+				isDescriptionOk(subtransaction.getDescription());
+	}
+	
+	/** Gets a transaction complement validity.
+	 * @param transaction the transaction to test
+	 * @return true if the transaction complement is valid according to this filter.
+	 * Be aware that the complement is considered as a subtransaction. So the behavior is the same
+	 * than in isOk(Subtransaction) method. No specific fields of the transaction are tested, so the complement
+	 * may be valid even if the whole transaction is not (for instance if its payment mode is not ok).
+	 * So, usually, you'll have to also test the transaction.
+	 * @see #isOk(Transaction)
+	 */
+	public boolean isComplementOk(AbstractTransaction transaction) {
+		double amount = transaction.getComplement();
+		if ((transaction.getSubTransactionSize()!=0) && (GlobalData.AMOUNT_COMPARATOR.compare(amount,0.0)==0)) {
+			return false;
+		}
+		return isOk(transaction.getCategory()) && isAmountOk(amount) && isDescriptionOk(transaction.getDescription()) && isCommentOk(transaction.getComment());
+	}
+
+	/** Copies a filter in this filter.
+	 * @param filter The filter to copy
+	 */
+	public void copy(Filter filter) {
+		this.setSuspended(true);
+		this.filter = filter.filter;
+		this.minAmount = filter.minAmount;
+		this.maxAmount = filter.maxAmount;
+		this.statementMatcher = filter.statementMatcher;
+		this.setValidAccounts(filter.getValidAccounts());
+		this.setValidModes(filter.getValidModes());
+		this.setValidCategories(filter.getValidCategories());
+		this.setDateFilter(filter.getDateFrom(), filter.getDateTo());
+		this.setValueDateFilter(filter.getValueDateFrom(), filter.getValueDateTo());
+		this.descriptionMatcher = filter.descriptionMatcher;
+		this.commentMatcher = filter.commentMatcher;
+		this.numberMatcher = filter.numberMatcher;
+		this.setSuspended(false);
+	}
+	
 }
