@@ -102,8 +102,8 @@ public class PeriodicalTransaction extends AbstractTransaction {
 	 * <br>The transactions are not added to the global data and this periodical transaction
 	 * is not changed : its next date field remains unchanged.
 	 * @param date Date until the transactions had to be generated (inclusive)
-	 * @param result an list where to put the transactions or null to return a new list
-	 * @return a transaction list (the one passed as second argument).
+	 * @param result a list where to put the transactions or null to return a new list
+	 * @return a transaction list (the one passed as second argument if it is not null).
 	 */
 	public List<Transaction> generate(Date date, List<Transaction> result) {
 		if (result==null) {
