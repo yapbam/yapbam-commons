@@ -26,6 +26,7 @@ public class DecrypterTask implements Callable<Void> {
 	/** Compress input stream and output it to an output stream.
 	 * @param in An input stream
 	 * @param out An output stream
+	 * @param password the input stream password
 	 * @param compatibilityMode true to activate the compatibility (with old encoded files) mode 
 	 */
 	public DecrypterTask(InputStream in, OutputStream out, String password, boolean compatibilityMode) {

@@ -113,7 +113,7 @@ public class StatData extends Observable {
 	}
 
 	/** Gets the total amount of expenses that match the filter.
-	 * @return an integer.
+	 * @return a negative integer.
 	 */
 	public double getExpenses() {
 		ensureIsUpdated();

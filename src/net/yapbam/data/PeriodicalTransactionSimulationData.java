@@ -7,8 +7,19 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import net.yapbam.data.event.AccountAddedEvent;
+import net.yapbam.data.event.CategoryAddedEvent;
+import net.yapbam.data.event.CheckbookAddedEvent;
+import net.yapbam.data.event.CheckbookPropertyChangedEvent;
+import net.yapbam.data.event.CheckbookRemovedEvent;
 import net.yapbam.data.event.DataEvent;
 import net.yapbam.data.event.DataListener;
+import net.yapbam.data.event.IsArchivedChangedEvent;
+import net.yapbam.data.event.IsLockedChangedEvent;
+import net.yapbam.data.event.ModeAddedEvent;
+import net.yapbam.data.event.NeedToBeSavedChangedEvent;
+import net.yapbam.data.event.PasswordChangedEvent;
+import net.yapbam.data.event.URIChangedEvent;
 
 public class PeriodicalTransactionSimulationData extends Observable {
 	public enum Unit {MONTH(GregorianCalendar.MONTH), YEAR(GregorianCalendar.YEAR);
@@ -38,8 +49,9 @@ public class PeriodicalTransactionSimulationData extends Observable {
 		data.getGlobalData().addListener(new DataListener() {
 			@Override
 			public void processEvent(DataEvent event) {
-				System.out.println(event); //TODO Do it only on useful events
-				invalidate();
+				if (hasImpact(event)) {
+					invalidate();
+				}
 			}
 		});
 		data.getFilter().addObserver(new Observer() {
@@ -50,6 +62,14 @@ public class PeriodicalTransactionSimulationData extends Observable {
 				}
 			}
 		});
+	}
+	
+	private boolean hasImpact(DataEvent event) {
+		return !(event instanceof AccountAddedEvent) && !(event instanceof CategoryAddedEvent) && !(event instanceof CheckbookAddedEvent) &&
+				!(event instanceof CheckbookPropertyChangedEvent) && !(event instanceof CheckbookRemovedEvent) &&
+				!(event instanceof IsArchivedChangedEvent) && !(event instanceof IsLockedChangedEvent) &&
+				!(event instanceof ModeAddedEvent) && !(event instanceof NeedToBeSavedChangedEvent) &&
+				!(event instanceof PasswordChangedEvent) && !(event instanceof URIChangedEvent);
 	}
 
 	public void setEndDate(Unit unit, int amount) {
