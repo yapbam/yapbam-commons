@@ -383,7 +383,7 @@ public class GlobalData extends DefaultListenable {
 
 	/** Removes a transaction from this.
 	 * If the transaction is not in this, does nothing. 
-	 * @param transaction
+	 * @param transaction The transaction to remove
 	 */
 	public void remove(Transaction transaction) {
 		remove(new Transaction[]{transaction});
