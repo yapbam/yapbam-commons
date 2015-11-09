@@ -35,7 +35,7 @@ public abstract class HtmlUtils {
 		return text;
 	}
 	
-	/** Converts a simple link encoded string to html.
+	/** Converts an encoded string to html.
 	 * @param content The encoded content.<br>Links are encoded with the following syntax [<i>text</i>[<i>url</i>]].
 	 * <br>If <i>text</i> is omitted, <i>url</i> is used as text.
 	 * <br>Examples:<ul>
