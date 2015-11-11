@@ -23,7 +23,6 @@ public class FilteredData extends DefaultListenable {
 	private Comparator<Transaction> comparator = TransactionComparator.INSTANCE;
 	private BalanceData balanceData;
 	private Filter filter;
-	private Observer filterObserver;
 	private Logger logger;
 	
 	/** Constructor.
@@ -32,13 +31,12 @@ public class FilteredData extends DefaultListenable {
 	public FilteredData(GlobalData data) {
 		this.data = data;
 		this.filter = new Filter();
-		this.filterObserver = new Observer() {
+		this.filter.addObserver(new Observer() {
 			@Override
 			public void update(Observable o, Object arg) {
 				filter();
 			}
-		};
-		this.filter.addObserver(this.filterObserver);
+		});
 		this.data.addListener(new DataListener() {
 			@Override
 			public void processEvent(DataEvent event) {

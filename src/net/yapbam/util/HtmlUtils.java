@@ -14,7 +14,10 @@ public abstract class HtmlUtils {
 	private static final Pattern p = Pattern.compile("\\[([^\\[]*)\\[([^\\]]+)\\]\\]");
 	public static final String START_TAG = "<HTML>";
 	public static final String END_TAG = "</HTML>";
+	public static final String START_BODY_TAG = "<BODY>";
+	public static final String END_BODY_TAG = "</BODY>";
 	public static final String NEW_LINE_TAG = "<BR>";
+	public static final String NON_BREAKING_SPACE = "&nbsp;";
 
 	private HtmlUtils() {
 		// To prevent instantiation
@@ -39,8 +42,8 @@ public abstract class HtmlUtils {
 	 * @param content The encoded content.<br>Links are encoded with the following syntax [<i>text</i>[<i>url</i>]].
 	 * <br>If <i>text</i> is omitted, <i>url</i> is used as text.
 	 * <br>Examples:<ul>
-	 * <li>This is a [link to Google[http://www.google.com]] -> This is a &lt;a href="http://www.google.com"&gt;link to Google&lt;/a&gt;</li>
-	 * <li>Try [[http://www.google.com]] -> Try &lt;a href="http://www.google.com"&gt;http://www.google.com&lt;/a&gt;</li></li>
+	 * <li>This is a [link to Google[http://www.google.com]] -&gt; This is a &lt;a href="http://www.google.com"&gt;link to Google&lt;/a&gt;</li>
+	 * <li>Try [[http://www.google.com]] -&gt; Try &lt;a href="http://www.google.com"&gt;http://www.google.com&lt;/a&gt;</li>
 	 * </ul>
 	 * @return the html text corresponding to the encoded content. The returned string does not contains "&lt;html&gt;&lt;/html&gt;" tags around the html generated content. 
 	 */
@@ -62,7 +65,7 @@ public abstract class HtmlUtils {
 	}
 
 	private static String getHTMLLink(String name, String url) {
-		return "<a href=\"" + url + "\">" + StringEscapeUtils.escapeHtml3(((name.length() == 0) ? url : name)) + "</a>";
+		return "<a href=\"" + url + "\">" + StringEscapeUtils.escapeHtml3(name.isEmpty() ? url : name) + "</a>";
 	}
 
 }
