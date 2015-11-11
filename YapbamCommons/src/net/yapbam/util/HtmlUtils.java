@@ -1,5 +1,7 @@
 package net.yapbam.util;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,7 +13,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
  * License GPL v3
  */
 public abstract class HtmlUtils {
-	private static final Pattern p = Pattern.compile("\\[([^\\[]*)\\[([^\\]]+)\\]\\]");
+	private static final Pattern p = Pattern.compile("\\[([^\\[\\]]*)\\[([^\\]]+)\\]\\]");
 	public static final String START_TAG = "<HTML>";
 	public static final String END_TAG = "</HTML>";
 	public static final String START_BODY_TAG = "<BODY>";
@@ -55,7 +57,14 @@ public abstract class HtmlUtils {
 			if (previous!=m.start()) {
 				sb.append(StringEscapeUtils.escapeHtml3(content.substring(previous, m.start())));
 			}
-			sb.append(getHTMLLink(m.group(1), m.group(2)));
+			try {
+				// Test the URL is valid
+				new URL(m.group(2));
+				sb.append(getHTMLLink(m.group(1), m.group(2)));
+			} catch (MalformedURLException e) {
+				// If the URL is not valid
+				sb.append(content.substring(m.start(), m.end()));
+			}
 			previous = m.end()+1;
 		}
 		if (previous<content.length()) {
