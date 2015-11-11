@@ -32,7 +32,7 @@ public class PeriodicalTransactionSimulationData extends Observable {
 		public int getField() {
 			return this.field;
 		}
-	};
+	}
 	
 	private FilteredData data;
 	private Date endDate;

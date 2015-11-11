@@ -8,6 +8,10 @@ import net.yapbam.data.GlobalData;
 import net.yapbam.util.HtmlUtils;
 
 public class TransactionUtils {
+	private static final String NEW_INDENTED_LINE = HtmlUtils.NEW_LINE_TAG+HtmlUtils.NON_BREAKING_SPACE+HtmlUtils.NON_BREAKING_SPACE;
+	private static final String OPEN = HtmlUtils.START_TAG+HtmlUtils.START_BODY_TAG;
+	private static final String END = HtmlUtils.END_TAG+HtmlUtils.END_BODY_TAG;
+
 	public interface WordingProvider {
 		String getComplementWording();
 	}
@@ -22,28 +26,28 @@ public class TransactionUtils {
 	public String getDescription (AbstractTransaction transaction, boolean spread, boolean mergeComment, boolean withHtmlTags) {
 		StringBuilder buf = new StringBuilder();
 		if (withHtmlTags) {
-			buf.append("<html><body>");
+			buf.append(OPEN);
 		}
 		if (spread) {
-			buf.append(getDescription(transaction, false, mergeComment, false)); //$NON-NLS-1$
+			buf.append(getDescription(transaction, false, mergeComment, false));
 			for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
-				buf.append("<BR>&nbsp;&nbsp;").append(StringEscapeUtils.escapeHtml3(transaction.getSubTransaction(i).getDescription())); //$NON-NLS-1$
+				buf.append(NEW_INDENTED_LINE).append(StringEscapeUtils.escapeHtml3(transaction.getSubTransaction(i).getDescription()));
 			}
 			if (transaction.getComplement()!=0) {
-				buf.append("<BR>&nbsp;&nbsp;").append(StringEscapeUtils.escapeHtml3(wordingProvider.getComplementWording())); //$NON-NLS-1$
+				buf.append(NEW_INDENTED_LINE).append(StringEscapeUtils.escapeHtml3(wordingProvider.getComplementWording()));
 			}
 		} else {
 			buf.append (StringEscapeUtils.escapeHtml3(transaction.getDescription()));
 			if (mergeComment && (transaction.getComment()!=null)) {
-				buf.append(" (");
+				buf.append(" ("); //$NON-NLS-1$
 				buf.append(getComment(transaction));
-				buf.append(")");
+				buf.append(")"); //$NON-NLS-1$
 			}
 		}
 		if (withHtmlTags) {
-			buf.append("</body></html>"); //$NON-NLS-1$
+			buf.append(END); //$NON-NLS-1$
 		}
-		return buf.toString().replace(" ", "&nbsp;");
+		return buf.toString().replace(" ", HtmlUtils.NON_BREAKING_SPACE);
 	}
 
 	public String getComment(AbstractTransaction transaction) {
@@ -108,15 +112,16 @@ public class TransactionUtils {
 
 	public Object getCategory(AbstractTransaction transaction, boolean spread) {
 		if (spread) {
-			StringBuilder buf = new StringBuilder("<html><body>").append(StringEscapeUtils.escapeHtml3(getName(transaction.getCategory()))); //$NON-NLS-1$
+			StringBuilder buf = new StringBuilder(OPEN);
+			buf.append(StringEscapeUtils.escapeHtml3(getName(transaction.getCategory()))); //$NON-NLS-1$
 			for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
-				buf.append("<BR>&nbsp;&nbsp;").append(StringEscapeUtils.escapeHtml3(getName(transaction.getSubTransaction(i).getCategory()))); //$NON-NLS-1$
+				buf.append(NEW_INDENTED_LINE).append(StringEscapeUtils.escapeHtml3(getName(transaction.getSubTransaction(i).getCategory())));
 			}
 			if (transaction.getComplement()!=0) {
-				buf.append("<BR>&nbsp;&nbsp;").append(StringEscapeUtils.escapeHtml3(getName(transaction.getCategory()))); //$NON-NLS-1$
+				buf.append(NEW_INDENTED_LINE).append(StringEscapeUtils.escapeHtml3(getName(transaction.getCategory())));
 			}
-			buf.append("</body></html>"); //$NON-NLS-1$
-			return buf.toString().replace(" ", "&nbsp;");
+			buf.append(END); //$NON-NLS-1$
+			return buf.toString().replace(" ", HtmlUtils.NON_BREAKING_SPACE);
 		} else {
 			return getName(transaction.getCategory());
 		}
