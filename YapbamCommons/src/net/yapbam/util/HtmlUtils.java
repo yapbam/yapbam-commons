@@ -57,12 +57,9 @@ public abstract class HtmlUtils {
 			if (previous!=m.start()) {
 				sb.append(StringEscapeUtils.escapeHtml3(content.substring(previous, m.start())));
 			}
-			try {
-				// Test the URL is valid
-				new URL(m.group(2));
+			if (isValidURL(m.group(2))) {
 				sb.append(getHTMLLink(m.group(1), m.group(2)));
-			} catch (MalformedURLException e) {
-				// If the URL is not valid
+			} else {
 				sb.append(content.substring(m.start(), m.end()));
 			}
 			previous = m.end()+1;
@@ -77,4 +74,28 @@ public abstract class HtmlUtils {
 		return "<a href=\"" + url + "\">" + StringEscapeUtils.escapeHtml3(name.isEmpty() ? url : name) + "</a>";
 	}
 
+	public static Matcher getLink(String encodedContent, int start, int end) {
+		Matcher m = p.matcher(encodedContent);
+		while (m.find()) {
+			if (m.start()<end && start<m.end()) {
+				if (isValidURL(m.group(2))) {
+					return m;
+				} else {
+					return null;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static boolean isValidURL(String url) {
+		try {
+			// Test the URL is valid
+			new URL(url);
+			return true;
+		} catch (MalformedURLException e) {
+			// If the URL is not valid
+			return false;
+		}
+	}
 }
