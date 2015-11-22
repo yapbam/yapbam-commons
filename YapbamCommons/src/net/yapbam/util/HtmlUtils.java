@@ -13,7 +13,8 @@ import org.apache.commons.lang3.StringEscapeUtils;
  * License GPL v3
  */
 public abstract class HtmlUtils {
-	private static final Pattern p = Pattern.compile("\\[([^\\[\\]]*)\\[([^\\]]+)\\]\\]");
+	private static final Pattern P = Pattern.compile("\\[([^\\[\\]]*)\\[([^\\]]+)\\]\\]");
+	private static final Mangler MANGLER = new Mangler("[]",'_');
 	public static final String START_TAG = "<HTML>";
 	public static final String END_TAG = "</HTML>";
 	public static final String START_BODY_TAG = "<BODY>";
@@ -50,7 +51,7 @@ public abstract class HtmlUtils {
 	 * @return the html text corresponding to the encoded content. The returned string does not contains "&lt;html&gt;&lt;/html&gt;" tags around the html generated content. 
 	 */
 	public static String toHtml(String content) {
-		Matcher m = p.matcher(content);
+		Matcher m = P.matcher(content);
 		StringBuilder sb = new StringBuilder();
 		int previous = 0;
 		while (m.find()) {
@@ -71,11 +72,11 @@ public abstract class HtmlUtils {
 	}
 
 	private static String getHTMLLink(String name, String url) {
-		return "<a href=\"" + url + "\">" + StringEscapeUtils.escapeHtml3(name.isEmpty() ? url : name) + "</a>";
+		return "<a href=\"" + url + "\">" + StringEscapeUtils.escapeHtml3(name.isEmpty() ? url : MANGLER.unmangle(name)) + "</a>";
 	}
 
 	public static Matcher getLink(String encodedContent, int start, int end) {
-		Matcher m = p.matcher(encodedContent);
+		Matcher m = P.matcher(encodedContent);
 		while (m.find()) {
 			if (m.start()<end && start<m.end()) {
 				if (isValidURL(m.group(2))) {
@@ -97,5 +98,13 @@ public abstract class HtmlUtils {
 			// If the URL is not valid
 			return false;
 		}
+	}
+	
+	public static String toEncoded(String name, String url) {
+		return '[' + MANGLER.mangle(name)+ '[' + url + "]]";
+	}
+	
+	public static String decodeLinkName(String name) {
+		return MANGLER.unmangle(name);
 	}
 }
