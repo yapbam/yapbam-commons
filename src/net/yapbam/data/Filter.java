@@ -549,23 +549,25 @@ public class Filter extends Observable {
 	}
 
 	/** Copies a filter in this filter.
+	 * <br>If filter is not equal to this, observers are notified of the changes.
 	 * @param filter The filter to copy
 	 */
 	public void copy(Filter filter) {
 		this.setSuspended(true);
-		this.filter = filter.filter;
+		if (this.minAmount!=filter.minAmount || this.maxAmount!=filter.maxAmount) {
+			setChanged();
+		}
 		this.minAmount = filter.minAmount;
 		this.maxAmount = filter.maxAmount;
-		this.statementMatcher = filter.statementMatcher;
+		this.setStatementFilter(filter.filter, filter.statementMatcher);
 		this.setValidAccounts(filter.getValidAccounts());
 		this.setValidModes(filter.getValidModes());
 		this.setValidCategories(filter.getValidCategories());
 		this.setDateFilter(filter.getDateFrom(), filter.getDateTo());
 		this.setValueDateFilter(filter.getValueDateFrom(), filter.getValueDateTo());
-		this.descriptionMatcher = filter.descriptionMatcher;
-		this.commentMatcher = filter.commentMatcher;
-		this.numberMatcher = filter.numberMatcher;
+		this.setDescriptionMatcher(filter.getDescriptionMatcher());
+		this.setCommentMatcher(filter.getCommentMatcher());
+		this.setNumberMatcher(filter.getNumberMatcher());
 		this.setSuspended(false);
 	}
-	
 }
