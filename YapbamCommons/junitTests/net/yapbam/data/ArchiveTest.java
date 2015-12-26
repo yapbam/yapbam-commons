@@ -13,6 +13,12 @@ import net.yapbam.date.helpers.DateStepper;
 import org.junit.Test;
 
 public class ArchiveTest {
+	private static final Archiver ARCHIVER = new Archiver(){
+		@Override
+		protected boolean save(GlobalData data) {
+			return true;
+		}};
+	
 	private static final String CATEGORY_1 = "category 1";
 	private static final String CATEGORY_2 = "category 2";
 	private static final String CATEGORY_3 = "category 3";
@@ -36,7 +42,11 @@ public class ArchiveTest {
 		for (int i = 0; i < transactions.length; i++) {
 			transactions[i] = data.getTransaction(i);
 		}
-		Archiver.archive (archiveData, transactions);
+		double[] finalBalances = new double[data.getAccountsNumber()];
+		for (int i = 0; i < finalBalances.length; i++) {
+			finalBalances[i] = data.getAccount(i).getBalanceData().getFinalBalance();
+		}
+		ARCHIVER.move (data, archiveData, transactions, true);
 		
 		// There should be five statements in archive
 		assertEquals(5, archiveData.getTransactionsNumber());
@@ -56,8 +66,9 @@ public class ArchiveTest {
 		// Categorie 3 should exists
 		assertNotNull(archiveData.getCategory(CATEGORY_3));
 
-		Archiver.remove (data, transactions);
-		
+		for (int i = 0; i < finalBalances.length; i++) {
+			assertTrue(GlobalData.AMOUNT_COMPARATOR.compare(finalBalances[i], data.getAccount(i).getBalanceData().getFinalBalance())==0);
+		}
 		// Difference between final archive balance and initial balance of common account should not change
 		double finalAccount1Diff = archiveAccount1.getBalanceData().getFinalBalance()-data.getAccount(ACCOUNT_1_NAME).getInitialBalance();
 		assertTrue(GlobalData.AMOUNT_COMPARATOR.compare(account1Diff,finalAccount1Diff)==0);
@@ -67,18 +78,56 @@ public class ArchiveTest {
 		assertTrue(GlobalData.AMOUNT_COMPARATOR.compare(data.getAccount(0).getInitialBalance(), -20.0)==0);
 		// account 2 initial balance should have changed
 		assertTrue(GlobalData.AMOUNT_COMPARATOR.compare(data.getAccount(1).getInitialBalance(), -25.0)==0);
+
+		// Test move back to data
+		List<Transaction> lst = new ArrayList<Transaction>();
+		for (int i = 0; i < archiveData.getTransactionsNumber(); i++) {
+			Transaction transaction = archiveData.getTransaction(i);
+			if (!transaction.getDescription().contains("Archived")) {
+				lst.add(transaction);
+			}
+		}
+		lst.toArray(transactions);
+		ARCHIVER.move (data, archiveData, transactions, false);
+		// Test final balances
+		for (int i = 0; i < finalBalances.length; i++) {
+			assertTrue(GlobalData.AMOUNT_COMPARATOR.compare(finalBalances[i], data.getAccount(i).getBalanceData().getFinalBalance())==0);
+		}
+		// There should be four statements in data
+		assertEquals(4, data.getTransactionsNumber());
+		// There should be one in archive
+		assertEquals(1, archiveData.getTransactionsNumber());
+		for (int i=0;i<archiveData.getAccountsNumber();i++) {
+			Account archiveAccount = archiveData.getAccount(i);
+			assertFalse(archiveAccount.getTransactionsNumber()==0);
+			// Difference between final archive balance and initial balance of common account should not change
+			finalAccount1Diff = archiveAccount.getBalanceData().getFinalBalance()-data.getAccount(archiveAccount.getName()).getInitialBalance();
+			assertTrue(GlobalData.AMOUNT_COMPARATOR.compare(account1Diff,finalAccount1Diff)==0);
+		}
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testNotAnArchive() {
 		GlobalData archiveData = buildArchiveData();
-		archiveData.setArchive(false);
 		GlobalData data = buildData();
 		Transaction[] transactions = new Transaction[data.getTransactionsNumber()];
 		for (int i = 0; i < transactions.length; i++) {
 			transactions[i] = data.getTransaction(i);
 		}
-		Archiver.archive (archiveData, transactions);
+		archiveData.setArchive(false);
+		ARCHIVER.move (data, archiveData, transactions, true);
+	}
+
+	@Test (expected=IllegalArgumentException.class)
+	public void testArchive() {
+		GlobalData archiveData = buildArchiveData();
+		GlobalData data = buildData();
+		data.setArchive(true);
+		Transaction[] transactions = new Transaction[data.getTransactionsNumber()];
+		for (int i = 0; i < transactions.length; i++) {
+			transactions[i] = data.getTransaction(i);
+		}
+		ARCHIVER.move (data, archiveData, transactions, true);
 	}
 
 	protected GlobalData buildArchiveData() {
