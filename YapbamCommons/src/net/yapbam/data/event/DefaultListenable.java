@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.slf4j.LoggerFactory;
+
 /** A listenable class allows some other classes to listen to the events occurring on the listenable class.
  *	<br>Please note that the following java system properties may be used to track the events:<ul>
- *		<li>if the traceAll system property is set to true, all data events are traced on stderr.<li> 
- *		<li>if the traceEvents system property is set to true, every event sent is traced on stderr.<li> 
- *		<li>if the traceEventListeners system property is set to true, the modifications in the listeners list are traced on stderr.<li>
+ *		<li>if the traceAll system property is set to true, all data events are logged with level debug.</li> 
+ *		<li>if the traceEvents system property is set to true, every event sent logged with level debug.</li> 
+ *		<li>if the traceEventListeners system property is set to true, the modifications in the listeners list are logged with level debug.</li>
  *	</ul>
+ *	Logs are written with <a href="http://www.slf4j.org/">slf4j</a> on the logger returned by LoggerFactory.getLogger(DefaultListenable.class)
  */
 public abstract class DefaultListenable {
 	private static final boolean TRACE_LISTENERS = Boolean.getBoolean("traceEventListeners"); //$NON-NLS-1$
@@ -74,10 +77,12 @@ public abstract class DefaultListenable {
 	}
 	
 	private void trace (String message) {
+		StringBuilder builder = new StringBuilder(indent+message.length());
 		for (int i = 0; i < indent; i++) {
-			System.err.print(' ');
+			builder.append(' ');
 		}
-		System.err.println(message);
+		builder.append(message);
+		LoggerFactory.getLogger(getClass()).debug(message);
 	}
 
 	/** Adds a new listener on this.
@@ -88,7 +93,7 @@ public abstract class DefaultListenable {
 			this.listeners = new ArrayList<DataListener>();
 		}
 		if (TRACE_ALL || TRACE_LISTENERS) {
-			System.err.println ("Add listener "+listener+" on "+this); //$NON-NLS-1$ //$NON-NLS-2$
+			LoggerFactory.getLogger(getClass()).debug("Add listener {} on {}",listener,this); //$NON-NLS-1$
 		}
 		listeners.add(listener);
 	}
@@ -97,7 +102,7 @@ public abstract class DefaultListenable {
 	 */
 	public void clearListeners() {
 		if (TRACE_ALL || TRACE_LISTENERS) {
-			System.err.println ("All listeners are cleared on "+this); //$NON-NLS-1$
+			LoggerFactory.getLogger(getClass()).debug("All listeners are cleared on "+this); //$NON-NLS-1$
 		}
 		this.listeners.clear();
 	}
