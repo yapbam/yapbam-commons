@@ -36,8 +36,8 @@ public class ECBCurrencyConverter extends AbstractXMLCurrencyConverter {
 						// See http://code.google.com/p/android/issues/detail?id=14963
 						getData().setReferenceDate(df.parse(date + " 13:15 GMT").getTime()); //$NON-NLS-1$
 					} catch (ParseException e) {
-						System.out.println (java.util.Arrays.asList(ids));
-						throw new SAXException("Cannot parse reference date: " + date); //$NON-NLS-1$
+						throw new SAXException("Cannot parse reference date: " + date + //$NON-NLS-1$
+								". Available time zones are: "+java.util.Arrays.asList(ids)); //$NON-NLS-1$
 					}
 				}
 				String currency = attributes.getValue("currency"); //$NON-NLS-1$

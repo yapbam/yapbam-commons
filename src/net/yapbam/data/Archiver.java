@@ -9,30 +9,48 @@ import java.util.Map.Entry;
 import net.yapbam.util.NullUtils;
 
 /** Transaction archiver.
- * <br>This class provides methods to transfer transactions from a GlobalData instance to another.
- * <br>The move has to phases:<ol>
- * <li>First we copy the moved transactions to the archive with {@link #copy(GlobalData, GlobalData, Transaction[], boolean)} method.</li>
- * <li>Second, we remove the transactions from the Global data instance with {@link #remove(GlobalData, GlobalData, Transaction[], boolean)}.</li></ol>
- * This two step process allows the developer to save the archive before destroying transactions from the GlobalData instance.
- * <br>Of course if the archive save fails, it should be a good idea to not remove transactions from their origin.
+ * <br>This class provides a method to transfer transactions from a GlobalData instance to an archive and the opposite.
  */
 public abstract class Archiver {
+	/** Constructor.
+	 */
 	protected Archiver() {
 		super();
 	}
 	
+	/** Moves some transactions to or from an archive.
+	 * <br>Missing account, modes and categories are created in the destination GlobalData.
+	 * <br>Modified modes are modified in the GlobalData destination if argument {@code toArchive} is true.
+	 * <br>The initial balances of accounts in {@code data} are updated.
+	 * @param data The GlobalData "standard" instance.
+	 * @param archive The archive.
+	 * @param transactions The transactions to move.
+	 * @param toArchive true to move transactions to archive. False to move them back to "standard" instance.
+	 * @return true if the move was made successfully
+	 * @throws IllegalArgumentException if archive.isArchive() is false or data.isArchive() is true.
+	 * @see GlobalData#isArchive()
+	 */
 	public final boolean move(GlobalData data, GlobalData archive, Transaction[] transactions, boolean toArchive) {
+		// The move has to phases:
+		// - First we copy the moved transactions to the destination with {@link #copy(GlobalData, GlobalData, Transaction[], boolean)} method.
+		// - Second, we remove the transactions from the source instance with {@link #remove(GlobalData, GlobalData, Transaction[], boolean)}.
+		// This two step process allows us to save the destination before destroying transactions from the source.
+		// Of course if the archive save fails, we do not remove transactions from their origin.
 		copy(data, archive, transactions, toArchive);
 		if (save(toArchive?archive:data)) {
 			remove(data, archive, transactions, toArchive);
 			if (!toArchive) {
-				save(archive);
+				return save(archive);
 			}
 			return true;
 		}
 		return false;
 	}
 	
+	/** Saves the data to disk.
+	 * @param data The data to save.
+	 * @return true if the data was successfully saved.
+	 */
 	protected abstract boolean save(GlobalData data);
 	
 	/** Copies some transactions to or from an archive.
