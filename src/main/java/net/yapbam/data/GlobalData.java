@@ -23,6 +23,8 @@ import net.yapbam.util.NullUtils;
  *  @see FilteredData
  */
 public class GlobalData extends DefaultListenable {
+	private static final char DEFAULT_CATEGORY_SEPARATOR = '.';
+	
 	private List<Account> accounts;
 	private List<Category> categories;
 	private List<PeriodicalTransaction> periodicals;
@@ -146,8 +148,7 @@ public class GlobalData extends DefaultListenable {
 	 * @return true if the data is empty
 	 */
 	public boolean isEmpty() {
-		//FIXME Doesn't make what comment says!!!
-		return this.accounts.isEmpty();
+		return this.accounts.isEmpty() && this.getCategoriesNumber()==1 && this.getSubCategorySeparator()==DEFAULT_CATEGORY_SEPARATOR;
 	}
 	
 	/** Tests if the data needs to be saved.
@@ -523,7 +524,7 @@ public class GlobalData extends DefaultListenable {
 	public void clear() {
 		this.categories = new ArrayList<Category>();
 		this.categories.add(Category.UNDEFINED);
-		this.subCategorySeparator = '.';
+		this.subCategorySeparator = DEFAULT_CATEGORY_SEPARATOR;
 		this.accounts = new ArrayList<Account>();
 		this.periodicals = new ArrayList<PeriodicalTransaction>();
 		this.transactions = new ArrayList<Transaction>();
