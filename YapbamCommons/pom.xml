@@ -8,7 +8,7 @@
 	</parent>
 
 	<artifactId>yapbam-commons</artifactId>
-	<version>1.7.0</version>
+	<version>1.7.1</version>
 
 	<scm>
 		<url>http://svn.code.sf.net/p/yapbam/code/</url>
@@ -45,24 +45,6 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>src</sourceDirectory>
-		<testSourceDirectory>junitTests</testSourceDirectory>
-		<resources>
-			<resource>
-				<directory>src</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
-		<testResources>
-			<testResource>
-				<directory>junitTests</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</testResource>
-		</testResources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><DATA version="1" nbAccounts="1" nbCategories="2" subCategorySeparator="." nbPeriodicalTransactions="0" nbTransactions="1">
+<ACCOUNT id="Mon compte" initialBalance="100.0" alertThresholdLess="-Infinity" alertThresholdMore="Infinity">
+<MODE id="CB">
+<EXPENSE stopDay="15" debtDay="31" kind="deferred"/>
+<RECEIPT stopDay="15" debtDay="31" kind="deferred"/>
+</MODE>
+</ACCOUNT>
+<CATEGORY id="Test"/>
+<TRANSACTION account="Mon compte" description="Opération" date="2013/9/30" amount="-50.0" mode="CB" category="Test" valueDate="2013/10/31"/>
+</DATA>
