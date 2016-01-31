@@ -1,0 +1,14 @@
+<list version="1.0">
+<meta>
+<type>resource-list</type>
+</meta>
+<resources start="0" count="168">
+<resource classname="Quote">
+<field name="name">USD/USD</field>
+<field name="price">1.000000</field>
+<field name="symbol">USD=X</field>
+<field name="ts">1387556952</field>
+<field name="type">currency</field>
+<field name="utctime">2013-12-20T16:29:12+0000</field>
+<field name="volume">0</field>
+</resource>
