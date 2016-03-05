@@ -12,7 +12,7 @@ import net.yapbam.data.Transaction;
  * @param <T> The type of the value we are trying to guess.
  */
 public abstract class AbstractTransactionWizard<T> {
-	private static final int MILLIS_PER_DAY = 60000 * 24;
+	private static final int MILLIS_PER_DAY = 3600000 * 24;
 	/** The global data used to guess. */
 	protected GlobalData data;
 	/** The guessed value. */ 
@@ -59,7 +59,7 @@ public abstract class AbstractTransactionWizard<T> {
 	 * @return a double
 	 */
 	public static double getRankingBasedOnDate(long now, Transaction transaction) {
-		// we will use a function between 0 (for very, very old ones) and 1 for recent one.
+		// We use a function between 0 (for very, very old ones) and 1 for recent one.
 		// Probably this function could be improved ...
 		long time = Math.abs(transaction.getDate().getTime() - now) / MILLIS_PER_DAY;
 		return 2 / Math.sqrt(time + 4);
