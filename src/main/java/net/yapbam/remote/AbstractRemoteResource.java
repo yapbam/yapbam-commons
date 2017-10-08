@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 
 import net.yapbam.remote.Cache;
+import net.yapbam.util.CoolHttpConnection;
 import net.yapbam.util.StreamUtils;
 
 import org.slf4j.Logger;
@@ -217,15 +218,16 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 		if (url==null) {
 			throw new FileNotFoundException();
 		}
-		URLConnection connection = url.openConnection(proxy);
-		if (connection instanceof HttpURLConnection) {
-			HttpURLConnection ct = (HttpURLConnection) connection;
-			int errorCode = ct.getResponseCode();
+		if (url.getProtocol().equalsIgnoreCase("https") || url.getProtocol().equalsIgnoreCase("http")) {
+			CoolHttpConnection connection = new CoolHttpConnection(url, proxy);
+			int errorCode = connection.getResponseCode();
 			if (errorCode != HttpURLConnection.HTTP_OK) {
 				throw new IOException(MessageFormat.format("Http Error {1} when opening {0}", url, errorCode)); //$NON-NLS-1$
 			}
-		}
 		return connection.getInputStream();
+		} else {
+			return url.openStream();
+		}
 	}
 	
 	/**

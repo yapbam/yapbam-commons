@@ -53,7 +53,7 @@ public class ECBCurrencyConverter extends AbstractXMLCurrencyConverter {
 		}
 	}
 
-	private static final String ECB_RATES_URL = "http://www.ecb.int/stats/eurofxref/eurofxref-daily.xml"; //$NON-NLS-1$
+	private static final String ECB_RATES_URL = "https://www.ecb.int/stats/eurofxref/eurofxref-daily.xml"; //$NON-NLS-1$
 	
 	/**
 	 * Constructor.
