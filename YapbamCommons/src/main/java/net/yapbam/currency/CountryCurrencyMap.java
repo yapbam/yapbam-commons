@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.LoggerFactory;
+
 /** A map between countries and currencies.
  * <br>This map is based on java internal data.
  * <br>This means that its content is related to the java version used, not to an "always uptodate" Internet source.
@@ -33,7 +35,15 @@ public class CountryCurrencyMap {
 		this.currencyToCountries = new HashMap<String, Set<String>>();
 		String[] isoCountries = Locale.getISOCountries();
 		for (String isoCountry : isoCountries) {
-			Currency currency = Currency.getInstance(new Locale("", isoCountry));
+			Currency currency = null;
+			try {
+				currency = Currency.getInstance(new Locale("", isoCountry));
+			} catch (IllegalArgumentException e) {
+				// Google is not able to copy API with no mistake. That funny boys find nothing more stupid
+				// than return non ISO 3166 countries in Locale.getIsoCountries(). So that strange code is
+				// just to have no error on Android.
+				LoggerFactory.getLogger(getClass()).warn("Fucking country returned by Locale.getISOCountries(): {}",isoCountry);
+			}
 			if (currency==null) {
 				this.countryToCurrency.put(isoCountry, null);
 			} else {
