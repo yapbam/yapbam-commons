@@ -21,12 +21,13 @@ public abstract class Base64Encoder {
 	public static String encode(byte[] bytes) {
 		try {
 			try {
-				// Java desktop
-				Class<?> class1 = Class.forName("javax.xml.bind.DatatypeConverter");
-				Method method = class1.getMethod("printBase64Binary", new Class<?>[]{byte[].class});
-				return (String) method.invoke(null, bytes);
+				return doJava8(bytes);
 			} catch (ClassNotFoundException e) { // NOSONAR No need to rethrow this exception, it simply denotes we are not on a java desktop machine
-				return doAndroid(bytes);
+				try {
+					return doOldJava(bytes);
+				} catch (ClassNotFoundException e1) { // NOSONAR No need to rethrow this exception, it simply denotes we are not on a java desktop machine
+					return doAndroid(bytes);
+				}
 			}
 		} catch (NoSuchMethodException e) {
 			throw new UnsupportedOperationException(e);
@@ -35,6 +36,20 @@ public abstract class Base64Encoder {
 		} catch (InvocationTargetException e) {
 			throw new UnsupportedOperationException(e);
 		}
+	}
+	
+	private static String doJava8(byte[] bytes) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		Class<?> class1 = Class.forName("java.util.Base64");
+		Method staticMethod = class1.getMethod("getEncoder", new Class<?>[]{});
+		Object instance = staticMethod.invoke(null, new Object[0]);
+		Method method = instance.getClass().getMethod("encode", new Class<?>[]{byte[].class});
+		return new String((byte[])method.invoke(instance, bytes));
+	}
+
+	private static String doOldJava(byte[] bytes) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		Class<?> class1 = Class.forName("javax.xml.bind.DatatypeConverter");
+		Method method = class1.getMethod("printBase64Binary", new Class<?>[]{byte[].class});
+		return (String) method.invoke(null, bytes);
 	}
 
 	private static String doAndroid(byte[] bytes) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
