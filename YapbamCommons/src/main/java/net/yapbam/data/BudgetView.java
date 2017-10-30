@@ -19,6 +19,7 @@ import net.yapbam.util.DateUtils;
 public class BudgetView extends DefaultListenable {
 	private FilteredData data;
 	private boolean year;
+	private boolean valueDate;
 	private Map<Key, Double> values;
 	private Calendar firstDate;
 	private Calendar lastDate;
@@ -107,6 +108,17 @@ public class BudgetView extends DefaultListenable {
 	public void setYear(boolean year) {
 		if (year!=this.year) {
 			this.year = year;
+			update();
+		}
+	}
+	
+	/** Sets the "per transaction date" or "per value date" state of this budget.
+	 * Budget is automatically computed when this attribute change.
+	 * @param valueDate true to set this budget on a per value date basis.
+	 */
+	public void setValueDate(boolean valueDate) {
+		if (valueDate!=this.valueDate) {
+			this.valueDate = valueDate;
 			update();
 		}
 	}
@@ -248,7 +260,7 @@ public class BudgetView extends DefaultListenable {
 		
 		for (int i = 0; i < data.getTransactionsNumber(); i++) {
 			Transaction transaction = data.getTransaction(i);
-			Date date = getNormalizedDate(transaction.getDate());
+			Date date = getNormalizedDate(this.valueDate?transaction.getValueDate():transaction.getDate());
 			for (int j = 0; j < transaction.getSubTransactionSize(); j++) {
 				SubTransaction subTransaction = transaction.getSubTransaction(j);
 				if (this.data.getFilter().isOk(subTransaction)) {
