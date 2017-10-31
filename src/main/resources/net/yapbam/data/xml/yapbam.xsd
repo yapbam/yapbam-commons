@@ -1,144 +1,181 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="DATA">
-    <xs:complexType>
+    <xs:complexType mixed="true">
       <xs:sequence>
-        <xs:element name="ACCOUNT" maxOccurs="unbounded" minOccurs="0">
-          <xs:complexType mixed="true">
-            <xs:sequence>
-              <xs:element name="MODE" maxOccurs="unbounded" minOccurs="0">
-                <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="EXPENSE" minOccurs="0" maxOccurs="1">
-                      <xs:complexType>
-                        <xs:simpleContent>
-                          <xs:extension base="xs:string">
-                            <xs:attribute type="xs:string" name="kind" use="optional"/>
-                            <xs:attribute type="xs:byte" name="period" use="optional"/>
-                            <xs:attribute type="xs:int" name="stopDay" use="optional"/>
-                            <xs:attribute type="xs:int" name="debtDay" use="optional"/>
-                          </xs:extension>
-                        </xs:simpleContent>
-                      </xs:complexType>
-                    </xs:element>
-                    <xs:element name="RECEIPT" minOccurs="0"  maxOccurs="1">
-                      <xs:complexType>
-                        <xs:simpleContent>
-                          <xs:extension base="xs:string">
-                            <xs:attribute type="xs:string" name="kind" use="optional"/>
-                            <xs:attribute type="xs:byte" name="period" use="optional"/>
-                            <xs:attribute type="xs:int" name="stopDay" use="optional"/>
-                            <xs:attribute type="xs:int" name="debtDay" use="optional"/>
-                          </xs:extension>
-                        </xs:simpleContent>
-                      </xs:complexType>
-                    </xs:element>
-                  </xs:sequence>
-                  <xs:attribute type="xs:string" name="id" use="required"/>
-                  <xs:attribute type="xs:string" name="checkbook" use="optional"/>
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="CHECKBOOK" maxOccurs="unbounded" minOccurs="0">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="prefix" use="required"/>
-                      <xs:attribute type="xs:int" name="first" use="required"/>
-                      <xs:attribute type="xs:int" name="size" use="required"/>
-                      <xs:attribute type="xs:int" name="next" use="optional"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-            <xs:attribute type="xs:string" name="id" use="required"/>
-            <xs:attribute type="xs:double" name="initialBalance" use="required"/>
-            <!-- WARNING: We allow string attributes (instead of double) for the two following attributes,
-            because INFINITY is a valid value for them and schema verification fails on such values. -->
-            <xs:attribute type="xs:string" name="alertThresholdLess" use="optional"/>
-            <xs:attribute type="xs:string" name="alertThresholdMore" use="optional"/>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="CATEGORY" maxOccurs="unbounded" minOccurs="0">
-          <xs:complexType>
-            <xs:simpleContent>
-              <xs:extension base="xs:string">
-                <xs:attribute type="xs:string" name="id" use="required"/>
-              </xs:extension>
-            </xs:simpleContent>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="PERIODICAL" maxOccurs="unbounded" minOccurs="0">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="DATE_STEPPER" minOccurs="0">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="kind" use="optional"/>
-                      <xs:attribute type="xs:int" name="period" use="optional"/>
-                      <xs:attribute type="xs:int" name="day" use="optional"/>
-                      <xs:attribute type="xs:string" name="last" use="optional"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="SUBTRANSACTION" maxOccurs="unbounded" minOccurs="0">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="description" use="required"/>
-                      <xs:attribute type="xs:double" name="amount" use="required"/>
-                      <xs:attribute type="xs:string" name="category" use="optional"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-            <xs:attribute type="xs:string" name="account" use="required"/>
-            <xs:attribute type="xs:string" name="description" use="optional"/>
-            <xs:attribute type="xs:string" name="comment" use="optional"/>
-            <xs:attribute type="xs:double" name="amount" use="required"/>
-            <xs:attribute type="xs:string" name="mode" use="optional"/>
-            <xs:attribute type="xs:string" name="category" use="optional"/>
-            <xs:attribute type="xs:string" name="enabled" use="optional"/>
-            <xs:attribute type="xs:string" name="next" use="optional"/>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="TRANSACTION" maxOccurs="unbounded" minOccurs="0">
-          <xs:complexType mixed="true">
-            <xs:sequence>
-              <xs:element name="SUBTRANSACTION" maxOccurs="unbounded" minOccurs="0">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="description" use="required"/>
-                      <xs:attribute type="xs:float" name="amount" use="required"/>
-                      <xs:attribute type="xs:string" name="category" use="optional"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-            <xs:attribute type="xs:string" name="account" use="required"/>
-            <xs:attribute type="xs:string" name="description" use="optional"/>
-            <xs:attribute type="xs:string" name="comment" use="optional"/>
-            <xs:attribute type="xs:double" name="amount" use="required"/>
-            <xs:attribute type="xs:string" name="mode" use="optional"/>
-            <xs:attribute type="xs:string" name="category" use="optional"/>
-            <xs:attribute type="xs:string" name="date" use="required"/>
-            <xs:attribute type="xs:string" name="valueDate" use="required"/>
-            <xs:attribute type="xs:string" name="statement" use="optional"/>
-            <xs:attribute type="xs:string" name="number" use="optional"/>
-          </xs:complexType>
-        </xs:element>
+      	<xs:element name="ACCOUNT" type="ACCOUNTType" maxOccurs="unbounded" minOccurs="0"/>
+      	<xs:element name="CATEGORY" type="CATEGORYType" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element name="FILTER" type="FILTERType" minOccurs="0" maxOccurs="unbounded"></xs:element>
+        <xs:element name="PERIODICAL" type="PERIODICALType" maxOccurs="unbounded" minOccurs="0"/>
+      	<xs:element name="TRANSACTION" maxOccurs="unbounded" minOccurs="0"/>
       </xs:sequence>
-      <xs:attribute type="xs:int" name="version" use="optional"/>
-      <xs:attribute type="xs:int" name="nbAccounts" use="optional"/>
-      <xs:attribute type="xs:int" name="nbCategories" use="optional"/>
-      <xs:attribute type="xs:string" name="subCategorySeparator" use="optional"/>
-      <xs:attribute type="xs:int" name="nbPeriodicalTransactions" use="optional"/>
-      <xs:attribute type="xs:int" name="nbTransactions" use="optional"/>
+      <xs:attribute type="xs:int" name="version"/>
+      <xs:attribute type="xs:int" name="nbAccounts"/>
+      <xs:attribute type="xs:int" name="nbCategories"/>
+      <xs:attribute type="xs:string" name="subCategorySeparator"/>
+      <xs:attribute type="xs:int" name="nbPeriodicalTransactions"/>
+      <xs:attribute type="xs:int" name="nbTransactions"/>
+      <xs:attribute type="xs:boolean" name="archive"/>
+      <xs:attribute type="xs:boolean" name="locked"/>
     </xs:complexType>
   </xs:element>
+
+	<xs:complexType name="ACCOUNTType" mixed="true">
+		<xs:sequence>
+			<xs:element name="MODE" type="MODEType" maxOccurs="unbounded" minOccurs="0"/>
+			<xs:element name="CHECKBOOK" type="CHECKBOOKType" maxOccurs="unbounded"	minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="id" use="required" />
+		<xs:attribute type="xs:double" name="initialBalance" use="required" />
+		<!-- WARNING: We allow string attributes (instead of double) for the two following attributes,
+			because INFINITY is a valid value for them and schema verification fails on such values. -->
+		<xs:attribute type="xs:string" name="alertThresholdLess" />
+		<xs:attribute type="xs:string" name="alertThresholdMore" />
+	</xs:complexType>
+
+  <xs:complexType name="MODEType">
+	<xs:sequence>
+		<xs:element name="EXPENSE" minOccurs="0" maxOccurs="1">
+			<xs:complexType>
+				<xs:simpleContent>
+					<xs:extension base="xs:string">
+						<xs:attribute type="xs:string" name="kind" />
+						<xs:attribute type="xs:byte" name="period" />
+						<xs:attribute type="xs:int" name="stopDay" />
+						<xs:attribute type="xs:int" name="debtDay" />
+					</xs:extension>
+				</xs:simpleContent>
+			</xs:complexType>
+		</xs:element>
+		<xs:element name="RECEIPT" minOccurs="0" maxOccurs="1">
+			<xs:complexType>
+				<xs:simpleContent>
+					<xs:extension base="xs:string">
+						<xs:attribute type="xs:string" name="kind" />
+						<xs:attribute type="xs:byte" name="period" />
+						<xs:attribute type="xs:int" name="stopDay" />
+						<xs:attribute type="xs:int" name="debtDay" />
+					</xs:extension>
+				</xs:simpleContent>
+			</xs:complexType>
+		</xs:element>
+	</xs:sequence>
+	<xs:attribute type="xs:string" name="id" use="required" />
+	<xs:attribute type="xs:string" name="checkbook" />
+  </xs:complexType>
+
+  <xs:complexType name="CHECKBOOKType">
+	<xs:simpleContent>
+		<xs:extension base="xs:string">
+			<xs:attribute type="xs:string" name="prefix" use="required" />
+			<xs:attribute type="xs:int" name="first" use="required" />
+			<xs:attribute type="xs:int" name="size" use="required" />
+			<xs:attribute type="xs:int" name="next" />
+		</xs:extension>
+	</xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="CATEGORYType">
+	<xs:simpleContent>
+		<xs:extension base="xs:string">
+			<xs:attribute type="xs:string" name="id" use="required" />
+		</xs:extension>
+	</xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="TRANSACTIONType" mixed="true">
+	<xs:sequence>
+		<xs:element name="SUBTRANSACTION" type="SUBTRANSACTIONType" maxOccurs="unbounded" minOccurs="0"/>
+	</xs:sequence>
+	<xs:attribute type="xs:string" name="account" use="required" />
+	<xs:attribute type="xs:string" name="description"/>
+	<xs:attribute type="xs:string" name="comment" />
+	<xs:attribute type="xs:double" name="amount" use="required" />
+	<xs:attribute type="xs:string" name="mode" />
+	<xs:attribute type="xs:string" name="category" />
+	<xs:attribute type="xs:string" name="date" use="required" />
+	<xs:attribute type="xs:string" name="valueDate" use="required" />
+	<xs:attribute type="xs:string" name="statement" />
+	<xs:attribute type="xs:string" name="number" />
+  </xs:complexType>
+
+  <xs:complexType name="SUBTRANSACTIONType">
+	<xs:simpleContent>
+		<xs:extension base="xs:string">
+			<xs:attribute type="xs:string" name="description" use="required" />
+			<xs:attribute type="xs:double" name="amount" use="required" />
+			<xs:attribute type="xs:string" name="category"/>
+		</xs:extension>
+	</xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="PERIODICALType">
+	<xs:sequence>
+		<xs:element name="DATE_STEPPER" minOccurs="0">
+			<xs:complexType>
+				<xs:simpleContent>
+					<xs:extension base="xs:string">
+						<xs:attribute type="xs:string" name="kind" />
+						<xs:attribute type="xs:int" name="period" />
+						<xs:attribute type="xs:int" name="day" />
+						<xs:attribute type="xs:string" name="last" />
+					</xs:extension>
+				</xs:simpleContent>
+			</xs:complexType>
+		</xs:element>
+		<xs:element name="SUBTRANSACTION" type="SUBTRANSACTIONType" maxOccurs="unbounded" minOccurs="0"/>
+	</xs:sequence>
+	<xs:attribute type="xs:string" name="account" use="required" />
+	<xs:attribute type="xs:string" name="description" />
+	<xs:attribute type="xs:string" name="comment" />
+	<xs:attribute type="xs:double" name="amount" use="required" />
+	<xs:attribute type="xs:string" name="mode" />
+	<xs:attribute type="xs:string" name="category" />
+	<xs:attribute type="xs:string" name="enabled" />
+	<xs:attribute type="xs:string" name="next" />
+ </xs:complexType>
+  
+  <xs:complexType name="FILTERType" mixed="true">
+  	<xs:sequence>
+	    <xs:element name="TEXT_MATCHER" type="TEXT_MATCHERType" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:sequence>
+  	<xs:attribute name="id" type="xs:string"/>
+  	<xs:attribute name="dateFrom" type="xs:string"/>
+  	<xs:attribute name="dateTo" type="xs:string"/>
+  	<xs:attribute name="valueDateFrom" type="xs:string"/>
+  	<xs:attribute name="valueDateTo" type="xs:string"/>
+  	<xs:attribute name="amountFrom" type="xs:string"/>
+  	<xs:attribute name="amountTo" type="xs:string"/>
+  	<xs:attribute name="filter">
+  		<xs:simpleType>
+  			<xs:restriction base="xs:int">
+  				<xs:minExclusive value="0"/>
+  				<xs:maxExclusive value="16"/>
+  			</xs:restriction>
+  		</xs:simpleType>
+  	</xs:attribute>
+  	<xs:attribute name="account" type="xs:string"/>
+  	<xs:attribute name="mode" type="xs:string"/>
+  	<xs:attribute name="category" type="xs:string"/>
+  	<xs:attribute name="description" type="xs:string"/>
+  	<xs:attribute name="comment" type="xs:string"/>
+  	<xs:attribute name="number" type="xs:string"/>
+  	<xs:attribute name="statement" type="xs:string"/>
+  </xs:complexType>
+  
+  <xs:complexType name="TEXT_MATCHERType">
+  	<xs:attribute name="id" type="xs:string"/>
+  	<xs:attribute name="kind">
+  		<xs:simpleType>
+  			<xs:restriction base="xs:string">
+  				<xs:enumeration value="contains"/>
+  				<xs:enumeration value="equals"/>
+  				<xs:enumeration value="regular"/>
+  			</xs:restriction>
+  		</xs:simpleType>
+  	</xs:attribute>
+  	<xs:attribute name="filter" type="xs:string"/>
+  	<xs:attribute name="caseSensitive" type="xs:boolean"/>
+  	<xs:attribute name="diacriticalSensitive" type="xs:boolean"/>
+  </xs:complexType>
 </xs:schema>

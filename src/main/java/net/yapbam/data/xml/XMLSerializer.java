@@ -37,7 +37,7 @@ public class XMLSerializer {
 	//TODO Not sure the xml schema validation allows to read all the previously saved file: Disable it by default
 	// This should be investigate by testing with real life data: A interesting way is to randomly test every
 	// Successfully read data and try it with validation. If it fails, silently post a message to a web server. 
-	private static final boolean SCHEMA_VALIDATION = Boolean.getBoolean("xml.schema.validation"); //$NON-NLS-1$
+	static boolean SCHEMA_VALIDATION = Boolean.getBoolean("xml.schema.validation"); //$NON-NLS-1$
 	private static final boolean SLOW_WRITING = Boolean.getBoolean("slowDataWriting"); //$NON-NLS-1$
 
 	private static final String EMPTY = ""; //$NON-NLS-1$
@@ -125,7 +125,7 @@ public class XMLSerializer {
 	static final String CASE_SENSITIVE_ATTRIBUTE = "caseSensitive"; //$NON-NLS-1$
 
 	private AttributesImpl atts;
-	private TransformerHandler hd;
+	private TransformerHandler hd; 
 	
 	/** Creates a new XML Serializer.
 	 * <br>The serializer outputs the xml header. After all elements are output, you should call closedocument in order
@@ -225,6 +225,10 @@ public class XMLSerializer {
 			for (int i=0;i<data.getCategoriesNumber();i++) {
 				serialize(data.getCategory(i));
 			}
+			// Filters
+			for (int i=0;i<data.getFiltersNumber();i++) {
+				serialize(data.getFilter(i));
+			}
 			// Periodical transactions
 			for (int i = 0; i < data.getPeriodicalTransactionsNumber(); i++) {
 				serialize(data.getPeriodicalTransaction(i));
@@ -254,6 +258,9 @@ public class XMLSerializer {
 	
 	public void serialize(Filter filter) throws SAXException {
 		atts.clear();
+		if (filter.getName()!=null) {
+			atts.addAttribute(EMPTY,EMPTY,ID_ATTRIBUTE,CDATA,filter.getName());
+		}
 		if (filter.getDateFrom()!=null) {
 			atts.addAttribute(EMPTY,EMPTY,FILTER_DATE_FROM_ATTRIBUTE,CDATA,toString(filter.getDateFrom()));
 		}

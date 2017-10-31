@@ -14,21 +14,45 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.security.AccessControlException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
 import net.yapbam.data.Account;
 import net.yapbam.data.Category;
+import net.yapbam.data.Filter;
 import net.yapbam.data.GlobalData;
 import net.yapbam.data.Mode;
 import net.yapbam.data.Transaction;
+import net.yapbam.util.TextMatcher;
+import net.yapbam.util.TextMatcher.Kind;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SerializerTest {
+	private static boolean previousValidation;
+
+	@BeforeClass
+	public static void init() {
+		previousValidation = XMLSerializer.SCHEMA_VALIDATION;
+		if (!previousValidation) {
+			XMLSerializer.SCHEMA_VALIDATION = true;
+		}
+	}
+	
+	@AfterClass
+	public static void tearDown() {
+		XMLSerializer.SCHEMA_VALIDATION = previousValidation;
+	}
+	
 	/** A fake output stream, that outputs nothing but keeps track of its closing. */
 	private static final class FakeOutputStream extends OutputStream {
 		private boolean closed = false;
@@ -64,7 +88,7 @@ public class SerializerTest {
 	@Test
 	public void test() throws IOException {
 		GlobalData data = new GlobalData();
-		Account account = new Account("toto", 50.24);
+		Account account = new Account("toto,x", 50.24);
 		data.add(account);
 		account = new Account("titi", -10.0);
 		data.add(account);
@@ -73,6 +97,13 @@ public class SerializerTest {
 		Transaction transaction = new Transaction(today, null, "description", "commentaire", -5.32, account, Mode.UNDEFINED, Category.UNDEFINED,
 				today, null, Collections.EMPTY_LIST);
 		data.add(transaction);
+		Filter filter = new Filter();
+		filter.setName("test");
+		filter.setAmountFilter(Filter.EXPENSES, 0.0, Double.MAX_VALUE);
+		filter.setDescriptionMatcher(new TextMatcher(Kind.CONTAINS, "extra", true, false));
+		Account[] accounts = new Account[]{data.getAccount(0), data.getAccount(1)};
+		filter.setValidAccounts(Arrays.asList(accounts));
+		data.add(filter);
 		
 		testInstance(data);
 		
@@ -126,6 +157,49 @@ public class SerializerTest {
 		}
 		assertEquals(data.getPeriodicalTransactionsNumber(), other.getPeriodicalTransactionsNumber());
 		//TODO Test if periodical transactions are the same
+		assertEquals(data.getFiltersNumber(), other.getFiltersNumber());
+		for (int i = 0; i < data.getFiltersNumber(); i++) {
+			assertFilterEquals(data.getFilter(i), other.getFilter(i));
+		}
+	}
+	
+	private void assertFilterEquals(Filter expected, Filter actual) {
+		assertEquals(expected.getName(), actual.getName());
+		assertAccountsEquals(expected.getValidAccounts(), actual.getValidAccounts());
+		assertMatcherEquals(expected.getDescriptionMatcher(), actual.getDescriptionMatcher());
+		assertMatcherEquals(expected.getCommentMatcher(), actual.getCommentMatcher());
+		assertEquals(expected.getDateFrom(), actual.getDateFrom());
+		assertEquals(expected.getDateTo(), actual.getDateTo());
+		assertEquals(expected.getValidModes(), actual.getValidModes());
+		assertEquals(expected.getMinAmount(), actual.getMinAmount(), 0.001);
+		assertEquals(expected.getMaxAmount(), actual.getMaxAmount(), 0.001);
+		assertMatcherEquals(expected.getNumberMatcher(), actual.getNumberMatcher());
+		assertEquals(expected.getValueDateFrom(), actual.getValueDateFrom());
+		assertEquals(expected.getValueDateTo(), actual.getValueDateTo());
+		assertMatcherEquals(expected.getStatementMatcher(), actual.getStatementMatcher());
+	}
+	
+	private void assertAccountsEquals(Collection<Account> expected, Collection<Account> actual) {
+		assertEquals(expected.size(), actual.size());
+		Set<String> expectedNames = new HashSet<String>();
+		for (Account account : expected) {
+			expectedNames.add(account.getName());
+		}
+		for (Account account : actual) {
+			assertTrue(expectedNames.contains(account.getName()));
+		}
+	}
+
+	private void assertMatcherEquals(TextMatcher expected, TextMatcher actual) {
+		if (expected==null) {
+			assertNull(actual);
+		} else {
+			assertNotNull(actual);
+			assertEquals(expected.getFilter(), actual.getFilter());
+			assertEquals(expected.getKind(), actual.getKind());
+			assertEquals(expected.isCaseSensitive(), actual.isCaseSensitive());
+			assertEquals(expected.isDiacriticalSensitive(), actual.isDiacriticalSensitive());
+		}
 	}
 
 	private GlobalData reread(GlobalData data) throws IOException {
@@ -138,7 +212,7 @@ public class SerializerTest {
 		}
 		
 		byte[] serialized = os.toByteArray();
-//		System.out.println (new String(serialized));
+//		System.out.println (new String(serialized)); //TODO
 		
 		ByteArrayInputStream is = new ByteArrayInputStream(serialized);
 		try {

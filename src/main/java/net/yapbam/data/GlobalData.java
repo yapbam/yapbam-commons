@@ -29,6 +29,7 @@ public class GlobalData extends DefaultListenable {
 	private List<Category> categories;
 	private List<PeriodicalTransaction> periodicals;
 	private List<Transaction> transactions;
+	private List<Filter> filters;
 	private boolean archive;
 	private boolean locked;
 	private URI uri;
@@ -528,6 +529,7 @@ public class GlobalData extends DefaultListenable {
 		this.accounts = new ArrayList<Account>();
 		this.periodicals = new ArrayList<PeriodicalTransaction>();
 		this.transactions = new ArrayList<Transaction>();
+		this.filters = new ArrayList<Filter>();
 		this.uri = null;
 		this.password = null;
 		this.somethingChanged = false;
@@ -961,5 +963,39 @@ public class GlobalData extends DefaultListenable {
 			}
 		}
 		return false;
+	}
+	
+	/** Adds a filter.
+	 * @param filter The filter to add
+	 */
+	public void add(Filter filter) {
+		this.filters.add(filter);
+		this.fireEvent(new FiltersAddedEvent(this, new Filter[]{filter}));
+		this.setChanged();
+	}
+	
+	/** Removes a filter.
+	 * @param filter The filter to be removed. If the filter is not in this, this method does nothing.
+	 */
+	public void remove(Filter filter) {
+		if (this.filters.remove(filter)) {
+			this.fireEvent(new FiltersRemovedEvent(this, new Filter[]{filter}));
+			this.setChanged();
+		}
+	}
+
+	/** Gets the number of filters.
+	 * @return an positive or null integer
+	 */
+	public int getFiltersNumber() {
+		return filters.size();
+	}
+
+	/** Gets a filter by its index. 
+	 * @param i The filter's index
+	 * @return a filter.
+	 */
+	public Filter getFilter(int i) {
+		return filters.get(i);
 	}
 }

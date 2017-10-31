@@ -24,6 +24,7 @@ public class Filter extends Observable {
 	public static final int RECEIPTS=8;
 	public static final int ALL = CHECKED+NOT_CHECKED+EXPENSES+RECEIPTS;
 
+	private String name;
 	private int filter;
 	private Set<Account> validAccounts;
 	private Set<String> validModes;
@@ -433,6 +434,7 @@ public class Filter extends Observable {
 	}
 	
 	private void init() {
+		this.name = null;
 		this.setDateFilter(null, null);
 		this.setValueDateFilter(null, null);
 		this.setValidCategories(null);
@@ -569,5 +571,20 @@ public class Filter extends Observable {
 		this.setCommentMatcher(filter.getCommentMatcher());
 		this.setNumberMatcher(filter.getNumberMatcher());
 		this.setSuspended(false);
+	}
+	
+	/** Gets this filter's name.
+	 * @return a string or null if the filter has no name.
+	 */
+	public String getName(){
+		return this.name;
+	}
+
+	/** Sets this filter's name.
+	 * @param name The new name, null to clear filter's name
+	 */
+	public void setName(String name){
+		this.name = name;
+		setChanged();
 	}
 }

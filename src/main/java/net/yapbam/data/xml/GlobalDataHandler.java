@@ -38,6 +38,7 @@ class GlobalDataHandler extends DefaultHandler {
 	private Map<String,String> tagToCData;
 	private String currentTag;
 	private Locator locator;
+	private DelegateHandler delegateHandler;
 	private boolean schemaValidation;
 	
 	//this will be called when XML-parser starts reading
@@ -77,6 +78,10 @@ class GlobalDataHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if ((report!=null) && report.isCancelled()) {
 			throw new ParsingCancelledException();
+		}
+		if (delegateHandler!=null) {
+			delegateHandler.startElement(uri, localName, qName, attributes);
+			return;
 		}
 		if (!this.schemaValidation) {
 			// A very basic alternative to schema validation. We just verify root tag is GLOBAL_DATA_TAG and is not duplicated
@@ -137,12 +142,7 @@ class GlobalDataHandler extends DefaultHandler {
 				alertThreshold = AlertThreshold.DEFAULT;
 			} else {
 				try {
-					// WARNING: xml schema allows string attributes (instead of double), because INFINITY is a valid
-					// value and schema verification fails on such values in double attributes.
-					// So, we have to verify here that attribute really contains a double.
-					String value = attributes.getValue(XMLSerializer.ALERT_THRESHOLD_MORE);
-					double max = value==null?Double.POSITIVE_INFINITY:Double.parseDouble(value);
-					alertThreshold = new AlertThreshold(Double.parseDouble(lessAttribute), max);
+					alertThreshold = new AlertThreshold(Double.parseDouble(lessAttribute), parseDouble(attributes, XMLSerializer.ALERT_THRESHOLD_MORE, Double.POSITIVE_INFINITY));
 				} catch (NumberFormatException e) {
 					throw new SAXParseException("Expecting double here", locator);
 				}
@@ -190,6 +190,9 @@ class GlobalDataHandler extends DefaultHandler {
 				LOGGER.warn("Too much value date computer"); //$NON-NLS-1$
 			}
 			vdcs[index] = vdc;
+		} else if (qName.equals(XMLSerializer.FILTER_TAG)) {
+			delegateHandler = new FilterHandler(data);
+			delegateHandler.startElement(uri, localName, qName, attributes);
 		} else if (qName.equals(XMLSerializer.TRANSACTION_TAG)) {
 			//We can't directly push the attributes because SAX may reuse the same instance to store next element's attributes.
 			this.tempData.push(buildMap(attributes));
@@ -253,10 +256,32 @@ class GlobalDataHandler extends DefaultHandler {
 		}
 	}
 
+	private double parseDouble(Attributes attributes, String attrName, double defaultValue) throws SAXParseException {
+		try {
+			// WARNING: xml schema allows string attributes (instead of double), because INFINITY is a valid
+			// value and schema verification fails on such values in double attributes.
+			// So, we have to verify here that attribute really contains a double.
+			String value = attributes.getValue(attrName);
+			return value==null?defaultValue:Double.parseDouble(value);
+		} catch (NumberFormatException e) {
+			throw new SAXParseException("Expecting double here", locator);
+		}
+	}
+
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		if ((report!=null) && report.isCancelled()) {
 			throw new ParsingCancelledException();
+		}
+		if (delegateHandler!=null) {
+			delegateHandler.endElement(uri, localName, qName);
+			if (delegateHandler.isEndTag(qName)) {
+				if (XMLSerializer.FILTER_TAG.equals(qName)) {
+					data.add(((FilterHandler)delegateHandler).getFilter());
+				}
+				delegateHandler = null;
+			}
+			return;
 		}
 		if (qName.equals(XMLSerializer.GLOBAL_DATA_TAG)) {
 			// NOTE: The following line took a very long time before being greatly optimized.
