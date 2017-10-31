@@ -16,9 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
-public class FilterHandler extends DefaultHandler {
+public class FilterHandler extends DelegateHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.class);
 	
 	private GlobalData data;
@@ -29,16 +28,21 @@ public class FilterHandler extends DefaultHandler {
 	private TextMatcher statementMatcher;
 	private int property;
 	
-
 	public FilterHandler(GlobalData data) {
 		super();
 		this.data = data;
 	}
-	
+
+	@Override
+	protected String getRootTag() {
+		return XMLSerializer.FILTER_TAG;
+	}
+
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (qName.equals(XMLSerializer.FILTER_TAG)) {
 			filter = new Filter();
+			filter.setName(attributes.getValue(XMLSerializer.ID_ATTRIBUTE));
 			Date dateFrom = DateUtils.integerToDate(XMLSerializer.toDate(attributes.getValue(XMLSerializer.FILTER_DATE_FROM_ATTRIBUTE)));
 			Date dateTo = DateUtils.integerToDate(XMLSerializer.toDate(attributes.getValue(XMLSerializer.FILTER_DATE_TO_ATTRIBUTE)));
 			filter.setDateFilter(dateFrom, dateTo);
@@ -49,7 +53,7 @@ public class FilterHandler extends DefaultHandler {
 			String amountTo = attributes.getValue(XMLSerializer.FILTER_AMOUNT_TO_ATTRIBUTE);
 			String filterString = attributes.getValue(XMLSerializer.FILTER_ATTRIBUTE);
 			property = filterString==null?Filter.ALL:Integer.parseInt(filterString);
-			filter.setAmountFilter(property, amountFrom==null?0.0:Double.parseDouble(amountFrom), amountFrom==null?Double.POSITIVE_INFINITY:Double.parseDouble(amountTo));
+			filter.setAmountFilter(property, amountFrom==null?0.0:Double.parseDouble(amountFrom), amountTo==null?Double.POSITIVE_INFINITY:Double.parseDouble(amountTo));
 
 			String accountsString = attributes.getValue(XMLSerializer.ACCOUNT_ATTRIBUTE);
 			if (accountsString!= null) {
