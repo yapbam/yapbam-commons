@@ -694,6 +694,12 @@ public class GlobalData extends DefaultListenable {
 				}
 			}
 			this.remove(removed.toArray(new PeriodicalTransaction[removed.size()]));
+			for (Filter filter : filters) {
+				List<Account> validAccounts = filter.getValidAccounts();
+				if ((validAccounts!=null) && validAccounts.remove(account)) {
+					filter.setValidAccounts(validAccounts.isEmpty() ? null : validAccounts);
+				}
+			}
 			this.accounts.remove(index);
 			this.fireEvent(new AccountRemovedEvent(this, index, account));
 			this.setChanged();
@@ -793,6 +799,12 @@ public class GlobalData extends DefaultListenable {
 		if (index>=0){
 			new CategoryUpdater(category, Category.UNDEFINED).doIt();
 			this.categories.remove(index);
+			for (Filter filter : filters) {
+				List<Category> validCategories = filter.getValidCategories();
+				if ((validCategories!=null) && validCategories.remove(category)) {
+					filter.setValidCategories(validCategories.isEmpty() ? null : validCategories);
+				}
+			}
 			this.fireEvent(new CategoryRemovedEvent(this, index, category));
 			this.setChanged();
 		}
@@ -860,9 +872,27 @@ public class GlobalData extends DefaultListenable {
 		if (index>=0){
 			new ModeUpdater(account, mode, Mode.UNDEFINED).doIt();
 			account.remove(mode);
+			for (Filter filter : filters) {
+				List<String> validModes = filter.getValidModes();
+				if ((validModes!=null) && (validModes.remove(mode.getName()))) {
+					if (!isUsedByFilteredAccounts(filter, mode)) {
+						filter.setValidModes(validModes.isEmpty()?null:validModes);
+					}
+				}
+			}
 			this.fireEvent(new ModeRemovedEvent(this, index, account, mode));
 			this.setChanged();
 		}
+	}
+	
+	boolean isUsedByFilteredAccounts(Filter filter, Mode mode) {
+		for (int i = 0; i < getAccountsNumber(); i++) {
+			Account account = getAccount(i);
+			if (filter.isOk(account) && account.getMode(mode.getName())!=null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Replaces a payment mode.
@@ -882,8 +912,31 @@ public class GlobalData extends DefaultListenable {
 			Mode oldVanished = new Mode(oldMode.getName(), oldMode.getReceiptVdc(), oldMode.getExpenseVdc(), oldMode.isUseCheckBook());
 			account.replace(oldMode, newMode);
 			event = new ModePropertyChangedEvent(this, account, oldVanished, oldMode);
+			for (Filter filter : filters) {
+				updateFilter(event, filter);
+			}
 			this.fireEvent(event);
 			this.setChanged();
+		}
+	}
+
+	void updateFilter(ModePropertyChangedEvent event, Filter filter) {
+		Mode oldMode;
+		if ((event.getChanges() & ModePropertyChangedEvent.NAME) != 0) {
+			List<String> validModes = filter.getValidModes();
+			oldMode = event.getOldMode();
+			if (validModes!=null && validModes.contains(oldMode.getName()) && filter.isOk(event.getAccount())) {
+				// If mode was part of the filter
+				// Add the new mode
+				if (!validModes.contains(event.getNewMode().getName())) {
+					validModes.add(event.getNewMode().getName());
+				}
+				// If mode is no more used by valid accounts, remove it
+				if (!isUsedByFilteredAccounts(filter, oldMode)) {
+					validModes.remove(oldMode.getName());
+				}
+				filter.setValidModes(validModes);
+			}
 		}
 	}
 

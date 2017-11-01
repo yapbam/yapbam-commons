@@ -154,6 +154,7 @@ public class FilteredData extends DefaultListenable {
 					}
 				} else if (event instanceof ModePropertyChangedEvent) {
 					ModePropertyChangedEvent evt = (ModePropertyChangedEvent) event;
+					FilteredData.this.data.updateFilter(evt, filter);
 					if (filter.isOk(evt.getNewMode())) {
 						fireEvent(event);
 					}
@@ -164,15 +165,7 @@ public class FilteredData extends DefaultListenable {
 					if ((validModes!=null) && (validModes.remove(removedModeName))) {
 						// If the suppressed mode belongs to the filter modes list
 						// We have to remove it if it is no more a mode of the one of the valid accounts of the filter.
-						boolean needRemoving = true;
-						for (int i = 0; i < FilteredData.this.data.getAccountsNumber(); i++) {
-							Account account = FilteredData.this.getGlobalData().getAccount(i);
-							if (filter.isOk(account) && (account.indexOf(evt.getMode())>=0)) {
-								needRemoving = false;
-								break;
-							}
-						}
-						if (needRemoving) {
+						if (!FilteredData.this.data.isUsedByFilteredAccounts(filter, evt.getMode())) {
 							filter.setValidModes(validModes.isEmpty()?null:validModes);
 							fireEvent (event);
 						}
