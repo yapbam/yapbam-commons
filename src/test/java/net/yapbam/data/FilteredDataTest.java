@@ -2,47 +2,24 @@ package net.yapbam.data;
 
 import java.util.Arrays;
 
-import net.yapbam.date.helpers.DateStepper;
+import net.yapbam.data.GlobalDataTest.TestData;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 /** Test of FilteredData.*/
 public class FilteredDataTest {
-	private static class TestData {
-		Account[] accounts;
-		Category[] categories;
-		Mode[] modes;
-		FilteredData fData;
-		
-		TestData() {
-			accounts = new Account[]{new Account("Toto", 0.0), new Account("Titi", 0.0), new Account("Tutu", 0.0)};
-			categories = new Category[]{new Category("cat0"), new Category("cat1"), new Category("cat2")};
-			modes = new Mode[]{new Mode("mode0", DateStepper.IMMEDIATE, DateStepper.IMMEDIATE, false), new Mode("mode1", DateStepper.IMMEDIATE, DateStepper.IMMEDIATE, false)};
-			// Build the global data
-			GlobalData gData = new GlobalData();
-			fData = new FilteredData(gData);
-			for (Account account : accounts) {
-				gData.add(account);
-			}
-			for (Category category : categories) {
-				gData.add(category);
-			}
-			for (Mode mode : modes) {
-				gData.getAccount(0).add(mode);
-			}
-		}
-	}
-	
 	@Test
 	public void testFilterUpdateWhenRemoving() {
 		TestData data = new TestData();
 
 		// Do the tests
 		// Test mode removing
-		data.fData.getFilter().setValidModes(Arrays.asList(new String[]{data.modes[0].getName()}));
+		data.fData.getFilter().setValidModes(Arrays.asList(data.modes[0].getName(), data.modes[1].getName()));
 		data.fData.getGlobalData().remove(data.fData.getGlobalData().getAccount(0), data.modes[0]);
-		assertNull(data.fData.getFilter().getValidModes());
+		assertEquals(2,data.fData.getFilter().getValidModes().size());
+		data.fData.getGlobalData().remove(data.fData.getGlobalData().getAccount(0), data.modes[1]);
+		assertEquals(1,data.fData.getFilter().getValidModes().size());
 		// Test account removing
 		data.fData.getFilter().setValidAccounts(Arrays.asList(new Account[]{data.accounts[0], data.accounts[1]}));
 		data.fData.getGlobalData().remove(data.accounts[1]);
