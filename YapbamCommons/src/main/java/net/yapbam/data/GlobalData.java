@@ -1022,6 +1022,11 @@ public class GlobalData extends DefaultListenable {
 	 * @param filter The filter to add
 	 */
 	public void add(Filter filter) {
+		if (filter.getName()==null) {
+			throw new IllegalArgumentException("Filter should have a name");
+		} else if (getFilter(filter.getName())!=null) {
+			throw new IllegalArgumentException("Filter "+filter.getName()+" already exists");
+		}
 		this.filters.add(filter);
 		this.fireEvent(new FiltersAddedEvent(this, new Filter[]{filter}));
 		this.setChanged();
@@ -1050,5 +1055,21 @@ public class GlobalData extends DefaultListenable {
 	 */
 	public Filter getFilter(int i) {
 		return filters.get(i);
+	}
+
+	/** Gets a filter by its name. 
+	 * @param name The filter's name
+	 * @return a filter or null if no filter has this name.
+	 */
+	public Filter getFilter(String name) {
+		if (name==null) {
+			return null;
+		}
+		for (Filter filter : filters) {
+			if (name.equals(filter.getName())) {
+				return filter;
+			}
+		}
+		return null;
 	}
 }
