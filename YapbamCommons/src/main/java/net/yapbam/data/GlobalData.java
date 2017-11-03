@@ -11,6 +11,8 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +79,14 @@ public class GlobalData extends DefaultListenable {
 				return 0;
 			}
 			return o1<o2?-1:1;
+		}
+	};
+	
+	private final Observer FILTER_OBSERVER = new Observer() {
+		@Override
+		public void update(Observable o, Object arg) {
+			GlobalData.this.fireEvent(new FilterPropertyChangedEvent(GlobalData.this, (Filter)o));
+			GlobalData.this.setChanged(true);
 		}
 	};
 	
@@ -1028,6 +1038,7 @@ public class GlobalData extends DefaultListenable {
 			throw new IllegalArgumentException("Filter "+filter.getName()+" already exists");
 		}
 		this.filters.add(filter);
+		filter.addObserver(FILTER_OBSERVER);
 		this.fireEvent(new FiltersAddedEvent(this, new Filter[]{filter}));
 		this.setChanged();
 	}
@@ -1037,6 +1048,7 @@ public class GlobalData extends DefaultListenable {
 	 */
 	public void remove(Filter filter) {
 		if (this.filters.remove(filter)) {
+			filter.deleteObserver(FILTER_OBSERVER);
 			this.fireEvent(new FiltersRemovedEvent(this, new Filter[]{filter}));
 			this.setChanged();
 		}
