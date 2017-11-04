@@ -1005,6 +1005,7 @@ public class GlobalData extends DefaultListenable {
 		locked = src.isLocked();
 		accounts = src.accounts;
 		categories = src.categories;
+		filters = src.filters;
 		subCategorySeparator = src.subCategorySeparator;
 		periodicals = src.periodicals;
 		transactions = src.transactions;
