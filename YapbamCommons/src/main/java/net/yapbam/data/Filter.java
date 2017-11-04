@@ -584,7 +584,9 @@ public class Filter extends Observable {
 	 * @param name The new name, null to clear filter's name
 	 */
 	public void setName(String name){
-		this.name = name;
-		setChanged();
+		if (!NullUtils.areEquals(this.name, name)) {
+			this.name = name;
+			setChanged();
+		}
 	}
 }
