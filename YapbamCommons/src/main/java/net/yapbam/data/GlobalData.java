@@ -86,7 +86,7 @@ public class GlobalData extends DefaultListenable {
 		@Override
 		public void update(Observable o, Object arg) {
 			GlobalData.this.fireEvent(new FilterPropertyChangedEvent(GlobalData.this, (Filter)o));
-			GlobalData.this.setChanged(true);
+			GlobalData.this.setChanged();
 		}
 	};
 	
@@ -1005,7 +1005,13 @@ public class GlobalData extends DefaultListenable {
 		locked = src.isLocked();
 		accounts = src.accounts;
 		categories = src.categories;
-		filters = src.filters;
+		filters = new ArrayList<Filter>();
+		for (Filter filter : src.filters) {
+			Filter copy = new Filter();
+			copy.copy(filter);
+			this.filters.add(copy);
+			copy.addObserver(FILTER_OBSERVER);
+		}
 		subCategorySeparator = src.subCategorySeparator;
 		periodicals = src.periodicals;
 		transactions = src.transactions;
