@@ -570,6 +570,7 @@ public class Filter extends Observable {
 		this.setDescriptionMatcher(filter.getDescriptionMatcher());
 		this.setCommentMatcher(filter.getCommentMatcher());
 		this.setNumberMatcher(filter.getNumberMatcher());
+		this.setName(filter.getName());
 		this.setSuspended(false);
 	}
 	
