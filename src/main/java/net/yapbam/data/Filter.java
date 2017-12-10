@@ -556,11 +556,7 @@ public class Filter extends Observable {
 	 */
 	public void copy(Filter filter) {
 		this.setSuspended(true);
-		if (this.minAmount!=filter.minAmount || this.maxAmount!=filter.maxAmount) {
-			setChanged();
-		}
-		this.minAmount = filter.minAmount;
-		this.maxAmount = filter.maxAmount;
+		this.setAmountFilter(filter.filter, filter.minAmount, filter.maxAmount);
 		this.setStatementFilter(filter.filter, filter.statementMatcher);
 		this.setValidAccounts(filter.getValidAccounts());
 		this.setValidModes(filter.getValidModes());
