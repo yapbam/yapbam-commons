@@ -156,18 +156,17 @@ public class BudgetView extends DefaultListenable {
 	 * (example: January the first for a year)
 	 * @see #getLastDate(int)
 	 */
-	@SuppressWarnings("deprecation")
 	public Date getDate(int index) {
 		if (index>=getDatesSize()) {
 			throw new ArrayIndexOutOfBoundsException(index);
 		}
+		Calendar c = (Calendar) this.firstDate.clone();
 		if (year) {
-			return new Date(firstDate.get(Calendar.YEAR)-1900+index, 0, 1);
+			c.set(c.get(Calendar.YEAR)+index, 0, 1);
 		} else {
-			Calendar c = (Calendar) this.firstDate.clone();
 			c.add(Calendar.MONTH, index);
-			return c.getTime();
 		}
+		return c.getTime();
 	}
 
 
@@ -178,19 +177,18 @@ public class BudgetView extends DefaultListenable {
 	 * (example: December 31 for a year)
 	 * @see #getDate(int)
 	 */
-	@SuppressWarnings("deprecation")
 	public Date getLastDate(int index) {
 		if (index>=getDatesSize()) {
 			throw new ArrayIndexOutOfBoundsException(index);
 		}
+		Calendar c = (Calendar) this.firstDate.clone();
 		if (year) {
-			return new Date(firstDate.get(Calendar.YEAR)+index, 11, 31);
+			c.set(c.get(Calendar.YEAR)+index, 11, 31);
 		} else {
-			Calendar c = (Calendar) this.firstDate.clone();
 			c.add(Calendar.MONTH, index);
 			c.set(Calendar.DATE, c.getActualMaximum(Calendar.DATE));
-			return c.getTime();
 		}
+		return c.getTime();
 	}
 	
 	/** Gets the amount for a date and a category.
