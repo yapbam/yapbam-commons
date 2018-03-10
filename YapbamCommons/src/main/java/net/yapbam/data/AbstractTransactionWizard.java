@@ -62,7 +62,7 @@ public abstract class AbstractTransactionWizard<T> {
 		// We use a function between 0 (for very, very old ones) and 1 for recent one.
 		// Probably this function could be improved ...
 		long time = Math.abs(transaction.getDate().getTime() - now) / MILLIS_PER_DAY;
-		return 2 / Math.sqrt(time + 4);
+		return 2 / Math.sqrt(time + 4.0);
 	}
 	
 	/** Gets the key in a map with the highest value.

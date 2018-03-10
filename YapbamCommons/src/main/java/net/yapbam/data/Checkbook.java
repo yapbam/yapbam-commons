@@ -105,7 +105,7 @@ public class Checkbook implements Serializable {
 	 * @see #getFirst()
 	 */
 	public BigInteger getLast() {
-		return this.firstNumber.add(BigInteger.valueOf(size-1));
+		return this.firstNumber.add(BigInteger.valueOf(size-1L));
 	}
 
 	/** Gets the total number of checks.
