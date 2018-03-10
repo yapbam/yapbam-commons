@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /** An abstract transaction.
  * These transactions have a description, an amount, an account, a mode, a category and a list of subtransactions.
@@ -11,7 +12,7 @@ import java.util.List;
 public abstract class AbstractTransaction implements Cloneable, Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private static volatile long currentId = 0;
+	private static final AtomicLong CURRENT_ID = new AtomicLong();
 	
 	private long id;
 	private String description;
@@ -22,11 +23,13 @@ public abstract class AbstractTransaction implements Cloneable, Serializable {
 	private Category category;
 	private List<SubTransaction> subTransactions;
 	
-	private static synchronized void setId(AbstractTransaction transaction) {
-		if (currentId==Long.MAX_VALUE) {
+	private static void setId(AbstractTransaction transaction) {
+		long id = CURRENT_ID.getAndIncrement();
+		if (id<0) {
 			throw new RuntimeException("Transaction counter has an overflow"); //$NON-NLS-1$
+		} else {
+			transaction.id = id;
 		}
-		transaction.id = currentId++;
 	}
 
 	/**
