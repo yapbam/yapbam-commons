@@ -162,13 +162,11 @@ public class FilteredData extends DefaultListenable {
 					ModeRemovedEvent evt = (ModeRemovedEvent) event;
 					List<String> validModes = filter.getValidModes();
 					String removedModeName = evt.getMode().getName();
-					if ((validModes!=null) && (validModes.remove(removedModeName))) {
-						// If the suppressed mode belongs to the filter modes list
-						// We have to remove it if it is no more a mode of the one of the valid accounts of the filter.
-						if (!FilteredData.this.data.isUsedByFilteredAccounts(filter, evt.getMode())) {
+					// If the suppressed mode belongs to the filter modes list
+					// We have to remove it if it is no more a mode of the one of the valid accounts of the filter.
+					if (validModes!=null && validModes.remove(removedModeName) && !FilteredData.this.data.isUsedByFilteredAccounts(filter, evt.getMode())) {
 							filter.setValidModes(validModes.isEmpty()?null:validModes);
 							fireEvent (event);
-						}
 					}
 				} else if ((event instanceof NeedToBeSavedChangedEvent) || (event instanceof IsLockedChangedEvent) || (event instanceof IsArchivedChangedEvent)) {
 					fireEvent(event);

@@ -1,15 +1,11 @@
 package net.yapbam.data;
 
-import java.io.Serializable;
-
 import net.yapbam.date.helpers.DateStepper;
 import net.yapbam.util.NullUtils;
 
 /** A payment mode (Blue card, check ...).
  */
-public class Mode implements Serializable {
-	private static final long serialVersionUID = 1L;
-	
+public class Mode {
 	/** Undefined mode (usable for receipts and expenses, the date value is the operation date). */ 
 	public static final Mode UNDEFINED = new Mode("",DateStepper.IMMEDIATE, DateStepper.IMMEDIATE, false);
 	

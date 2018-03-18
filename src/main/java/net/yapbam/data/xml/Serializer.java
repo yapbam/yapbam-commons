@@ -10,7 +10,7 @@ import net.yapbam.data.*;
 
 /** The class implements xml yapbam data serialization and deserialization to (or from) an URL.
  * Currently supported URL type are :<UL>
- * <LI> file.
+ * <LI>file</LI>
  * </UL>
  */
 public class Serializer extends AbstractSerializer<GlobalData> {
@@ -68,6 +68,7 @@ public class Serializer extends AbstractSerializer<GlobalData> {
 	 * @throws AccessControlException If the password is wrong. Note that if data is not password protected, password argument is ignored
 	 * @throws UnsupportedFormatException If the format of data in the input stream is not supported
 	 */
+ 	@Override
 	public GlobalData read(String password, InputStream in, ProgressReport report) throws IOException, AccessControlException {
 		// Verify if the stream is encrypted or not
 		if (!in.markSupported()) {
@@ -85,6 +86,7 @@ public class Serializer extends AbstractSerializer<GlobalData> {
 		return super.read(password, in, report);
 	}
 	
+ 	@Override
 	public GlobalData directRead(String password, InputStream in, ProgressReport report) throws IOException {
 		GlobalData result = XMLSerializer.read(in, report);
 		if (result!=null) {
@@ -93,6 +95,7 @@ public class Serializer extends AbstractSerializer<GlobalData> {
 		return result;
 	}
 	
+	@Override
 	public boolean isPasswordOk(InputStream in, String password) throws IOException {
 		boolean isZipped = isZippedInputStream(in);
 		if (isZipped) {

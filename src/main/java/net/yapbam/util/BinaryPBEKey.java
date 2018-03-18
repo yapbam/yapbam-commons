@@ -27,14 +27,17 @@ public class BinaryPBEKey implements SecretKey {
 		}
 	}
 
+	@Override
 	public byte[] getEncoded() {
 		return (byte[]) key.clone();
 	}
 
+	@Override
 	public String getAlgorithm() {
 		return Crypto.ALGORITHM;
 	}
 
+	@Override
 	public String getFormat() {
 		return "RAW";
 	}
@@ -43,6 +46,7 @@ public class BinaryPBEKey implements SecretKey {
 	 * Calculates a hash code value for the object. Objects that are equal will
 	 * also have the same hashcode.
 	 */
+	@Override
 	public int hashCode() {
 		int ret = 0;
 
@@ -53,6 +57,7 @@ public class BinaryPBEKey implements SecretKey {
 		return ret;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -73,6 +78,7 @@ public class BinaryPBEKey implements SecretKey {
 		return ret;
 	}
 
+	@Override
 	public void destroy() {
 		Arrays.fill(this.key, (byte) 0);
 	}
@@ -81,6 +87,7 @@ public class BinaryPBEKey implements SecretKey {
 	 * Ensure that the password bytes of this key are zeroed out when there are no
 	 * more references to it.
 	 */
+	@Override
 	protected void finalize() throws Throwable {
 		try {
 			destroy();

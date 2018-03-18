@@ -1,6 +1,5 @@
 package net.yapbam.data;
 
-import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Date;
 
@@ -9,9 +8,7 @@ import java.util.Date;
  * The history itself is a list of these elements.
  * @see BalanceHistory
  */
-public class BalanceHistoryElement implements Serializable {
-	private static final long serialVersionUID = 1L;
-
+public class BalanceHistoryElement {
 	private double balance;
 	private Date from;
 	private Date to;

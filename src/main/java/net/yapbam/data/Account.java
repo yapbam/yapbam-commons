@@ -1,15 +1,12 @@
 package net.yapbam.data;
 
-import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 /** A bank account */
-public class Account implements Serializable {
-	private static final long serialVersionUID = 1L;
-	
+public class Account {
 	private String name;
 	private double initialBalance;
 	private List<Mode> modes;

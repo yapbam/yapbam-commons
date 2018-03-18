@@ -1,10 +1,7 @@
 package net.yapbam.data;
 
-import java.io.Serializable;
-
 /** A category (Food, Sport, etc ...) */
-public class Category implements Serializable, Comparable<Category> {
-	private static final long serialVersionUID = 1L;
+public class Category implements Comparable<Category> {
 	/** The undefined category. */
 	public static final Category UNDEFINED = new Category(""); //$NON-NLS-1$
 

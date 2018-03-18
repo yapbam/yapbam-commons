@@ -40,22 +40,22 @@ public abstract class Base64Encoder {
 	
 	private static String doJava8(byte[] bytes) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Class<?> class1 = Class.forName("java.util.Base64");
-		Method staticMethod = class1.getMethod("getEncoder", new Class<?>[]{});
-		Object instance = staticMethod.invoke(null, new Object[0]);
-		Method method = instance.getClass().getMethod("encode", new Class<?>[]{byte[].class});
+		Method staticMethod = class1.getMethod("getEncoder");
+		Object instance = staticMethod.invoke(null);
+		Method method = instance.getClass().getMethod("encode", byte[].class);
 		return new String((byte[])method.invoke(instance, bytes));
 	}
 
 	private static String doOldJava(byte[] bytes) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Class<?> class1 = Class.forName("javax.xml.bind.DatatypeConverter");
-		Method method = class1.getMethod("printBase64Binary", new Class<?>[]{byte[].class});
+		Method method = class1.getMethod("printBase64Binary", byte[].class);
 		return (String) method.invoke(null, bytes);
 	}
 
 	private static String doAndroid(byte[] bytes) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		try {
 			Class<?> class1 = Class.forName("android.util.Base64");
-			Method method = class1.getMethod("encode", new Class<?>[]{byte[].class, int.class});
+			Method method = class1.getMethod("encode", byte[].class, int.class);
 			int flags = class1.getField("NO_WRAP").getInt(null);
 			return new String((byte[])method.invoke(null, bytes, flags));
 		} catch (ClassNotFoundException e1) {

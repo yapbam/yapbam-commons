@@ -108,6 +108,7 @@ class CipherOutputStream extends FilterOutputStream { //NOSONAR
 	 *              if an I/O error occurs.
 	 * @since JCE1.2
 	 */
+	@Override
 	public void write(int b) throws IOException {
 		ibuffer[0] = (byte) b;
 		obuffer = cipher.update(ibuffer, 0, 1);
@@ -134,7 +135,8 @@ class CipherOutputStream extends FilterOutputStream { //NOSONAR
 	 * @see javax.crypto.CipherOutputStream#write(byte[], int, int)
 	 * @since JCE1.2
 	 */
-	public void write(byte b[]) throws IOException {
+	@Override
+	public void write(byte[] b) throws IOException {
 		write(b, 0, b.length);
 	}
 
@@ -152,7 +154,8 @@ class CipherOutputStream extends FilterOutputStream { //NOSONAR
 	 *              if an I/O error occurs.
 	 * @since JCE1.2
 	 */
-	public void write(byte b[], int off, int len) throws IOException {
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
 		obuffer = cipher.update(b, off, len);
 		if (obuffer != null) {
 			output.write(obuffer);
@@ -175,6 +178,7 @@ class CipherOutputStream extends FilterOutputStream { //NOSONAR
 	 *              if an I/O error occurs.
 	 * @since JCE1.2
 	 */
+	@Override
 	public void flush() throws IOException {
 		if (obuffer != null) {
 			output.write(obuffer);
@@ -199,6 +203,7 @@ class CipherOutputStream extends FilterOutputStream { //NOSONAR
 	 *              if an I/O error occurs.
 	 * @since JCE1.2
 	 */
+	@Override
 	public void close() throws IOException {
 		finish();
 		out.close();
