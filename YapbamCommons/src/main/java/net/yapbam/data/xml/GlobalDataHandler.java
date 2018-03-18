@@ -101,6 +101,7 @@ class GlobalDataHandler extends DefaultHandler {
 					Thread.sleep(1000);
 				}
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
 			// Verify that the version is ok
 			String dummy = attributes.getValue(XMLSerializer.VERSION_ATTRIBUTE);
@@ -334,6 +335,7 @@ class GlobalDataHandler extends DefaultHandler {
 						Thread.sleep(1);
 					} catch (InterruptedException e) {
 						// Do nothing
+						Thread.currentThread().interrupt();
 					}
 				}
 			}
@@ -346,12 +348,10 @@ class GlobalDataHandler extends DefaultHandler {
 			Date nextDate = attribute==null?null:DateUtils.integerToDate(XMLSerializer.toDate(attribute));
 			boolean enabled = Boolean.parseBoolean(attributes.get(XMLSerializer.ENABLED_ATTRIBUTE));
 			// In previous Yapbam versions, next date could be after end date. Now, it would launch an IllegalArgumentException
-			if (nextDate!=null) {
-				if ((stepper!=null) && (stepper.getLastDate()!=null) && (stepper.getLastDate().compareTo(nextDate)<0)) {
-					// If next date is after end
-					// Set the next date to "no next date"
-					nextDate = null;
-				}
+			if (nextDate!=null && stepper!=null && stepper.getLastDate()!=null && stepper.getLastDate().compareTo(nextDate)<0) {
+				// If next date is after end
+				// Set the next date to "no next date"
+				nextDate = null;
 			}
 			// In previous Yapbam versions, next date could also be null on enabled periodical transactions
 			// Now, it would launch an IllegalArgumentException

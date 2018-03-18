@@ -243,6 +243,7 @@ public class XMLSerializer {
 						Thread.sleep(1);
 					} catch (InterruptedException e) {
 						// Nothing to do
+						Thread.currentThread().interrupt();
 					}
 				}
 				serialize(data.getTransaction(i));

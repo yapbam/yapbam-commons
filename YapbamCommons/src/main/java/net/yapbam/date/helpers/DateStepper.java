@@ -7,7 +7,7 @@ import java.util.Date;
  * the next date of a periodical transaction
  */
 public abstract class DateStepper {
-	
+
 	/** A trivial value date computer, that returns the transaction date as value date.*/
 	public static final DateStepper IMMEDIATE = new DateStepper() {
 		@Override

@@ -38,7 +38,7 @@ public class GlobalData extends DefaultListenable {
 	private String password;
 	private char subCategorySeparator;
 
-	private boolean somethingChanged;
+	private transient boolean somethingChanged;
 	private boolean eventsPending;
 
 	private static Currency defaultCurrency;
@@ -234,6 +234,7 @@ public class GlobalData extends DefaultListenable {
 	/** Tests whether the events are enabled or not.
 	 * @return true if the events are enabled.
 	 */
+	@Override
 	public boolean isEventsEnabled() {
 		return super.isEventsEnabled();
 	}
@@ -884,10 +885,8 @@ public class GlobalData extends DefaultListenable {
 			account.remove(mode);
 			for (Filter filter : filters) {
 				List<String> validModes = filter.getValidModes();
-				if ((validModes!=null) && (validModes.remove(mode.getName()))) {
-					if (!isUsedByFilteredAccounts(filter, mode)) {
-						filter.setValidModes(validModes.isEmpty()?null:validModes);
-					}
+				if (validModes!=null && validModes.remove(mode.getName()) && !isUsedByFilteredAccounts(filter, mode)) {
+					filter.setValidModes(validModes.isEmpty()?null:validModes);
 				}
 			}
 			this.fireEvent(new ModeRemovedEvent(this, index, account, mode));

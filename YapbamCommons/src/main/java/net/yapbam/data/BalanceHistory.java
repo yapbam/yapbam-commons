@@ -1,6 +1,5 @@
 package net.yapbam.data;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,8 +16,7 @@ import net.yapbam.util.NullUtils;
  * @see BalanceHistoryElement
  * @see BalanceData#getBalanceHistory()
  */
-public class BalanceHistory implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class BalanceHistory {
 
 	private static final Comparator<Object> COMPARATOR = new Comparator<Object>() {
 		public int compare(Object o1, Object o2) {

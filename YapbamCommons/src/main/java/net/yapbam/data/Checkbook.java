@@ -1,6 +1,5 @@
 package net.yapbam.data;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 
@@ -9,9 +8,7 @@ import java.text.MessageFormat;
  * All the check in a checkbook share the same prefix and have consecutive numbers.
  * The concatenation of prefix and number is the check "Full number".
  */
-public class Checkbook implements Serializable {
-	private static final long serialVersionUID = 1L;
-
+public class Checkbook {
 	private String prefix;
 	private BigInteger firstNumber;
 	private int size;

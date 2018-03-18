@@ -39,7 +39,8 @@ public class DecrypterTask implements Callable<Void> {
 	public static void verifyPassword(InputStream stream, String password) throws IOException, AccessControlException {
 		byte[] digest = EncrypterTask.getDigest(password);
 		byte[] fileDigest = new byte[digest.length];
-		for (int missing=fileDigest.length; missing>0; ) {
+		int missing=fileDigest.length;
+		while (missing>0) {
 			int nb = stream.read(fileDigest, fileDigest.length-missing, missing);
 			if (nb==-1) {
 				throw new IOException("end of stream reached before end of password digest");

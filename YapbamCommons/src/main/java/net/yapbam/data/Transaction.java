@@ -1,6 +1,5 @@
 package net.yapbam.data;
 
-import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,9 +8,7 @@ import java.util.List;
 import net.yapbam.util.DateUtils;
 
 /** A bank transaction */
-public class Transaction extends AbstractTransaction implements Serializable {
-	private static final long serialVersionUID = 1L;
-	
+public class Transaction extends AbstractTransaction {
 	private int date;
 	private String number;
 	private int valueDate;

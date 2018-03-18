@@ -74,6 +74,7 @@ public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 			}
 		}
 		
+		@Override
 		public void characters(char[] buffer, int start, int length) {
 			if (this.field!=null) {
 				this.buffer.append(buffer, start, length);

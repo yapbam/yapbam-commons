@@ -20,8 +20,8 @@ public abstract class DefaultListenable {
 	private static final boolean TRACE_ALL = Boolean.getBoolean("traceAll"); //$NON-NLS-1$
 	private static int indent = 0;
 	
-	private transient Collection<DataListener> listeners;
-	private transient boolean eventsDisabled;
+	private Collection<DataListener> listeners;
+	private boolean eventsDisabled;
 	
 	/** Constructor.
 	 * <br>Events throwing is enabled.

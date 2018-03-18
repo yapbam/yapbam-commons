@@ -119,7 +119,10 @@ public abstract class AbstractSerializer<T> {
 					throw new RuntimeException(cause);
 				}
 			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+				for (Future<? extends Object> future : futures) {
+					future.cancel(true);
+				}
+				Thread.currentThread().interrupt();
 			}
 		} else {
 			directWrite(data, out, report);
@@ -205,7 +208,8 @@ public abstract class AbstractSerializer<T> {
 					throw new RuntimeException(cause);
 				}
 			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+				Thread.currentThread().interrupt();
+				return null;
 			}
 		} else {
 			// Stream is not encoded
