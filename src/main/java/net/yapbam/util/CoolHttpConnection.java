@@ -16,20 +16,31 @@ import javax.net.ssl.X509TrustManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** A Http connection that follow redirects from http to https.
+/** A Http connection that follows redirects from http to https and patches bugs in java6 and 7.
  */
 public class CoolHttpConnection {
+	private static final String HTTPS_PROTOCOL = "https";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CoolHttpConnection.class);
+	public static final boolean IS_SSL_PATCHED;
+	private static ProxiedFailover proxiedFailOver = null; 
 
 	private HttpURLConnection ct;
 	
 	static {
 		// Deactivate SSL certificate checking for old versions of java (java has its local approved certificate repository).
 		// This results in old java version to not trust recent valid certificates (here we patch versions that does not trust LetsEncrypt).
-		patchSSL();
+		IS_SSL_PATCHED = patchSSL();
 	}
 	
-	private static void patchSSL() {
+	public interface ProxiedFailover {
+		URL getProxied(URL url) throws IOException;
+	}
+	
+	public static void setProxiedFailOver(ProxiedFailover failOver) {
+		proxiedFailOver = failOver;
+	}
+	
+	private static boolean patchSSL() {
 		String javaVersion = System.getProperty("java.version");
 		boolean deactivate = false;
 		if (javaVersion.startsWith("1.8_")) {
@@ -41,13 +52,14 @@ public class CoolHttpConnection {
 			} catch (NumberFormatException e) {
 				LOGGER.warn("Unable to find java 8 release number", e);
 			}
-		} else if (javaVersion.startsWith("1.7")) {
+		} else if (javaVersion.startsWith("1.7") || javaVersion.startsWith("1.6")) {
 			deactivate = true;
 		}
 		if (deactivate) {
 			deactivateSSLCertificate();
 			LOGGER.warn("{} java version is too old, SSL certificate checking is deactivated",javaVersion);
 		}
+		return deactivate;
 	}
 
 	protected static void deactivateSSLCertificate() {
@@ -76,16 +88,61 @@ public class CoolHttpConnection {
 		}
 	}
 
-	public CoolHttpConnection(URL url, Proxy proxy) throws IOException {
-		this.ct = (HttpURLConnection) url.openConnection(proxy);
-		while (this.ct.getResponseCode()==HttpURLConnection.HTTP_MOVED_PERM || this.ct.getResponseCode()==HttpURLConnection.HTTP_MOVED_TEMP) {
-			String redirect = ct.getHeaderField("Location");
-			ct.disconnect();
-			url = new URL(redirect);
-			this.ct = (HttpURLConnection) url.openConnection(proxy);
+	public CoolHttpConnection(URL url, Proxy proxy, URL... failOvers) throws IOException {
+		try {
+			this.ct = buildConnection(url, proxy);
+		} catch (IOException e) {
+			if (!tryFailOvers(proxy, url, e, failOvers)) {
+				throw e;
+			}
+		} catch (RuntimeException e) {
+			if (!tryFailOvers(proxy, url, e, failOvers)) {
+				throw e;
+			}
 		}
 	}
 	
+	private boolean tryFailOvers(Proxy proxy, URL original, Exception e, URL... failOvers) throws IOException {
+		LOGGER.warn("Error while trying target URL "+original, e);
+		for (URL failOver : failOvers) {
+			if (tryIt(proxy, failOver)) {
+				return true;
+			}
+		}
+		if (proxiedFailOver!=null && IS_SSL_PATCHED) {
+			if (HTTPS_PROTOCOL.equals(original.getProtocol()) && tryIt(proxy, proxiedFailOver.getProxied(original))) {
+				return true;
+			}
+			for (URL failOver : failOvers) {
+				if (HTTPS_PROTOCOL.equals(failOver.getProtocol()) && tryIt(proxy, proxiedFailOver.getProxied(failOver))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean tryIt(Proxy proxy, URL failOver) {
+		try {
+			this.ct = buildConnection(failOver, proxy);
+			return true;
+		} catch (Exception ee) {
+			LOGGER.warn("Error while trying failover URL "+failOver, ee);
+			return false;
+		}
+	}
+
+	private HttpURLConnection buildConnection(URL url, Proxy proxy) throws IOException {
+		HttpURLConnection connect = (HttpURLConnection) url.openConnection(proxy);
+		while (connect.getResponseCode()==HttpURLConnection.HTTP_MOVED_PERM || connect.getResponseCode()==HttpURLConnection.HTTP_MOVED_TEMP) {
+			String redirect = connect.getHeaderField("Location");
+			connect.disconnect();
+			url = new URL(redirect);
+			return (HttpURLConnection) url.openConnection(proxy);
+		}
+		return connect;
+	}
+
 	public int getResponseCode() throws IOException {
 		return this.ct.getResponseCode();
 	}

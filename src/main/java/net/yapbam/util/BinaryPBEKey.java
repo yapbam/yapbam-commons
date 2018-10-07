@@ -78,7 +78,6 @@ public class BinaryPBEKey implements SecretKey {
 		return ret;
 	}
 
-	@Override
 	public void destroy() {
 		Arrays.fill(this.key, (byte) 0);
 	}
