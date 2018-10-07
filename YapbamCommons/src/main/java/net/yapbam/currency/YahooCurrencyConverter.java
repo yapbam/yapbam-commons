@@ -15,7 +15,9 @@ import org.xml.sax.*;
  *  
  * @version 1.01 2015-07-12
  * @author Jean-Marc Astesana
+ * @deprecated Yahoo stopped its web service
  */
+@Deprecated
 public class YahooCurrencyConverter extends AbstractXMLCurrencyConverter {
 	private static final String YAHOO_RATES_URL = "https://finance.yahoo.com/webservice/v1/symbols/allcurrencies/quote?format=xml"; //$NON-NLS-1$
 	private static final String NAME_ATTRIBUTE = "name"; //$NON-NLS-1$
