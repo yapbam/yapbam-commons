@@ -45,7 +45,7 @@ public class GlobalData extends DefaultListenable {
 	private static double defaultPrecision;
 	static {
 		final Locale locale = Locale.getDefault();
-System.out.println("Locale.getDefault(.getCountry)="+locale.getCountry()); //TODO To be removed
+System.out.println("Locale.getDefault(.getCountry)="+locale.getCountry()+" US -> "+Locale.US.getCountry()+" -> "+Locale.US.getCountry().matches("^[a-zA-Z]{2}$")); //TODO To be removed
 		setDefaultCurrency(Currency.getInstance(locale.getCountry()==null || locale.getCountry().isEmpty() ? Locale.US : locale));
 	}
 
