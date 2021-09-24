@@ -17,10 +17,8 @@ import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
@@ -73,7 +71,7 @@ public class SerializerTest {
 		}
 	}
 
-	private static final double doubleAccuracy = Math.pow(10, -Currency.getInstance(Locale.getDefault()).getDefaultFractionDigits())/2;
+	private static final double doubleAccuracy = Math.pow(10, -GlobalData.getDefaultCurrency().getDefaultFractionDigits())/2;
 	
 	@Test
 	public void testArchiveAndLock() throws IOException {
