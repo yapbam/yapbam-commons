@@ -1,9 +1,10 @@
-This project contains common source code between Desktop and Android version of Yapbam.
+This project contains common source code between Desktop and Android (if one is released someday) versions of Yapbam.
 
-Android notes :
----------------
+# Android notes :
 The Android Logger implementation has a bug that prevent level lower that INFO to be effectively logged.
 A workaround is to use the following code at application startup:
+
+ ```java
 	// Remove buggy handlers from the root logger
 	Logger logger = Logger.getAnonymousLogger().getParent();
 	Handler[] handlers = logger.getHandlers();
@@ -16,5 +17,6 @@ A workaround is to use the following code at application startup:
 	// Set the right level limit
 	handler.setLevel(Level.FINEST);
 	logger.setLevel(Level.FINEST);
+```
 	
 FixedAndroidHandler.java is available in the same folder as this file.

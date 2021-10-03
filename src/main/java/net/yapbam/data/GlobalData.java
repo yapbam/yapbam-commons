@@ -44,7 +44,8 @@ public class GlobalData extends DefaultListenable {
 	private static Currency defaultCurrency;
 	private static double defaultPrecision;
 	static {
-		setDefaultCurrency(Currency.getInstance(Locale.getDefault()));
+		final Locale locale = Locale.getDefault();
+		setDefaultCurrency(Currency.getInstance(locale.getCountry()==null || locale.getCountry().isEmpty() ? Locale.US : locale));
 	}
 
 	private static final Comparator<Transaction> COMPARATOR = new Comparator<Transaction>() {
