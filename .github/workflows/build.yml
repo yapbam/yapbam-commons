@@ -1,9 +1,6 @@
 name: Build
 on:
-  push:
-    branches:
-      - master
-      - housekeeping
+  push
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
