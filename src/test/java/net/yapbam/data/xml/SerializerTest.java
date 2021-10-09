@@ -23,10 +23,12 @@ import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
 import net.yapbam.data.Account;
+import net.yapbam.data.AlertThreshold;
 import net.yapbam.data.Category;
 import net.yapbam.data.Filter;
 import net.yapbam.data.GlobalData;
 import net.yapbam.data.Mode;
+import net.yapbam.data.SubTransaction;
 import net.yapbam.data.Transaction;
 import net.yapbam.util.TextMatcher;
 import net.yapbam.util.TextMatcher.Kind;
@@ -91,9 +93,11 @@ public class SerializerTest {
 		account = new Account("titi", -10.0);
 		data.add(account);
 		data.setComment(account, "Un commentaire avec plusieurs lignes\nEt des caractères accentués.");
+		data.setAlertThreshold(account, new AlertThreshold(1000, 2000));
+		data.setCheckNumberAlertThreshold(account, 3);
 		Date today = new Date();
 		Transaction transaction = new Transaction(today, null, "description", "commentaire", -5.32, account, Mode.UNDEFINED, Category.UNDEFINED,
-				today, null, Collections.EMPTY_LIST);
+				today, null, Collections.<SubTransaction>emptyList());
 		data.add(transaction);
 		Filter filter = new Filter();
 		filter.setName("test");
@@ -112,7 +116,7 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void emptyTest() throws Exception {
+	public void emptyTest() throws IOException {
 		GlobalData data = new GlobalData();		
 		testInstance(data);
 		data.setPassword("été");
@@ -126,7 +130,9 @@ public class SerializerTest {
 		assertEquals(data.getCategoriesNumber(), other.getCategoriesNumber());
 		for (int i = 0; i < data.getCategoriesNumber(); i++) {
 			Category category = data.getCategory(i);
-			if (!category.equals(Category.UNDEFINED)) assertNotNull(other.getCategory(category.getName()));
+			if (!category.equals(Category.UNDEFINED)) {
+				assertNotNull(other.getCategory(category.getName()));
+			}
 		}
 		
 		assertEquals(other.getAccountsNumber(), data.getAccountsNumber());
@@ -135,6 +141,8 @@ public class SerializerTest {
 			Account oAccount = other.getAccount(account.getName());
 			assertNotNull(oAccount);
 			assertEquals(account.getInitialBalance(), oAccount.getInitialBalance(), doubleAccuracy);
+			assertEquals(account.getAlertThreshold(), oAccount.getAlertThreshold());
+			assertEquals(account.getCheckNumberAlertThreshold(), oAccount.getCheckNumberAlertThreshold());
 			assertEquals(account.getComment(), oAccount.getComment());
 
 			assertEquals(account.getModesNumber(), oAccount.getModesNumber());
@@ -214,8 +222,7 @@ public class SerializerTest {
 		
 		ByteArrayInputStream is = new ByteArrayInputStream(serialized);
 		try {
-			GlobalData other = new Serializer().read(data.getPassword(), is, null);
-			return other;
+			return new Serializer().read(data.getPassword(), is, null);
 		} finally {
 			is.close();
 		}

@@ -8,7 +8,7 @@
 	</parent>
 
 	<artifactId>yapbam-commons</artifactId>
-	<version>1.8.9</version>
+	<version>1.9.0</version>
 
 	<scm>
 		<url>https://github.com/yapbam/yapbam-commons.git</url>

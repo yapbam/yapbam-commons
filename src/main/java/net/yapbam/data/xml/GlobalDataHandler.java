@@ -149,6 +149,10 @@ class GlobalDataHandler extends DefaultHandler {
 				}
 			}
 			this.data.setAlertThreshold(account, alertThreshold);
+			String checkNumber = attributes.getValue(XMLSerializer.CHECK_NUMBER_ALERT_THRESHOLD);
+			if (checkNumber!=null) {
+				this.data.setCheckNumberAlertThreshold(account, Integer.parseInt(checkNumber));
+			}
 			this.tempData.push(account);
 		} else if (qName.equals(XMLSerializer.CATEGORY_TAG)) {
 			String id = attributes.getValue(XMLSerializer.ID_ATTRIBUTE).trim();
