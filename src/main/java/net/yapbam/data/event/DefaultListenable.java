@@ -102,7 +102,7 @@ public abstract class DefaultListenable {
 	 */
 	public void clearListeners() {
 		if (TRACE_ALL || TRACE_LISTENERS) {
-			LoggerFactory.getLogger(getClass()).debug("All listeners are cleared on "+this); //$NON-NLS-1$
+			LoggerFactory.getLogger(getClass()).debug("All listeners are cleared on {}", this); //$NON-NLS-1$
 		}
 		this.listeners.clear();
 	}
