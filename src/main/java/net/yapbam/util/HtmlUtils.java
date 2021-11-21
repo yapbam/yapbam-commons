@@ -72,7 +72,7 @@ public abstract class HtmlUtils {
 	}
 	
 	/** Converts lines to HTML
-	 * @param withStartAndEnd true to add <html> tags at the beginning and the end of the return
+	 * @param withStartAndEnd true to add &lt;html&gt; tags at the beginning and the end of the return
 	 * @param lines The lines
 	 * @return A concatenation of the lines, converted to HTML.
 	 */
