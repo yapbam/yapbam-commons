@@ -8,7 +8,7 @@
 	</parent>
 
 	<artifactId>yapbam-commons</artifactId>
-	<version>1.8.9</version>
+	<version>1.9.0</version>
 
 	<scm>
 		<url>https://github.com/yapbam/yapbam-commons.git</url>
@@ -25,10 +25,11 @@
     </properties>
 
 	<dependencies>
+		<!-- -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.12.0</version>
+			<artifactId>commons-text</artifactId>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -46,6 +47,12 @@
 			<groupId>com.fathzer</groupId>
 			<artifactId>javaluator</artifactId>
 			<version>3.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

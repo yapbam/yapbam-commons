@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 /** Some utility methods on html Strings.
  * 
@@ -56,7 +56,7 @@ public abstract class HtmlUtils {
 		int previousEnd = 0;
 		while (m.find()) {
 			if (previousEnd!=m.start()) {
-				sb.append(StringEscapeUtils.escapeHtml3(content.substring(previousEnd, m.start())));
+				sb.append(StringEscapeUtils.escapeHtml4(content.substring(previousEnd, m.start())));
 			}
 			previousEnd = m.end();
 			if (isValidURL(m.group(2))) {
@@ -66,13 +66,38 @@ public abstract class HtmlUtils {
 			}
 		}
 		if (previousEnd<content.length()) {
-			sb.append(StringEscapeUtils.escapeHtml3(content.substring(previousEnd)));
+			sb.append(StringEscapeUtils.escapeHtml4(content.substring(previousEnd)));
 		}
 		return sb.toString();
 	}
+	
+	/** Converts lines to HTML
+	 * @param withStartAndEnd true to add &lt;html&gt; tags at the beginning and the end of the return
+	 * @param lines The lines
+	 * @return A concatenation of the lines, converted to HTML.
+	 */
+	public static String linesToHtml(boolean withStartAndEnd, String... lines) {
+		final StringBuilder builder = new StringBuilder();
+		if (withStartAndEnd) {
+			builder.append(HtmlUtils.START_TAG);
+		}
+		boolean first = true;
+		for (String line:lines) {
+			if (first) {
+				first = false;
+			} else {
+				builder.append(HtmlUtils.NEW_LINE_TAG);
+			}
+			builder.append(HtmlUtils.toHtml(line));
+		}
+		if (withStartAndEnd) {
+			builder.append(HtmlUtils.END_TAG);
+		}
+		return builder.toString();
+	}
 
 	private static String getHTMLLink(String name, String url) {
-		return "<a href=\"" + url + "\">" + StringEscapeUtils.escapeHtml3(name.isEmpty() ? url : MANGLER.unmangle(name)) + "</a>";
+		return "<a href=\"" + url + "\">" + StringEscapeUtils.escapeHtml4(name.isEmpty() ? url : MANGLER.unmangle(name)) + "</a>";
 	}
 
 	public static Matcher getLink(String encodedContent, int start, int end) {

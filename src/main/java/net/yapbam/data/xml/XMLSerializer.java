@@ -86,6 +86,7 @@ public class XMLSerializer {
 	static final String INITIAL_BALANCE_ATTRIBUTE = "initialBalance"; //$NON-NLS-1$
 	static final String ALERT_THRESHOLD_LESS = "alertThresholdLess"; //$NON-NLS-1$
 	static final String ALERT_THRESHOLD_MORE = "alertThresholdMore"; //$NON-NLS-1$
+	static final String CHECK_NUMBER_ALERT_THRESHOLD = "checkNumberAlertThreshold"; //$NON-NLS-1$
 	static final String ALERT_IGNORE = "no"; //$NON-NLS-1$
 	static final String ID_ATTRIBUTE = "id"; //$NON-NLS-1$
 	static final String NEXT_DATE_ATTRIBUTE = "next"; //$NON-NLS-1$
@@ -387,6 +388,9 @@ public class XMLSerializer {
 		if (!alertThreshold.equals(AlertThreshold.DEFAULT)) {
 			atts.addAttribute(EMPTY, EMPTY, ALERT_THRESHOLD_LESS, CDATA, Double.toString(alertThreshold.getLessThreshold()));
 			atts.addAttribute(EMPTY, EMPTY, ALERT_THRESHOLD_MORE, CDATA, Double.toString(alertThreshold.getMoreThreshold()));
+		}
+		if (account.getCheckNumberAlertThreshold()>=0) {
+			atts.addAttribute(EMPTY, EMPTY, CHECK_NUMBER_ALERT_THRESHOLD, CDATA, Integer.toString(account.getCheckNumberAlertThreshold()));
 		}
 		
 		hd.startElement(EMPTY,EMPTY,ACCOUNT_TAG,atts);

@@ -37,4 +37,10 @@ public class HtmlUtilsTest {
 	public void testComplex() {
 		assertEquals ("<a href=\"http://x.com\">x</a>.[[]]<a href=\"http://y.com\">y</a>", HtmlUtils.toHtml("[x[http://x.com]].[[]][y[http://y.com]]"));
 	}
+	
+	@Test
+	public void testConvertLines() {
+		assertEquals("a is &lt; b<BR>ok", HtmlUtils.linesToHtml(false, "a is < b","ok"));
+		assertEquals("<HTML>a<BR>b</HTML>", HtmlUtils.linesToHtml(true, "a","b"));
+	}
 }

@@ -15,6 +15,7 @@ public class Account {
 	private int unCheckedTransactionNumber;
 	private BalanceData balanceData;
 	private AlertThreshold alertThreshold;
+	private int checkNumberAlertThreshold;
 	private String comment;
 
 	/** Constructor.
@@ -45,6 +46,7 @@ public class Account {
 		this.alertThreshold = alerts;
 		this.modes = new ArrayList<Mode>();
 		this.checkbooks = new ArrayList<Checkbook>();
+		this.checkNumberAlertThreshold = -1;
 		this.balanceData = new BalanceData();
 		this.balanceData.clear(initialBalance);
 		this.add(Mode.UNDEFINED);
@@ -217,6 +219,17 @@ public class Account {
 	void setAlertThreshold(AlertThreshold alertThreshold) {
 		this.alertThreshold = alertThreshold;
 	}
+	
+	/** Gets the number of available checks under which an alert should be raised.
+	 * @return an int. A negative number if no alert is set (which is the default).
+	 */
+	public int getCheckNumberAlertThreshold() {
+		return this.checkNumberAlertThreshold;
+	}
+
+	void setCheckNumberAlertThreshold(int alertThreshold) {
+		this.checkNumberAlertThreshold = alertThreshold;
+	}
 
 	/** Gets this account's balance data.
 	 * @return a BalanceData
@@ -259,5 +272,24 @@ public class Account {
 		} else {
 			return null;
 		}
+	}
+	
+	/** Gets the number of check remaining for this account.
+	 * @return a positive or null integer
+	 * @see #getCheckNumberAlertThreshold()
+	 */
+	public int getRemainingChecks() {
+		int result = 0;
+		for (Checkbook book : this.checkbooks) {
+			result+= book.getRemaining();
+		}
+		return result;
+	}
+	
+	/** Tests whether the account has an alert on number of checks.
+	 * @return true if account is running out of checks.
+	 */
+	public boolean hasRemainingChecksAlert() {
+		return getRemainingChecks() <= getCheckNumberAlertThreshold();
 	}
 }

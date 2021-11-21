@@ -19,7 +19,7 @@ public class Checkbook {
 	 * @param prefix The check number prefix; the non numerical part preceding the number itself
 	 * @param start The first available check number, not including the prefix
 	 * @param size The number of checks still available
-	 * @param next The next check number
+	 * @param next The next check number or null if checkbook has no check remaining 
 	 */
 	public Checkbook(String prefix, BigInteger start, int size, BigInteger next) {
 		this.firstNumber = start;

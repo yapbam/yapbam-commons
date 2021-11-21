@@ -38,7 +38,7 @@ public class GlobalData extends DefaultListenable {
 	private String password;
 	private char subCategorySeparator;
 
-	private transient boolean somethingChanged;
+	private boolean somethingChanged;
 	private boolean eventsPending;
 
 	private static Currency defaultCurrency;
@@ -763,6 +763,20 @@ public class GlobalData extends DefaultListenable {
 		if (!old.equals(threshold)) {
 			account.setAlertThreshold(threshold);
 			this.fireEvent(new AccountPropertyChangedEvent(this, AccountPropertyChangedEvent.ALERT_THRESHOLD, account, old, threshold));
+			this.setChanged();
+		}
+	}
+	
+	/** Changes the check number alert threshold for an account.
+	 * @param account the account to be changed
+	 * @param threshold the alert threshold to apply to this account
+	 * @see AccountPropertyChangedEvent
+	 */
+	public void setCheckNumberAlertThreshold (Account account, int threshold) {
+		final int old = account.getCheckNumberAlertThreshold();
+		if (old != threshold) {
+			account.setCheckNumberAlertThreshold(threshold);
+			this.fireEvent(new AccountPropertyChangedEvent(this, AccountPropertyChangedEvent.CHECK_NUMBER_ALERT_THRESHOLD, account, old, threshold));
 			this.setChanged();
 		}
 	}
