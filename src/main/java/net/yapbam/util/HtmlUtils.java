@@ -70,6 +70,31 @@ public abstract class HtmlUtils {
 		}
 		return sb.toString();
 	}
+	
+	/** Converts lines to HTML
+	 * @param withStartAndEnd true to add <html> tags at the beginning and the end of the return
+	 * @param lines The lines
+	 * @return A concatenation of the lines, converted to HTML.
+	 */
+	public static String linesToHtml(boolean withStartAndEnd, String... lines) {
+		final StringBuilder builder = new StringBuilder();
+		if (withStartAndEnd) {
+			builder.append(HtmlUtils.START_TAG);
+		}
+		boolean first = true;
+		for (String line:lines) {
+			if (first) {
+				first = false;
+			} else {
+				builder.append(HtmlUtils.NEW_LINE_TAG);
+			}
+			builder.append(HtmlUtils.toHtml(line));
+		}
+		if (withStartAndEnd) {
+			builder.append(HtmlUtils.END_TAG);
+		}
+		return builder.toString();
+	}
 
 	private static String getHTMLLink(String name, String url) {
 		return "<a href=\"" + url + "\">" + StringEscapeUtils.escapeHtml4(name.isEmpty() ? url : MANGLER.unmangle(name)) + "</a>";

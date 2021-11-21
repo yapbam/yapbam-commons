@@ -285,4 +285,11 @@ public class Account {
 		}
 		return result;
 	}
+	
+	/** Tests whether the account has an alert on number of checks.
+	 * @return true if account is running out of checks.
+	 */
+	public boolean hasRemainingChecksAlert() {
+		return getRemainingChecks() <= getCheckNumberAlertThreshold();
+	}
 }
