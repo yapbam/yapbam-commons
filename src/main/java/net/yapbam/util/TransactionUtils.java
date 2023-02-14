@@ -1,7 +1,5 @@
 package net.yapbam.util;
 
-import org.apache.commons.text.StringEscapeUtils;
-
 import net.yapbam.data.AbstractTransaction;
 import net.yapbam.data.Category;
 import net.yapbam.data.GlobalData;
@@ -30,13 +28,13 @@ public class TransactionUtils {
 		if (spread) {
 			buf.append(getDescription(transaction, false, mergeComment, false));
 			for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
-				buf.append(NEW_INDENTED_LINE).append(StringEscapeUtils.escapeHtml4(transaction.getSubTransaction(i).getDescription()));
+				buf.append(NEW_INDENTED_LINE).append(HtmlUtils.escape(transaction.getSubTransaction(i).getDescription()));
 			}
 			if (transaction.getComplement()!=0) {
-				buf.append(NEW_INDENTED_LINE).append(StringEscapeUtils.escapeHtml4(wordingProvider.getComplementWording()));
+				buf.append(NEW_INDENTED_LINE).append(HtmlUtils.escape(wordingProvider.getComplementWording()));
 			}
 		} else {
-			buf.append (StringEscapeUtils.escapeHtml4(transaction.getDescription()));
+			buf.append (HtmlUtils.escape(transaction.getDescription()));
 			if (mergeComment && (transaction.getComment()!=null)) {
 				buf.append(" ("); //$NON-NLS-1$
 				buf.append(getComment(transaction));
@@ -112,12 +110,12 @@ public class TransactionUtils {
 	public Object getCategory(AbstractTransaction transaction, boolean spread) {
 		if (spread) {
 			StringBuilder buf = new StringBuilder(OPEN);
-			buf.append(StringEscapeUtils.escapeHtml4(getName(transaction.getCategory()))); //$NON-NLS-1$
+			buf.append(HtmlUtils.escape(getName(transaction.getCategory())));
 			for (int i = 0; i < transaction.getSubTransactionSize(); i++) {
-				buf.append(NEW_INDENTED_LINE).append(StringEscapeUtils.escapeHtml4(getName(transaction.getSubTransaction(i).getCategory())));
+				buf.append(NEW_INDENTED_LINE).append(HtmlUtils.escape(getName(transaction.getSubTransaction(i).getCategory())));
 			}
 			if (transaction.getComplement()!=0) {
-				buf.append(NEW_INDENTED_LINE).append(StringEscapeUtils.escapeHtml4(getName(transaction.getCategory())));
+				buf.append(NEW_INDENTED_LINE).append(HtmlUtils.escape(getName(transaction.getCategory())));
 			}
 			buf.append(END); //$NON-NLS-1$
 			return buf.toString().replace(" ", HtmlUtils.NON_BREAKING_SPACE);
