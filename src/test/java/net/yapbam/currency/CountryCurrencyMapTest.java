@@ -1,18 +1,16 @@
 package net.yapbam.currency;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Set;
 
-import net.yapbam.currency.CountryCurrencyMap;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-
-public class CountryCurrencyMapTest {
+class CountryCurrencyMapTest {
 	@Test
-	public void test() {
+	void test() {
 		CountryCurrencyMap map = CountryCurrencyMap.INSTANCE;
 		
 		String[] isoCountries = Locale.getISOCountries();
@@ -28,20 +26,23 @@ public class CountryCurrencyMapTest {
 		}
 	}
 
-	@Test (expected=UnsupportedOperationException.class)
-	public void testNoChangeAllowed1() {
-		CountryCurrencyMap.INSTANCE.getCountries().clear();
+	@Test
+	void testNoChangeAllowed1() {
+		Set<String> countries = CountryCurrencyMap.INSTANCE.getCountries();
+		assertThrows (UnsupportedOperationException.class, countries::clear);
 	}
 
-	@Test (expected=UnsupportedOperationException.class)
-	public void testNoChangeAllowed2() {
-		CountryCurrencyMap.INSTANCE.getCurrencies().clear();
+	@Test
+	void testNoChangeAllowed2() {
+		Set<String> currencies = CountryCurrencyMap.INSTANCE.getCurrencies();
+		assertThrows (UnsupportedOperationException.class, currencies::clear);
 	}
 
-	@Test (expected=UnsupportedOperationException.class)
-	public void testNoChangeAllowed3() {
+	@Test
+	void testNoChangeAllowed3() {
 		CountryCurrencyMap map = CountryCurrencyMap.INSTANCE;
 		String currency = map.getCurrencies().iterator().next();
-		map.getCountries(currency).clear();
+		Set<String> countries = map.getCountries(currency);
+		assertThrows (UnsupportedOperationException.class, countries::clear);
 	}
 }

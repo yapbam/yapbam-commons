@@ -1,6 +1,6 @@
 package net.yapbam.data.xml;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -33,23 +33,23 @@ import net.yapbam.data.Transaction;
 import net.yapbam.util.TextMatcher;
 import net.yapbam.util.TextMatcher.Kind;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class SerializerTest {
+class SerializerTest {
 	private static boolean previousValidation;
 
-	@BeforeClass
-	public static void init() {
+	@BeforeAll
+	static void init() {
 		previousValidation = XMLSerializer.SCHEMA_VALIDATION;
 		if (!previousValidation) {
 			XMLSerializer.SCHEMA_VALIDATION = true;
 		}
 	}
 	
-	@AfterClass
-	public static void tearDown() {
+	@AfterAll
+	static void tearDown() {
 		XMLSerializer.SCHEMA_VALIDATION = previousValidation;
 	}
 	
@@ -76,7 +76,7 @@ public class SerializerTest {
 	private static final double doubleAccuracy = Math.pow(10, -GlobalData.getDefaultCurrency().getDefaultFractionDigits())/2;
 	
 	@Test
-	public void testArchiveAndLock() throws IOException {
+	void testArchiveAndLock() throws IOException {
 		GlobalData data = new GlobalData();
 		data.setArchive(true);
 		data.setLocked(true);
@@ -86,13 +86,13 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void test() throws IOException {
+	void test() throws IOException {
 		GlobalData data = new GlobalData();
 		Account account = new Account("toto,x", 50.24);
 		data.add(account);
 		account = new Account("titi", -10.0);
 		data.add(account);
-		data.setComment(account, "Un commentaire avec plusieurs lignes\nEt des caractères accentués.");
+		data.setComment(account, "Un commentaire avec plusieurs lignes\nEt des caractï¿½res accentuï¿½s.");
 		data.setAlertThreshold(account, new AlertThreshold(1000, 2000));
 		data.setCheckNumberAlertThreshold(account, 3);
 		Date today = new Date();
@@ -111,15 +111,15 @@ public class SerializerTest {
 		
 		data.setPassword("this is the big password");
 		testInstance(data);
-		data.setPassword("été is a non ascii password");
+		data.setPassword("ï¿½tï¿½ is a non ascii password");
 		testInstance(data);
 	}
 
 	@Test
-	public void emptyTest() throws IOException {
+	void emptyTest() throws IOException {
 		GlobalData data = new GlobalData();		
 		testInstance(data);
-		data.setPassword("été");
+		data.setPassword("ï¿½tï¿½");
 		testInstance(data);
 	}
 
@@ -229,7 +229,7 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void testInvalidXMLFile() {
+	void testInvalidXMLFile() {
 		testInvalidXMLFile(new String[]{}, UnsupportedFormatException.class); // An empty file
 		testInvalidXMLFile(new String[]{"This is not an XML file"}, UnsupportedFormatException.class); // Not an xml file
 		testInvalidXMLFile(new String[]{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "<DATA>"}, UnsupportedFormatException.class); // Tag is not closed
@@ -276,7 +276,7 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void pbPre0_12_0() {
+	void pbPre0_12_0() {
 		try {
 			InputStream in = getClass().getResource("bugpre0.13.3.xml").openStream();
 			try {
@@ -292,7 +292,7 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void pre0_16_0() {
+	void pre0_16_0() {
 		testPwdOk("pre0.16.0.xml", null, true);
 		testPwdOk("pre0.16.0.xml", "gti", false);
 		testPre0_16_0("pre0.16.0.xml", null);
@@ -301,10 +301,10 @@ public class SerializerTest {
 		testPwdOk("pre0.16.0-gti.xml", "gti", true);
 		testPre0_16_0("pre0.16.0-gti.xml", "gti");
 		
-		testPwdOk("pre0.16.0-été.xml", null, false);
-		testPwdOk("pre0.16.0-été.xml", "gti", false);
-		testPwdOk("pre0.16.0-été.xml", "été", true);
-		testPre0_16_0("pre0.16.0-été.xml", "été");
+		testPwdOk("pre0.16.0-Ã©tÃ©.xml", null, false);
+		testPwdOk("pre0.16.0-Ã©tÃ©.xml", "gti", false);
+		testPwdOk("pre0.16.0-Ã©tÃ©.xml", "Ã©tÃ©", true);
+		testPre0_16_0("pre0.16.0-Ã©tÃ©.xml", "Ã©tÃ©");
 		
 		testPwdOk("pre0.16.0.zip", null, true);
 		testPwdOk("pre0.16.0.zip", "gti", false);
@@ -314,10 +314,10 @@ public class SerializerTest {
 		testPwdOk("pre0.16.0-gti.zip", "gti", true);
 		testPre0_16_0("pre0.16.0-gti.zip", "gti");
 		
-		testPwdOk("pre0.16.0-été.zip", null, false);
-		testPwdOk("pre0.16.0-été.zip", "gti", false);
-		testPwdOk("pre0.16.0-été.zip", "été", true);
-		testPre0_16_0("pre0.16.0-été.zip", "été");
+		testPwdOk("pre0.16.0-Ã©tÃ©.zip", null, false);
+		testPwdOk("pre0.16.0-Ã©tÃ©.zip", "gti", false);
+		testPwdOk("pre0.16.0-Ã©tÃ©.zip", "Ã©tÃ©", true);
+		testPre0_16_0("pre0.16.0-Ã©tÃ©.zip", "Ã©tÃ©");
 	}
 		
 	private void testPwdOk(String resName, String password, boolean expectedResult) {
@@ -356,34 +356,39 @@ public class SerializerTest {
 	}
 	
 	@Test
-	public void pre0_16_0WrongPwd_1() {
+	void pre0_16_0WrongPwd_1() {
 		// Password is wrong, but should be ignored
 		testPre0_16_0("pre0.16.0.xml", "xxx");
 	}
-	@Test(expected = AccessControlException.class)
-	public void pre0_16_0WrongPwd_2() {
-		testPre0_16_0("pre0.16.0-gti.xml", null);
-	}
-	@Test(expected = AccessControlException.class)
-	public void pre0_16_0WrongPwd_3() {
-		testPre0_16_0("pre0.16.0-été.xml", "ete");
-	}
+	
 	@Test
-	public void pre0_16_0WrongPwd_4() {
-		// Password is wrong, but should be ignored
-		testPre0_16_0("pre0.16.0.zip", "xxx");
-	}
-	@Test(expected = AccessControlException.class)
-	public void pre0_16_0WrongPwd_5() {
-		testPre0_16_0("pre0.16.0-gti.zip", "xxx");
-	}
-	@Test(expected = AccessControlException.class)
-	public void pre0_16_0WrongPwd_6() {
-		testPre0_16_0("pre0.16.0-été.zip", null);
+	void pre0_16_0WrongPwd_2() {
+		assertThrows(AccessControlException.class, () -> testPre0_16_0("pre0.16.0-gti.xml", null));
 	}
 	
 	@Test
-	public void testWithZipFile() throws IOException {
+	void pre0_16_0WrongPwd_3() {
+		assertThrows(AccessControlException.class, () -> testPre0_16_0("pre0.16.0-Ã©tÃ©.xml", "ete"));
+	}
+	
+	@Test
+	void pre0_16_0WrongPwd_4() {
+		// Password is wrong, but should be ignored
+		testPre0_16_0("pre0.16.0.zip", "xxx");
+	}
+	
+	@Test
+	void pre0_16_0WrongPwd_5() {
+		assertThrows(AccessControlException.class, () -> testPre0_16_0("pre0.16.0-gti.zip", "xxx"));
+	}
+	
+	@Test
+	void pre0_16_0WrongPwd_6() {
+		assertThrows(AccessControlException.class, () -> testPre0_16_0("pre0.16.0-Ã©tÃ©.zip", null));
+	}
+	
+	@Test
+	void testWithZipFile() throws IOException {
 		GlobalData data = new GlobalData();
 		String pwd = "gti";
 		data.setPassword(pwd);
@@ -407,7 +412,7 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void testWriteDontCloseStream() throws IOException {
+	void testWriteDontCloseStream() throws IOException {
 		GlobalData data = new GlobalData();
 		FakeOutputStream out = new FakeOutputStream();
 		try {

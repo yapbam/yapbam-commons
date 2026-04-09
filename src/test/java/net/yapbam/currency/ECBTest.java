@@ -1,6 +1,6 @@
 package net.yapbam.currency;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -10,16 +10,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.jupiter.api.Test;
+
 import net.yapbam.remote.Cache;
 import net.yapbam.remote.MemoryCache;
 
-import org.junit.Test;
-
-public class ECBTest {
+class ECBTest {
 	private static String path;
 
 	private static class ECBTestConverter extends ECBCurrencyConverter {
-		public ECBTestConverter(Cache cache) throws IOException, ParseException {
+		public ECBTestConverter(Cache cache) {
 			super(Proxy.NO_PROXY, cache);
 		}
 
@@ -30,7 +30,7 @@ public class ECBTest {
 	}
 
 	@Test
-	public void test() throws IOException, ParseException {
+	void test() throws IOException, ParseException {
 		path = "ecb.xml";
 		Cache cache = new MemoryCache();
 		AbstractCurrencyConverter cvt = new ECBTestConverter(cache);
@@ -62,31 +62,26 @@ public class ECBTest {
 		assertEquals(1.0/1.3655, x.convert(1.0, "USD", "EUR"), 0.0001);
 	}
 
-	@Test(expected = ParseException.class)
-	public void testBad1() throws IOException, ParseException {
+	@Test
+	void testBad1() {
 		path = "bad_ecb.xml";
-		new ECBTestConverter(new MemoryCache()).update();
+		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
+		assertThrows(ParseException.class, cvt::update);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testBadArgs1() throws IOException, ParseException {
+	@Test
+	void testBadArgs() throws IOException, ParseException {
 		path = "ecb.xml";
 		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
 		cvt.update();
-		cvt.convert(1.0, "XXX", "USD");
+		assertThrows(IllegalArgumentException.class, () -> cvt.convert(1.0, "XXX", "USD"));
+		assertThrows(IllegalArgumentException.class, () -> cvt.convert(1.0, "USD", "XXX"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testBadArgs2() throws IOException, ParseException {
-		path = "yahoo.xml";
-		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
-		cvt.update();
-		cvt.convert(1.0, "USD", "XXX");
-	}
-
-	@Test(expected = IOException.class)
-	public void testUnknown() throws IOException, ParseException {
+	@Test
+	void testUnknown() {
 		path = "unknown.xml";
-		new ECBTestConverter(new MemoryCache()).update();
+		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
+		assertThrows(IOException.class, cvt::update);
 	}
 }

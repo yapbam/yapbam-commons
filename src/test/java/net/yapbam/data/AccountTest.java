@@ -1,14 +1,14 @@
 package net.yapbam.data;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class AccountTest {
+class AccountTest {
 	@Test
-	public void test() {
+	void test() {
 		Account account = new Account("test", 0.0);
 		assertFalse(account.hasRemainingChecksAlert());
 		account.setCheckNumberAlertThreshold(0);

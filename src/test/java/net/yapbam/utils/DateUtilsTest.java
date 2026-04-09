@@ -1,17 +1,17 @@
 package net.yapbam.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.GregorianCalendar;
 
 import net.yapbam.util.DateUtils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class DateUtilsTest {
+class DateUtilsTest {
 
 	@Test
-	public void test() {
+	void test() {
 		GregorianCalendar first = new GregorianCalendar(2009, 11, 31, 23, 59, 59);
 		Object original1 = first.clone();
 		GregorianCalendar last = new GregorianCalendar(2010, 0, 1, 0, 0, 0);

@@ -1,17 +1,17 @@
 package net.yapbam.data.xml;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import net.yapbam.data.GlobalData;
 import net.yapbam.data.ProgressReport;
 
-public class ReadCancelTest {
+class ReadCancelTest {
 	private static class AutoCancelReporter implements ProgressReport {
 		private boolean cancelled = false;
 		
@@ -33,8 +33,8 @@ public class ReadCancelTest {
 	}
 	
 	@Test
-	public void test() {
-//		test("bugpre0.13.3.xml", null);
+	void test() {
+		test("bugpre0.13.3.xml", null);
 		test("pre0.16.0-gti.zip", "gti");
 	}
 

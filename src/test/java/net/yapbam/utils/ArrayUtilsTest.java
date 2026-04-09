@@ -1,21 +1,21 @@
 package net.yapbam.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import net.yapbam.util.ArrayUtils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ArrayUtilsTest {
+class ArrayUtilsTest {
 
 	@Test
-	public void testToStringStringArray() {
+	void testToStringStringArray() {
 		String[] array = new String[0];
 		String string = ArrayUtils.toString(array);
 		assertEquals(string, "");
 		assertEquals(ArrayUtils.parseStringArray(string).length, 0);
 
-		array = new String[] { "echo test", "&é+\"'],%t", "X" };
+		array = new String[] { "echo test", "&Ã +\"'],%t", "X" };
 		string = ArrayUtils.toString(array);
 		// System.out.println (string);
 		assertArrayEquals(array, ArrayUtils.parseStringArray(string));
@@ -32,7 +32,7 @@ public class ArrayUtilsTest {
 	}
 	
 	@Test
-	public void testBuildIntArray() {
+	void testBuildIntArray() {
 		int[] result = ArrayUtils.buildIntArray(0, 1, 10);
 		assertEquals(0, result.length);
 		result = ArrayUtils.buildIntArray(10, 0, 1);

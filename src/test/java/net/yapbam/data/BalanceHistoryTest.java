@@ -1,23 +1,21 @@
 package net.yapbam.data;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Date;
 import java.util.List;
 
-import net.yapbam.data.BalanceHistory;
-import net.yapbam.data.BalanceHistoryElement;
 import net.yapbam.date.helpers.DayDateStepper;
 import net.yapbam.util.DateUtils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("deprecation")
-public class BalanceHistoryTest {
+class BalanceHistoryTest {
 	private static final Date dBeforeUnix = new Date(-1000,1,1); // A date before the Unix start of time (1/1/1970)
 
 	@Test
-	public void testBalanceHistory() {		
+	void testBalanceHistory() {		
 		Date date1 = new Date(109,5,1);
 		BalanceHistory history = new BalanceHistory(0);
 		assertEquals(0, history.getBalance(date1), 0.01);

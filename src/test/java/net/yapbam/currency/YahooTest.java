@@ -1,6 +1,6 @@
 package net.yapbam.currency;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -10,16 +10,17 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.jupiter.api.Test;
+
 import net.yapbam.remote.Cache;
 import net.yapbam.remote.MemoryCache;
 
-import org.junit.Test;
-
-public class YahooTest {
+class YahooTest {
 	private static String path;
 	
+	@SuppressWarnings("deprecation")
 	private static class YahooTestConverter extends YahooCurrencyConverter {
-		public YahooTestConverter(Cache cache) throws IOException, ParseException {
+		public YahooTestConverter(Cache cache) {
 			super(Proxy.NO_PROXY, cache);
 		}
 
@@ -30,10 +31,10 @@ public class YahooTest {
 	}
 
 	@Test
-	public void test() throws IOException, ParseException {
+	void test() throws IOException, ParseException {
 		path = "yahoo.xml";
 		Cache cache = new MemoryCache();
-		YahooCurrencyConverter cvt = new YahooTestConverter(cache);
+		AbstractCurrencyConverter cvt = new YahooTestConverter(cache);
 		assertTrue(cvt.getRefreshTimeStamp()<0);
 		assertTrue(cvt.getTimeStamp()<0);
 		assertFalse(cvt.isSynchronized());
@@ -53,7 +54,7 @@ public class YahooTest {
 		assertEquals(0.730903, cvt.convert(1.0, "USD", "EUR"), 0.0001);
 		assertEquals(1387592587000L, cvt.getTimeStamp());
 		path = "bad_yahoo.xml";
-		YahooCurrencyConverter x = new YahooTestConverter(cache);
+		AbstractCurrencyConverter x = new YahooTestConverter(cache);
 		Set<String> currencies = new HashSet<String>(Arrays.asList(x.getCurrencies()));
 		assertEquals(3, currencies.size());
 		assertTrue(currencies.contains("USD"));
@@ -62,32 +63,26 @@ public class YahooTest {
 		assertEquals(0.730903, x.convert(1.0, "USD", "EUR"), 0.0001);
 	}
 
-	@Test (expected = ParseException.class)
-	public void testBad1() throws IOException, ParseException {
+	@Test
+	void testBad1() {
 		path = "bad_yahoo.xml";
-		new YahooTestConverter(new MemoryCache()).update();
+		AbstractCurrencyConverter cvt = new YahooTestConverter(new MemoryCache());
+		assertThrows(ParseException.class, cvt::update);
 	}
 
-	@Test (expected = IllegalArgumentException.class)
-	public void testBadArgs1() throws IOException, ParseException {
+	@Test
+	void testBadArgs() throws IOException, ParseException {
 		path = "yahoo.xml";
-		YahooCurrencyConverter cvt = new YahooTestConverter(new MemoryCache());
+		AbstractCurrencyConverter cvt = new YahooTestConverter(new MemoryCache());
 		cvt.update();
-		cvt.convert(1.0, "XXX", "USD");
-	}
-
-
-	@Test (expected = IllegalArgumentException.class)
-	public void testBadArgs2() throws IOException, ParseException {
-		path = "yahoo.xml";
-		YahooCurrencyConverter cvt = new YahooTestConverter(new MemoryCache());
-		cvt.update();
-		cvt.convert(1.0, "USD", "XXX");
+		assertThrows(IllegalArgumentException.class, () -> cvt.convert(1.0, "XXX", "USD"));
+		assertThrows(IllegalArgumentException.class, () -> cvt.convert(1.0, "USD", "XXX"));
 	}
 	
-	@Test (expected = IOException.class)
-	public void testUnknown() throws IOException, ParseException {
+	@Test
+	void testUnknown() {
+		AbstractCurrencyConverter cvt = new YahooTestConverter(new MemoryCache());
 		path = "unknown.xml";
-		new YahooTestConverter(new MemoryCache()).update();
+		assertThrows(IOException.class, cvt::update);
 	}
 }

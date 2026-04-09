@@ -1,15 +1,15 @@
 package net.yapbam.data;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import net.yapbam.date.helpers.DateStepper;
 
-public class GlobalDataTest {
+class GlobalDataTest {
 
 	static class TestData {
 		Account[] accounts;
@@ -49,17 +49,17 @@ public class GlobalDataTest {
 		}
 	}
 
-	@Test (expected=IllegalArgumentException.class)
-	public void testUnknownAccount() {
+	@Test
+	void testUnknownAccount() {
 		GlobalData data = new GlobalData();
 		Date date = new Date();
 		Account account = new Account("test",0.0);
 		Transaction t = new Transaction(date, null, "test", null, 100, account, Mode.UNDEFINED, Category.UNDEFINED, date, null, null);
-		data.add(t);
+		assertThrows(IllegalArgumentException.class, () -> data.add(t));
 	}
 
 	@Test
-	public void testDuplicated() {
+	void testDuplicated() {
 		GlobalData data = new GlobalData();
 		Date date = new Date();
 		Account account = new Account("test",0.0);
@@ -85,14 +85,15 @@ public class GlobalDataTest {
 		}
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
-	public void testNullCategoryName() {
+	@Test
+	void testNullCategoryName() {
 		GlobalData data = new GlobalData();
-		data.setName(new Category("test"), null);
+		Category category = new Category("test");
+		assertThrows(IllegalArgumentException.class, () -> data.setName(category, null));
 	}
 	
 	@Test
-	public void testFilterUpdate() {
+	void testFilterUpdate() {
 		TestData testData = new TestData();
 		GlobalData data = testData.fData.getGlobalData();
 

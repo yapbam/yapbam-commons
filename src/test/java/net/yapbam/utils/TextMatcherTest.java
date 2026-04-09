@@ -1,104 +1,104 @@
 package net.yapbam.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import net.yapbam.util.TextMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TextMatcherTest {
+class TextMatcherTest {
 	@Test
-	public void testEquals() {
-		TextMatcher matcher = new TextMatcher(TextMatcher.Kind.EQUALS, "été".toUpperCase(), true, true);
-		assertFalse(matcher.matches("Eté"));
-		assertFalse(matcher.matches("été"));
+	void testEquals() {
+		TextMatcher matcher = new TextMatcher(TextMatcher.Kind.EQUALS, "Ã©tÃ©".toUpperCase(), true, true);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertFalse(matcher.matches("Ã©tÃ©"));
 		assertFalse(matcher.matches("ETE"));
-		assertTrue(matcher.matches("été".toUpperCase()));
-		assertFalse(matcher.matches("été".toUpperCase()+"s"));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertFalse(matcher.matches("Ã©tÃ©".toUpperCase()+"s"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.EQUALS, "été".toUpperCase(), true, false);
-		assertFalse(matcher.matches("Eté"));
-		assertFalse(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.EQUALS, "Ã©tÃ©".toUpperCase(), true, false);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertFalse(matcher.matches("Ã©tÃ©"));
 		assertTrue(matcher.matches("ETE"));
-		assertTrue(matcher.matches("été".toUpperCase()));
-		assertFalse(matcher.matches("été".toUpperCase()+"s"));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertFalse(matcher.matches("Ã©tÃ©".toUpperCase()+"s"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.EQUALS, "été".toUpperCase(), false, false);
-		assertTrue(matcher.matches("Eté"));
-		assertTrue(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.EQUALS, "Ã©tÃ©".toUpperCase(), false, false);
+		assertTrue(matcher.matches("EtÃ©"));
+		assertTrue(matcher.matches("Ã©tÃ©"));
 		assertTrue(matcher.matches("ETE"));
-		assertTrue(matcher.matches("été".toUpperCase()));
-		assertFalse(matcher.matches("été".toUpperCase()+"s"));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertFalse(matcher.matches("Ã©tÃ©".toUpperCase()+"s"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.EQUALS, "été".toUpperCase(), false, true);
-		assertFalse(matcher.matches("Eté"));
-		assertTrue(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.EQUALS, "Ã©tÃ©".toUpperCase(), false, true);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertTrue(matcher.matches("Ã©tÃ©"));
 		assertFalse(matcher.matches("ETE"));
-		assertTrue(matcher.matches("été".toUpperCase()));
-		assertFalse(matcher.matches("été".toUpperCase()+"s"));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertFalse(matcher.matches("Ã©tÃ©".toUpperCase()+"s"));
 	}
 
 	@Test
-	public void testContains() {
-		TextMatcher matcher = new TextMatcher(TextMatcher.Kind.CONTAINS, "été".toUpperCase(), true, true);
-		assertFalse(matcher.matches("Eté"));
-		assertFalse(matcher.matches("été"));
+	void testContains() {
+		TextMatcher matcher = new TextMatcher(TextMatcher.Kind.CONTAINS, "Ã©tÃ©".toUpperCase(), true, true);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertFalse(matcher.matches("Ã©tÃ©"));
 		assertFalse(matcher.matches("ETE"));
-		assertTrue(matcher.matches("xété".toUpperCase()));
-		assertTrue(matcher.matches("été".toUpperCase()+"s"));
+		assertTrue(matcher.matches("xÃ©tÃ©".toUpperCase()));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()+"s"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.CONTAINS, "été".toUpperCase(), true, false);
-		assertFalse(matcher.matches("Eté"));
-		assertFalse(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.CONTAINS, "Ã©tÃ©".toUpperCase(), true, false);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertFalse(matcher.matches("Ã©tÃ©"));
 		assertTrue(matcher.matches("ETE"));
-		assertTrue(matcher.matches("été".toUpperCase()));
-		assertTrue(matcher.matches("x"+"été".toUpperCase()+"s"));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertTrue(matcher.matches("x"+"Ã©tÃ©".toUpperCase()+"s"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.CONTAINS, "été".toUpperCase(), false, false);
-		assertTrue(matcher.matches("Eté"));
-		assertTrue(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.CONTAINS, "Ã©tÃ©".toUpperCase(), false, false);
+		assertTrue(matcher.matches("EtÃ©"));
+		assertTrue(matcher.matches("Ã©tÃ©"));
 		assertTrue(matcher.matches("ETE"));
-		assertTrue(matcher.matches("été".toUpperCase()));
-		assertTrue(matcher.matches("été".toUpperCase()+"s"));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()+"s"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.CONTAINS, "été".toUpperCase(), false, true);
-		assertFalse(matcher.matches("Eté"));
-		assertTrue(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.CONTAINS, "Ã©tÃ©".toUpperCase(), false, true);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertTrue(matcher.matches("Ã©tÃ©"));
 		assertFalse(matcher.matches("ETE"));
-		assertTrue(matcher.matches("xété".toUpperCase()));
-		assertTrue(matcher.matches("été".toUpperCase()+"s"));
+		assertTrue(matcher.matches("xÃ©tÃ©".toUpperCase()));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()+"s"));
 	}
 
 	@Test
-	public void testRegular() {
-		TextMatcher matcher = new TextMatcher(TextMatcher.Kind.REGULAR, "^ét.*$", true, true);
-		assertFalse(matcher.matches("Eté"));
-		assertTrue(matcher.matches("été"));
+	void testRegular() {
+		TextMatcher matcher = new TextMatcher(TextMatcher.Kind.REGULAR, "^Ã©t.*$", true, true);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertTrue(matcher.matches("Ã©tÃ©"));
 		assertFalse(matcher.matches("ETE"));
-		assertFalse(matcher.matches("été".toUpperCase()));
-		assertFalse(matcher.matches("être"));
+		assertFalse(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertFalse(matcher.matches("Ãªtre"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.REGULAR, "^ét.*$", true, false);
-		assertFalse(matcher.matches("Eté"));
-		assertTrue(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.REGULAR, "^Ã©t.*$", true, false);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertTrue(matcher.matches("Ã©tÃ©"));
 		assertFalse(matcher.matches("ETE"));
-		assertFalse(matcher.matches("été".toUpperCase()));
-		assertTrue(matcher.matches("être"));
+		assertFalse(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertTrue(matcher.matches("Ãªtre"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.REGULAR, "^ét.*$", false, false);
-		assertTrue(matcher.matches("Eté"));
-		assertTrue(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.REGULAR, "^Ã©t.*$", false, false);
+		assertTrue(matcher.matches("EtÃ©"));
+		assertTrue(matcher.matches("Ã©tÃ©"));
 		assertTrue(matcher.matches("ETE"));
-		assertTrue(matcher.matches("été".toUpperCase()));
-		assertTrue(matcher.matches("être"));
-		assertFalse(matcher.matches("hêtre"));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertTrue(matcher.matches("Ãªtre"));
+		assertFalse(matcher.matches("hÃªtre"));
 
-		matcher = new TextMatcher(TextMatcher.Kind.REGULAR, "^ét.*$", false, true);
-		assertFalse(matcher.matches("Eté"));
-		assertTrue(matcher.matches("été"));
+		matcher = new TextMatcher(TextMatcher.Kind.REGULAR, "^Ã©t.*$", false, true);
+		assertFalse(matcher.matches("EtÃ©"));
+		assertTrue(matcher.matches("Ã©tÃ©"));
 		assertFalse(matcher.matches("ETE"));
-		assertTrue(matcher.matches("été".toUpperCase()));
-		assertFalse(matcher.matches("être"));
+		assertTrue(matcher.matches("Ã©tÃ©".toUpperCase()));
+		assertFalse(matcher.matches("Ãªtre"));
 	}
 
 }
