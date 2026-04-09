@@ -3,7 +3,6 @@ package net.yapbam.remote;
 import java.net.*;
 import java.io.*;
 
-import net.yapbam.remote.Cache;
 import net.yapbam.util.CoolHttpConnection;
 import net.yapbam.util.StreamUtils;
 
