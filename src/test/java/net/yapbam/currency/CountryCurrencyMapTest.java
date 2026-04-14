@@ -17,7 +17,7 @@ class CountryCurrencyMapTest {
 		Set<String> countries = map.getCountries();
 		for (String isoCountry : isoCountries) {
 			assertTrue(countries.contains(isoCountry));
-			Currency c = Currency.getInstance(new Locale("",isoCountry));
+			Currency c = Currency.getInstance(new Locale.Builder().setRegion(isoCountry).build());
 			if (c==null) {
 				assertNull(map.getCurrency(isoCountry));
 			} else {
