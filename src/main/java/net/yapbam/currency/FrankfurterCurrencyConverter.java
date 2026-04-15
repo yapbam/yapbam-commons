@@ -18,11 +18,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import net.yapbam.remote.Cache;
-import net.yapbam.remote.MemoryCache;
 
 public class FrankfurterCurrencyConverter extends AbstractCurrencyConverter {
     private static final String RATES_URL = "https://api.frankfurter.dev/v2/rates?base=EUR"; //$NON-NLS-1$
-
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
     public FrankfurterCurrencyConverter(Proxy proxy, Cache cache) {
         super(proxy, cache);
@@ -78,9 +77,7 @@ public class FrankfurterCurrencyConverter extends AbstractCurrencyConverter {
             throw new ParseException("Missing date attribute in quote item", 0);
         }
         
-        String dateStr = dateObj.toString();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        Date date = dateFormat.parse(dateStr);
+        Date date = dateFormat.parse(dateObj.toString());
         
         // Parse the quote and rate attributes
         Object quoteObj = jsonItem.get("quote");
@@ -102,13 +99,5 @@ public class FrankfurterCurrencyConverter extends AbstractCurrencyConverter {
         }
         
         return date.getTime();
-    }
-
-    public static void main(String[] args) throws ParseException, IOException {
-        AbstractCurrencyConverter converter = new FrankfurterCurrencyConverter(Proxy.NO_PROXY, new MemoryCache());
-        converter.update();
-        // System.out.println("TimeStamp: "+converter.getTimeStamp());
-        // System.out.println("Currencies: "+Arrays.asList(converter.getCurrencies()));
-        // System.out.println("1 euro= "+converter.convert(100, "EUR", "USD")/100.0+" USD");
     }
 }
