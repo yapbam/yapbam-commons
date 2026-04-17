@@ -53,8 +53,7 @@ class ECBTest {
 		assertEquals(1387545300000L, cvt.getTimeStamp());
 		path = "bad_ecb.xml";
 		AbstractCurrencyConverter x = new ECBTestConverter(cache);
-		Set<String> currencies = new HashSet<String>(Arrays.asList(x
-				.getCurrencies()));
+		Set<String> currencies = new HashSet<>(Arrays.asList(x.getCurrencies()));
 		assertEquals(3, currencies.size());
 		assertTrue(currencies.contains("USD"));
 		assertTrue(currencies.contains("EUR"));

@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -55,9 +54,7 @@ class FrankfurterTest {
 		assertEquals(new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse("2026-04-15").getTime(), cvt.getTimeStamp());
 		path = "bad_frankfurter.json";
 		AbstractCurrencyConverter x = new FrankfurterTestConverter(cache);
-		Set<String> currencies = new HashSet<String>(Arrays.asList(x
-				.getCurrencies()));
-		assertEquals(new HashSet<>(Arrays.asList("AED", "AFN", "ALL", "AMD", "EUR")), currencies);
+		assertEquals(new HashSet<>(Arrays.asList("AED", "AFN", "ALL", "AMD", "EUR")), new HashSet<>(Arrays.asList(x.getCurrencies())));
 		assertEquals(1.0/95.8, x.convert(1.0, "ALL", "EUR"), 0.0001);
 	}
 

@@ -21,10 +21,17 @@ import net.yapbam.remote.Cache;
 
 public class FrankfurterCurrencyConverter extends AbstractCurrencyConverter {
     private static final String RATES_URL = "https://api.frankfurter.dev/v2/rates?base=EUR"; //$NON-NLS-1$
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private SimpleDateFormat dateFormat;
 
     public FrankfurterCurrencyConverter(Proxy proxy, Cache cache) {
         super(proxy, cache);
+    }
+
+    private SimpleDateFormat getFormat() {
+        if (dateFormat == null) {
+            dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        }
+        return dateFormat;
     }
 
     @Override
@@ -77,7 +84,7 @@ public class FrankfurterCurrencyConverter extends AbstractCurrencyConverter {
             throw new ParseException("Missing date attribute in quote item", 0);
         }
         
-        Date date = dateFormat.parse(dateObj.toString());
+        Date date = getFormat().parse(dateObj.toString());
         
         // Parse the quote and rate attributes
         Object quoteObj = jsonItem.get("quote");
