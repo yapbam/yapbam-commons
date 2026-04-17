@@ -38,6 +38,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class SerializerTest {
+	private static final Class<? extends SecurityException> WRONG_PASSWORD_EXCEPTION = AccessControlException.class;
 	private static boolean previousValidation;
 
 	@BeforeAll
@@ -73,7 +74,7 @@ class SerializerTest {
 		}
 	}
 
-	private static final double doubleAccuracy = Math.pow(10, -GlobalData.getDefaultCurrency().getDefaultFractionDigits())/2;
+	private static final double DOUBLE_ACCURACY = Math.pow(10, -GlobalData.getDefaultCurrency().getDefaultFractionDigits())/2;
 	
 	@Test
 	void testArchiveAndLock() throws IOException {
@@ -140,7 +141,7 @@ class SerializerTest {
 			Account account = data.getAccount(i);
 			Account oAccount = other.getAccount(account.getName());
 			assertNotNull(oAccount);
-			assertEquals(account.getInitialBalance(), oAccount.getInitialBalance(), doubleAccuracy);
+			assertEquals(account.getInitialBalance(), oAccount.getInitialBalance(), DOUBLE_ACCURACY);
 			assertEquals(account.getAlertThreshold(), oAccount.getAlertThreshold());
 			assertEquals(account.getCheckNumberAlertThreshold(), oAccount.getCheckNumberAlertThreshold());
 			assertEquals(account.getComment(), oAccount.getComment());
@@ -209,22 +210,15 @@ class SerializerTest {
 	}
 
 	private GlobalData reread(GlobalData data) throws IOException {
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		try {
+		byte[] serialized;
+		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 			new Serializer().write(data, os, null);
-		} finally {
 			os.flush();
-			os.close();
+			serialized = os.toByteArray();
 		}
 		
-		byte[] serialized = os.toByteArray();
-//		System.out.println (new String(serialized)); //TODO
-		
-		ByteArrayInputStream is = new ByteArrayInputStream(serialized);
-		try {
+		try (ByteArrayInputStream is = new ByteArrayInputStream(serialized)) {
 			return new Serializer().read(data.getPassword(), is, null);
-		} finally {
-			is.close();
 		}
 	}
 
@@ -245,27 +239,20 @@ class SerializerTest {
 		File file;
 		try {
 			file = File.createTempFile("testYapbam", ".tmp");
-			BufferedWriter buf = new BufferedWriter(new FileWriter(file));
-			try {
+			try (BufferedWriter buf = new BufferedWriter(new FileWriter(file))) {
 				for (String string : content) {
 					buf.write(string);
 					buf.newLine();
 				}
-			} finally {
-				buf.close();
 			}
-			try {
-				FileInputStream in = new FileInputStream(file);
-				try {
-					new Serializer().read(null, in, null);
-				} finally {
-					in.close();
-				}
+			Serializer serializer = new Serializer();
+			try (FileInputStream in = new FileInputStream(file)) {
+				serializer.read(null, in, null);
 				fail("Parsing of invalid file should fail");
 			} catch (AccessControlException e) {
 				fail("Should not require password");
 			} catch (UnsupportedFormatException e) {
-				assertTrue(e.getClass().equals(expectedException));
+				assertEquals(expectedException, e.getClass());
 				// Yeah, this is the right exception 
 			} catch (IOException e) {
 				fail("Should throw a more specify IOException");
@@ -325,11 +312,8 @@ class SerializerTest {
 			URL resource = getClass().getResource(resName);
 			if (resource==null) fail("Unable to locate "+resName);
 			
-			InputStream in = resource.openStream();
-			try {
+			try (InputStream in = resource.openStream()) {
 				assertEquals(expectedResult, new Serializer().isPasswordOk(in, password));
-			} finally {
-				in.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -342,12 +326,9 @@ class SerializerTest {
 			URL resource = getClass().getResource(resName);
 			if (resource==null) fail("Unable to locate "+resName);
 			
-			InputStream in = resource.openStream();
-			try {
+			try (InputStream in = resource.openStream()) {
 				GlobalData data = new Serializer().read(password, in, null);
 				assertEquals(1, data.getAccountsNumber());
-			} finally {
-				in.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -363,12 +344,12 @@ class SerializerTest {
 	
 	@Test
 	void pre0_16_0WrongPwd_2() {
-		assertThrows(AccessControlException.class, () -> testPre0_16_0("pre0.16.0-gti.xml", null));
+		assertThrows(WRONG_PASSWORD_EXCEPTION, () -> testPre0_16_0("pre0.16.0-gti.xml", null));
 	}
 	
 	@Test
 	void pre0_16_0WrongPwd_3() {
-		assertThrows(AccessControlException.class, () -> testPre0_16_0("pre0.16.0-été.xml", "ete"));
+		assertThrows(WRONG_PASSWORD_EXCEPTION, () -> testPre0_16_0("pre0.16.0-été.xml", "ete"));
 	}
 	
 	@Test
@@ -379,12 +360,12 @@ class SerializerTest {
 	
 	@Test
 	void pre0_16_0WrongPwd_5() {
-		assertThrows(AccessControlException.class, () -> testPre0_16_0("pre0.16.0-gti.zip", "xxx"));
+		assertThrows(WRONG_PASSWORD_EXCEPTION, () -> testPre0_16_0("pre0.16.0-gti.zip", "xxx"));
 	}
 	
 	@Test
 	void pre0_16_0WrongPwd_6() {
-		assertThrows(AccessControlException.class, () -> testPre0_16_0("pre0.16.0-été.zip", null));
+		assertThrows(WRONG_PASSWORD_EXCEPTION, () -> testPre0_16_0("pre0.16.0-été.zip", null));
 	}
 	
 	@Test
@@ -392,26 +373,22 @@ class SerializerTest {
 		GlobalData data = new GlobalData();
 		String pwd = "gti";
 		data.setPassword(pwd);
-		File file = File.createTempFile("yapbam", null);
+		final File file = File.createTempFile("yapbam", null);
 		file.deleteOnExit();
-		OutputStream out = new FileOutputStream(file);
-		try {
-			out = new ZipOutputStream(out);
+		try (OutputStream out = new ZipOutputStream(new FileOutputStream(file))) {
 			new Serializer().writeToZip(data, (ZipOutputStream) out, "the entry name", null);
-		} finally {
 			out.flush();
-			out.close();
 		}
 		
-		InputStream in = new FileInputStream(file);
-		try {
-			new Serializer().read(pwd, in, null);
-		} finally {
-			in.close();
-		}
+		assertDoesNotThrow(() -> {
+			try (InputStream in = new FileInputStream(file)) {
+				new Serializer().read(pwd, in, null);
+			}
+		});
 	}
 
 	@Test
+	@SuppressWarnings("java:S2093")
 	void testWriteDontCloseStream() throws IOException {
 		GlobalData data = new GlobalData();
 		FakeOutputStream out = new FakeOutputStream();
