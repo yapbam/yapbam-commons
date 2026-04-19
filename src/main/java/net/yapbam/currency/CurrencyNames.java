@@ -48,7 +48,7 @@ public class CurrencyNames {
 			return null;
 		}
 	}
-	
+
 	private static void reset() {
 		// Load default resource bundle if not already loaded
 		if (defaultResourceBundle == null) {
