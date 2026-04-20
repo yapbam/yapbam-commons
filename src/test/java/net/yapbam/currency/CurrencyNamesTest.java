@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,6 +35,8 @@ import net.yapbam.remote.MemoryCache;
 import net.yapbam.util.TextUtils;
 
 class CurrencyNamesTest {
+	private static final String RESOURCES_PATH = "src/main/resources/net/yapbam/currency/";
+
 	private static Locale locale;
 	
 	@BeforeAll
@@ -83,17 +86,21 @@ class CurrencyNamesTest {
 		Proxy proxy = Proxy.NO_PROXY;
 		usefull.addAll(getUsedCurrencies(new ECBCurrencyConverter(proxy, new MemoryCache())));
 		usefull.addAll(getUsedCurrencies(new FrankfurterCurrencyConverter(proxy, new MemoryCache())));
-		assertDoesNotThrow(() -> checkUsageForLanguage(usefull, null));
+		for (String language : getResourcesLanguages()) {
+			assertDoesNotThrow(() -> checkUsageForLanguage(usefull, language));
+		}
 	}
 
 	private void checkUsageForLanguage(Set<String> usefull, String language) throws IOException {
 		Logger logger = LoggerFactory.getLogger(CurrencyNamesTest.class);
+		String lng = language==null?"default":language;
+		// Search for useless codes
 		Properties properties = getKnownCodes(language);
-		for (String code : properties.stringPropertyNames()) {
-			if (!usefull.contains(code)) {
-				logger.warn("Useless currency code {} for {} language -> {}", code, language==null?"default":language, properties.getProperty(code));
-			}
+		List<String> uselessCodes = properties.stringPropertyNames().stream().filter(c -> !usefull.contains(c)).collect(Collectors.toList());
+		if (!uselessCodes.isEmpty()) {
+			logger.info("Useless currency code(s) {} for {} language", uselessCodes, lng);
 		}
+		// Search for duplicate wordings
 		Map<String, List<String>> map = new HashMap<>();
 		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
 			map.computeIfAbsent((String) entry.getValue(), k -> new ArrayList<>()).add((String) entry.getKey());
@@ -101,9 +108,9 @@ class CurrencyNamesTest {
 		map.entrySet().stream().filter(e -> e.getValue().size() > 1).forEach(e -> {
 			List<String> canBeRemoved = e.getValue().stream().filter(code -> !usefull.contains(code)).collect(Collectors.toList());
 			if (canBeRemoved.size()>=e.getValue().size()-1) {
-				logger.info("Duplicate currency name '{}' for codes: {}. {}", e.getKey(), e.getValue(), uselessWording(canBeRemoved));
+				logger.info("Duplicate currency name '{}' for codes: {} and {} langage. {}", e.getKey(), e.getValue(), lng, uselessWording(canBeRemoved));
 			} else {
-				logger.warn("Duplicate currency name '{}' for codes: {}. {}", e.getKey(), e.getValue(), uselessWording(canBeRemoved));
+				logger.warn("Duplicate currency name '{}' for codes: {} and {} langage. {}", e.getKey(), e.getValue(), lng, uselessWording(canBeRemoved));
 			}
 			Locale currentLocale = language == null ? Locale.US : Locale.forLanguageTag(language);
 			logger.info("Java wordings: {}", getJavaWordings(e.getValue(), currentLocale));
@@ -137,9 +144,23 @@ class CurrencyNamesTest {
 		return Arrays.asList(converter.getCurrencies());
 	}
 
+	private Collection<String> getResourcesLanguages() throws IOException {
+		// List all files in RESOURCES_PATH that start with "currencyNames" and end with ".properties"
+		File resourcesDir = new File(RESOURCES_PATH);
+		File[] files = resourcesDir.listFiles((dir, name) -> name.startsWith("currencyNames") && name.endsWith(".properties"));
+		if (files == null) {
+			fail("No resources files found in " + RESOURCES_PATH);
+		}
+		return Arrays.stream(files)
+			.map(File::getName)
+			.map(name -> name.substring("currencyNames".length(), name.length() - ".properties".length()))
+			.map(name -> name.isEmpty() ? null : name.substring(1))
+			.collect(Collectors.toList());
+	}
+
 	private Properties getKnownCodes(String language) throws IOException {
 		String id = language == null ? "" : "_" + language;
-		try (InputStreamReader reader = new InputStreamReader(new FileInputStream("src/main/resources/net/yapbam/currency/currencyNames"+id+".properties"), StandardCharsets.UTF_8)) {
+		try (InputStreamReader reader = new InputStreamReader(new FileInputStream(RESOURCES_PATH + "currencyNames"+id+".properties"), StandardCharsets.UTF_8)) {
 			Properties properties = new Properties();
 			properties.load(reader);
 			return properties;
