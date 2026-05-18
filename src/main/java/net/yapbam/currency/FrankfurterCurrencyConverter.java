@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -37,7 +38,7 @@ public class FrankfurterCurrencyConverter extends AbstractCurrencyConverter {
     @Override
     protected URL getSourceURL() {
         try {
-            return new URL(RATES_URL);
+            return URI.create(RATES_URL).toURL();
         } catch (MalformedURLException e) {
             throw new UncheckedIOException(e);
         }
