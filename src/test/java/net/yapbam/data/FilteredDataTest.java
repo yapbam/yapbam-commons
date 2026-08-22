@@ -4,13 +4,13 @@ import java.util.Arrays;
 
 import net.yapbam.data.GlobalDataTest.TestData;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 /** Test of FilteredData.*/
-public class FilteredDataTest {
+class FilteredDataTest {
 	@Test
-	public void testFilterUpdateWhenRemoving() {
+	void testFilterUpdateWhenRemoving() {
 		TestData data = new TestData();
 
 		// Do the tests
@@ -40,7 +40,7 @@ public class FilteredDataTest {
 	}
 	
 	@Test
-	public void testEmptyFilterUpdateWhenRemoving() {
+	void testEmptyFilterUpdateWhenRemoving() {
 		TestData data = new TestData();
 
 		// Do the tests
@@ -57,7 +57,7 @@ public class FilteredDataTest {
 	}
 	
 	@Test
-	public void testNotConcernedFilterUpdateWhenRemoving() {
+	void testNotConcernedFilterUpdateWhenRemoving() {
 		TestData data = new TestData();
 
 		// Do the tests

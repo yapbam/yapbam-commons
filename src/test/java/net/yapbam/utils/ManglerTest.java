@@ -1,14 +1,14 @@
 package net.yapbam.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import net.yapbam.util.Mangler;
 
-public class ManglerTest {
+class ManglerTest {
 	@Test
-	public void test() {
+	void test() {
 		String original = "RXT 1.6 16V";
 		String escapedChars = " ";
 		Mangler m = new Mangler(escapedChars, '_');
@@ -22,13 +22,13 @@ public class ManglerTest {
 		}
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
-	public void testEscapeInEscaped() {
-		new Mangler("_", '_');
+	@Test
+	void testEscapeInEscaped() {
+		assertThrows(IllegalArgumentException.class, () -> new Mangler("_", '_'));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
-	public void testEscapedInEscaped() {
-		new Mangler("+1", '_');
+	@Test
+	void testEscapedInEscaped() {
+		assertThrows(IllegalArgumentException.class, () -> new Mangler("+1", '_'));
 	}
 }

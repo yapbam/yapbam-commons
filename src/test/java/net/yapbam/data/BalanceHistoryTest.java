@@ -1,23 +1,21 @@
 package net.yapbam.data;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Date;
 import java.util.List;
 
-import net.yapbam.data.BalanceHistory;
-import net.yapbam.data.BalanceHistoryElement;
 import net.yapbam.date.helpers.DayDateStepper;
 import net.yapbam.util.DateUtils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("deprecation")
-public class BalanceHistoryTest {
+class BalanceHistoryTest {
 	private static final Date dBeforeUnix = new Date(-1000,1,1); // A date before the Unix start of time (1/1/1970)
 
 	@Test
-	public void testBalanceHistory() {		
+	void testBalanceHistory() {		
 		Date date1 = new Date(109,5,1);
 		BalanceHistory history = new BalanceHistory(0);
 		assertEquals(0, history.getBalance(date1), 0.01);
@@ -64,7 +62,7 @@ public class BalanceHistoryTest {
 	}
 	
 	@Test
-	public void testElement() {
+	void testElement() {
 		BalanceHistoryElement element = new BalanceHistoryElement(0, new Date(110,0,1), new Date(111,0,1));
 		assertTrue(element.getRelativePosition(new Date(109,0,1))<0);
 		assertEquals(0,element.getRelativePosition(new Date(110,5,1)));
@@ -82,7 +80,7 @@ public class BalanceHistoryTest {
 	}
 
 	@Test
-	public void testGetTransactions () {
+	void testGetTransactions () {
 		BalanceHistory bh = new BalanceHistory(0);
 		// An empty balance history has one element
 		assertEquals(1, bh.size());
@@ -99,7 +97,6 @@ public class BalanceHistoryTest {
 		bh.add(new Transaction(yesterday, null, "3", null, -10, account, Mode.UNDEFINED, Category.UNDEFINED, today, null, null));
 		bh.add(new Transaction(fourDaysAfter, null, "4", null, -20, account, Mode.UNDEFINED, Category.UNDEFINED, sixDaysAfter, null, null));
 		
-//		display(bh);
 		assertEquals(4, bh.size());
 		
 		int total = 0;
@@ -120,15 +117,5 @@ public class BalanceHistoryTest {
 		assertEquals(1, transactions.size());
 		
 		assertEquals(bh.getTransactionsNumber(), total);
-	}
-	
-	private void display(BalanceHistory bh) {
-		for (int i=0; i<bh.size() ; i++) {
-			System.out.println (bh.get(i));
-			List<Transaction> transactions = bh.getTransactions(i);
-			for (Transaction transaction : transactions) {
-				System.out.println ("  "+transaction);
-			}
-		}
 	}
 }

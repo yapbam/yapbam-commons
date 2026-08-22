@@ -21,6 +21,7 @@ import javax.xml.parsers.SAXParserFactory;
  * @author Jean-Marc Astesana
  */
 public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConverter {
+	private static final String DISALLOW_DOCTYPE_DECL = "http://apache.org/xml/features/disallow-doctype-decl";
 
 	/**
 	 * Constructor.
@@ -52,14 +53,14 @@ public abstract class AbstractXMLCurrencyConverter extends AbstractCurrencyConve
 	protected CurrencyData parseXML(Cache cache, boolean tmp) throws ParseException, IOException {
 		CurrencyHandler handler = getXMLHandler();
 		try {
-			XMLReader saxReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			// Prevent XXE attack by disabling DOCTYPE declarations
+			factory.setFeature(DISALLOW_DOCTYPE_DECL, true);
+			XMLReader saxReader = factory.newSAXParser().getXMLReader();
 			saxReader.setContentHandler(handler);
 			saxReader.setErrorHandler(handler);
-			InputStream input = cache.getInputStream(tmp);
-			try {
+			try (InputStream input = cache.getInputStream(tmp)) {
 				saxReader.parse(new InputSource(input));
-			} finally {
-				input.close();
 			}
 		} catch (SAXException e) {
 			ParseException x = new ParseException(e.toString(), 0);

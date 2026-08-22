@@ -1,6 +1,6 @@
 package net.yapbam.remote;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,16 +10,14 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
 
-import net.yapbam.remote.MemoryCache;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-
-public class CacheTest {
+class CacheTest {
 	private static final CharSequence FIRST = "first";
 	private static final CharSequence SECOND = "second";
 
 	@Test
-	public void test() throws IOException {
+	void test() throws IOException {
 		MemoryCache cache = new MemoryCache();
 		assertTrue(cache.isEmpty());
 		assertTrue(cache.getTimeStamp()<0);
@@ -36,23 +34,23 @@ public class CacheTest {
 		assertEquals(FIRST, getCacheContent(cache, false));
 	}
 	
-	@Test (expected = FileNotFoundException.class)
-	public void testNoTmp() throws IOException {
+	@Test
+	void testNoTmp() {
 		MemoryCache cache = new MemoryCache();
-		cache.getInputStream(true);
+		assertThrows(FileNotFoundException.class, () -> cache.getInputStream(true));
 	}
 
-	@Test (expected = FileNotFoundException.class)
-	public void testNoCommited1() throws IOException {
+	@Test
+	void testNoCommited1() {
 		MemoryCache cache = new MemoryCache();
-		cache.getInputStream(false);
+		assertThrows(FileNotFoundException.class, () -> cache.getInputStream(false));
 	}
 
-	@Test (expected = FileNotFoundException.class)
-	public void testNoCommited2() throws IOException {
+	@Test
+	void testNoCommited2() throws IOException {
 		MemoryCache cache = new MemoryCache();
 		setCache(cache, FIRST);
-		cache.getInputStream(false);
+		assertThrows(FileNotFoundException.class, () -> cache.getInputStream(false));
 	}
 
 	private void setCache(MemoryCache cache, CharSequence content) throws IOException {

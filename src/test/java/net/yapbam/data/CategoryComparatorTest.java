@@ -1,6 +1,6 @@
 package net.yapbam.data;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,12 +8,12 @@ import java.util.Locale;
 
 import net.yapbam.data.comparator.CategoryComparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CategoryComparatorTest {
+class CategoryComparatorTest {
 
 	@Test
-	public void test() {
+	void test() {
 		Category c1 = new Category("aZBC");
 		Category c2 = new Category("ABZC");
 		Category c3 = new Category("BZaC");
@@ -32,21 +32,21 @@ public class CategoryComparatorTest {
 	}
 
 	@Test
-	public void test2() {
+	void test2() {
 		Category c1 = new Category("AZBZA");
 		Category c2 = new Category("AZB");
 		assertEquals(1, new CategoryComparator(Locale.FRANCE, 'Z').compare(c1, c2));
 	}
 
 	@Test
-	public void test3() {
+	void test3() {
 		Category c1 = new Category("AZBZ");
 		Category c2 = new Category("AZBZ");
 		assertEquals(0, new CategoryComparator(Locale.FRANCE, 'Z').compare(c1, c2));
 	}
 
 	@Test
-	public void test4() {
+	void test4() {
 		Category c1 = new Category("AZB");
 		Category c2 = new Category("AZBZBZB");
 		assertEquals(-1, new CategoryComparator(Locale.FRANCE, 'Z').compare(c1, c2));

@@ -1,21 +1,16 @@
 package net.yapbam.date.helpers;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Date;
 
-import net.yapbam.date.helpers.DateStepper;
-import net.yapbam.date.helpers.DayDateStepper;
-import net.yapbam.date.helpers.DeferredValueDateComputer;
-import net.yapbam.date.helpers.MonthDateStepper;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-
-public class ValueDateComputerTest {
+class ValueDateComputerTest {
 
 	@SuppressWarnings("deprecation")
 	@Test
-	public void test() {
+	void test() {
 		MonthDateStepper mdi = new MonthDateStepper(1, 30);
 		assertEquals(new Date(109,1,28), mdi.getNextStep(new Date(109,0,31)));
 		assertEquals(new Date(109,2,30), mdi.getNextStep(new Date(109,1,28)));

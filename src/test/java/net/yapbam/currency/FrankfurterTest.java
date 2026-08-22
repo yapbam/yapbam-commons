@@ -6,20 +6,21 @@ import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
 import net.yapbam.remote.Cache;
 import net.yapbam.remote.MemoryCache;
 
-class ECBTest {
+class FrankfurterTest {
 	private static String path;
 
-	private static class ECBTestConverter extends ECBCurrencyConverter {
-		public ECBTestConverter(Cache cache) {
+	private static class FrankfurterTestConverter extends FrankfurterCurrencyConverter {
+		public FrankfurterTestConverter(Cache cache) {
 			super(Proxy.NO_PROXY, cache);
 		}
 
@@ -31,9 +32,9 @@ class ECBTest {
 
 	@Test
 	void test() throws IOException, ParseException {
-		path = "ecb.xml";
+		path = "frankfurter.json";
 		Cache cache = new MemoryCache();
-		AbstractCurrencyConverter cvt = new ECBTestConverter(cache);
+		AbstractCurrencyConverter cvt = new FrankfurterTestConverter(cache);
 		assertTrue(cvt.getRefreshTimeStamp()<0);
 		assertTrue(cvt.getTimeStamp()<0);
 		assertFalse(cvt.isSynchronized());
@@ -45,33 +46,29 @@ class ECBTest {
 		assertTrue(cvt.getRefreshTimeStamp()>0);
 		assertTrue(cvt.getTimeStamp()>0);
 		assertTrue(cvt.isSynchronized());
-		assertTrue(cvt.isAvailable("USD"));
-		assertTrue(cvt.isAvailable("JPY"));
-		assertTrue(cvt.isAvailable("EUR"));
-		assertEquals(1.0, cvt.convert(1.0, "USD", "USD"), 0.0);
-		assertEquals(1.3655, cvt.convert(1.0, "EUR", "USD"), 0.0001);
-		assertEquals(1387545300000L, cvt.getTimeStamp());
-		path = "bad_ecb.xml";
-		AbstractCurrencyConverter x = new ECBTestConverter(cache);
-		Set<String> currencies = new HashSet<>(Arrays.asList(x.getCurrencies()));
-		assertEquals(3, currencies.size());
-		assertTrue(currencies.contains("USD"));
-		assertTrue(currencies.contains("EUR"));
-		assertTrue(currencies.contains("JPY"));
-		assertEquals(1.0/1.3655, x.convert(1.0, "USD", "EUR"), 0.0001);
+		assertTrue(cvt.isAvailable("AED"));
+		assertTrue(cvt.isAvailable("AFN"));
+		assertTrue(cvt.isAvailable("ALL"));
+		assertEquals(1.0, cvt.convert(1.0, "AED", "AED"), 0.0);
+		assertEquals(4.3272, cvt.convert(1.0, "EUR", "AED"), 0.0001);
+		assertEquals(new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse("2026-04-15").getTime(), cvt.getTimeStamp());
+		path = "bad_frankfurter.json";
+		AbstractCurrencyConverter x = new FrankfurterTestConverter(cache);
+		assertEquals(new HashSet<>(Arrays.asList("AED", "AFN", "ALL", "AMD", "EUR")), new HashSet<>(Arrays.asList(x.getCurrencies())));
+		assertEquals(1.0/95.8, x.convert(1.0, "ALL", "EUR"), 0.0001);
 	}
 
 	@Test
 	void testBad1() {
-		path = "bad_ecb.xml";
-		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
+		path = "bad_frankfurter.json";
+		AbstractCurrencyConverter cvt = new FrankfurterTestConverter(new MemoryCache());
 		assertThrows(ParseException.class, cvt::update);
 	}
 
 	@Test
 	void testBadArgs() throws IOException, ParseException {
-		path = "ecb.xml";
-		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
+		path = "frankfurter.json";
+		AbstractCurrencyConverter cvt = new FrankfurterTestConverter(new MemoryCache());
 		cvt.update();
 		assertThrows(IllegalArgumentException.class, () -> cvt.convert(1.0, "XXX", "USD"));
 		assertThrows(IllegalArgumentException.class, () -> cvt.convert(1.0, "USD", "XXX"));
@@ -79,8 +76,8 @@ class ECBTest {
 
 	@Test
 	void testUnknown() {
-		path = "unknown.xml";
-		AbstractCurrencyConverter cvt = new ECBTestConverter(new MemoryCache());
+		path = "unknown.json";
+		AbstractCurrencyConverter cvt = new FrankfurterTestConverter(new MemoryCache());
 		assertThrows(IOException.class, cvt::update);
 	}
 }

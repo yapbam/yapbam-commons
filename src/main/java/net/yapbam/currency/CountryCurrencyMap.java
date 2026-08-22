@@ -18,26 +18,23 @@ import org.slf4j.LoggerFactory;
 public class CountryCurrencyMap {
 	public static final CountryCurrencyMap INSTANCE = new CountryCurrencyMap();
 	
-	/* The following information is related to an online source of data.
+	/* An online source of data exists (https://raw.github.com/datasets/country-codes/master/data/country-codes.csv).
 	 * After thinking about it, it seems a better solution to use internal java data.
 	 * The pro are: The data is guaranteed to be available (it is part of the JVM).
-	 * The cons are; The data is not necessary upto date.
-	private static final int CURRENCY_COL_INDEX = 14;
-	private static final int COUNTRY_COL_INDEX = 2;
-	private static final String TABLE_URL = "https://raw.github.com/datasets/country-codes/master/data/country-codes.csv";
+	 * The cons are; The data is not necessary upto date, depending on the java version used.
 	 */
 
 	private Map<String,String> countryToCurrency;
 	private Map<String,Set<String>> currencyToCountries;
 
 	private CountryCurrencyMap() {
-		this.countryToCurrency = new HashMap<String, String>();
-		this.currencyToCountries = new HashMap<String, Set<String>>();
+		this.countryToCurrency = new HashMap<>();
+		this.currencyToCountries = new HashMap<>();
 		String[] isoCountries = Locale.getISOCountries();
 		for (String isoCountry : isoCountries) {
 			Currency currency = null;
 			try {
-				currency = Currency.getInstance(new Locale("", isoCountry));
+				currency = Currency.getInstance(new Locale.Builder().setRegion(isoCountry).build());
 			} catch (IllegalArgumentException e) {
 				// Google is not able to copy API with no mistake. That funny boys find nothing more stupid
 				// than return non ISO 3166 countries in Locale.getIsoCountries(). So that strange code is
@@ -49,11 +46,7 @@ public class CountryCurrencyMap {
 			} else {
 				String code = currency.getCurrencyCode();
 				this.countryToCurrency.put(isoCountry, code);
-				Set<String> countries = currencyToCountries.get(code);
-				if (countries==null) {
-					countries = new TreeSet<String>();
-					currencyToCountries.put(code, countries);
-				}
+				Set<String> countries = currencyToCountries.computeIfAbsent(code, c -> new TreeSet<>());
 				countries.add(isoCountry);
 			}
 		}

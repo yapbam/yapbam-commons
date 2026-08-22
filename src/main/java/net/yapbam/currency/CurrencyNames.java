@@ -3,65 +3,82 @@ package net.yapbam.currency;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Properties;
 
+import net.yapbam.util.TextUtils;
+
 public class CurrencyNames {
 	private static final String BUNDLE_NAME = "/net/yapbam/currency/currencyNames"; //$NON-NLS-1$
+	private static final String RESOURCE_SUFFIX = ".properties";
 
-	private static Properties RESOURCE_BUNDLE;
+	private static Properties defaultResourceBundle;
+	private static Properties resourceBundle;
 	private static Locale resourceBundleLocale;
 
 	private CurrencyNames() {
 	}
 
 	/** Gets the wording of a currency.
-	 * <br>The wording is returned according the default locale. If there's no localized name known for the default locale, English wording is returned.
+	 * <br>The wording is first searched in the current locale bundle. If not found, it is searched in the java Currency class. If not found, it is searched in the default bundle. If not found, the key itself is returned.
 	 * @param key The ISO-4217 currency code.
-	 * @return The currency name or null if the name is unknown.
+	 * @return The currency name or the key itself if the name is unknown.
 	 */
 	public static String get(String key) {
 		reset();
-		String wording = (String) RESOURCE_BUNDLE.get(key);
+		// Search in the current locale bundle
+		String wording = (String) resourceBundle.get(key);
+		// If not found search in java Currency class
+		wording = wording == null ? getJavaDisplayName(key) : wording;
+		// If not found, search in the default bundle
+		wording = wording == null ? (String) defaultResourceBundle.get(key) : wording;
+		// If found nowhere, return the key itself
 		return wording==null ? key : wording;
 	}
-	
+
+	static String getJavaDisplayName(String key) {
+		try {
+			Currency currency = Currency.getInstance(key);
+			Locale locale = Locale.getDefault();
+			return TextUtils.capitalizeFirst(currency.getDisplayName(locale), locale);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+
 	private static void reset() {
+		// Load default resource bundle if not already loaded
+		if (defaultResourceBundle == null) {
+			defaultResourceBundle = new Properties();
+			try {
+				tryLoading(defaultResourceBundle, BUNDLE_NAME + RESOURCE_SUFFIX);
+			} catch (IOException e) {
+				throw new MissingResourceException("", "", BUNDLE_NAME);
+			}
+		}
 		if (!Locale.getDefault().equals(resourceBundleLocale)) {
 			Properties properties = new Properties();
 			String lang = Locale.getDefault().getLanguage();
-			String resourceSuffix = ".properties";
-			boolean ok = false;
 			try {
-				ok = tryLoading(properties, BUNDLE_NAME+"_"+lang+resourceSuffix);
-				if (!ok) {
-					ok = tryLoading(properties, BUNDLE_NAME+resourceSuffix);
-				}
+				tryLoading(properties, BUNDLE_NAME+"_"+lang+RESOURCE_SUFFIX);
 			} catch (IOException e) {
-				ok = false;
+				// Ignore, get will fallback to default
 			}
-			if (!ok) {
-				throw new MissingResourceException("", "", BUNDLE_NAME);
-			}
-			RESOURCE_BUNDLE = properties;
+			resourceBundle = properties;
 			resourceBundleLocale = Locale.getDefault();
 		}
 	}
 	
-	private static boolean tryLoading(Properties properties, String name) throws IOException {
+	private static void tryLoading(Properties properties, String name) throws IOException {
 		InputStream stream = CurrencyNames.class.getResourceAsStream(name);
 		if (stream==null) {
-			return false;
+			throw new IOException("Resource not found: " + name);
 		}
-		try {
-			InputStreamReader reader = new InputStreamReader(stream, "ISO8859-1");
-			try {
-				properties.load(reader);
-				return true;
-			} finally {
-				reader.close();
-			}
+		try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.ISO_8859_1)) {
+			properties.load(reader);
 		} finally {
 			stream.close();
 		}

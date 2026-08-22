@@ -1,6 +1,6 @@
 package net.yapbam.data.xml;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -33,23 +33,24 @@ import net.yapbam.data.Transaction;
 import net.yapbam.util.TextMatcher;
 import net.yapbam.util.TextMatcher.Kind;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class SerializerTest {
+class SerializerTest {
+	private static final Class<? extends SecurityException> WRONG_PASSWORD_EXCEPTION = AccessControlException.class;
 	private static boolean previousValidation;
 
-	@BeforeClass
-	public static void init() {
+	@BeforeAll
+	static void init() {
 		previousValidation = XMLSerializer.SCHEMA_VALIDATION;
 		if (!previousValidation) {
 			XMLSerializer.SCHEMA_VALIDATION = true;
 		}
 	}
 	
-	@AfterClass
-	public static void tearDown() {
+	@AfterAll
+	static void tearDown() {
 		XMLSerializer.SCHEMA_VALIDATION = previousValidation;
 	}
 	
@@ -73,10 +74,10 @@ public class SerializerTest {
 		}
 	}
 
-	private static final double doubleAccuracy = Math.pow(10, -GlobalData.getDefaultCurrency().getDefaultFractionDigits())/2;
+	private static final double DOUBLE_ACCURACY = Math.pow(10, -GlobalData.getDefaultCurrency().getDefaultFractionDigits())/2;
 	
 	@Test
-	public void testArchiveAndLock() throws IOException {
+	void testArchiveAndLock() throws IOException {
 		GlobalData data = new GlobalData();
 		data.setArchive(true);
 		data.setLocked(true);
@@ -86,13 +87,13 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void test() throws IOException {
+	void test() throws IOException {
 		GlobalData data = new GlobalData();
 		Account account = new Account("toto,x", 50.24);
 		data.add(account);
 		account = new Account("titi", -10.0);
 		data.add(account);
-		data.setComment(account, "Un commentaire avec plusieurs lignes\nEt des caractères accentués.");
+		data.setComment(account, "Un commentaire avec plusieurs lignes\nEt des caractï¿½res accentuï¿½s.");
 		data.setAlertThreshold(account, new AlertThreshold(1000, 2000));
 		data.setCheckNumberAlertThreshold(account, 3);
 		Date today = new Date();
@@ -111,15 +112,15 @@ public class SerializerTest {
 		
 		data.setPassword("this is the big password");
 		testInstance(data);
-		data.setPassword("été is a non ascii password");
+		data.setPassword("ï¿½tï¿½ is a non ascii password");
 		testInstance(data);
 	}
 
 	@Test
-	public void emptyTest() throws IOException {
+	void emptyTest() throws IOException {
 		GlobalData data = new GlobalData();		
 		testInstance(data);
-		data.setPassword("été");
+		data.setPassword("ï¿½tï¿½");
 		testInstance(data);
 	}
 
@@ -140,7 +141,7 @@ public class SerializerTest {
 			Account account = data.getAccount(i);
 			Account oAccount = other.getAccount(account.getName());
 			assertNotNull(oAccount);
-			assertEquals(account.getInitialBalance(), oAccount.getInitialBalance(), doubleAccuracy);
+			assertEquals(account.getInitialBalance(), oAccount.getInitialBalance(), DOUBLE_ACCURACY);
 			assertEquals(account.getAlertThreshold(), oAccount.getAlertThreshold());
 			assertEquals(account.getCheckNumberAlertThreshold(), oAccount.getCheckNumberAlertThreshold());
 			assertEquals(account.getComment(), oAccount.getComment());
@@ -209,27 +210,20 @@ public class SerializerTest {
 	}
 
 	private GlobalData reread(GlobalData data) throws IOException {
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		try {
+		byte[] serialized;
+		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 			new Serializer().write(data, os, null);
-		} finally {
 			os.flush();
-			os.close();
+			serialized = os.toByteArray();
 		}
 		
-		byte[] serialized = os.toByteArray();
-//		System.out.println (new String(serialized)); //TODO
-		
-		ByteArrayInputStream is = new ByteArrayInputStream(serialized);
-		try {
+		try (ByteArrayInputStream is = new ByteArrayInputStream(serialized)) {
 			return new Serializer().read(data.getPassword(), is, null);
-		} finally {
-			is.close();
 		}
 	}
 
 	@Test
-	public void testInvalidXMLFile() {
+	void testInvalidXMLFile() {
 		testInvalidXMLFile(new String[]{}, UnsupportedFormatException.class); // An empty file
 		testInvalidXMLFile(new String[]{"This is not an XML file"}, UnsupportedFormatException.class); // Not an xml file
 		testInvalidXMLFile(new String[]{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "<DATA>"}, UnsupportedFormatException.class); // Tag is not closed
@@ -245,27 +239,20 @@ public class SerializerTest {
 		File file;
 		try {
 			file = File.createTempFile("testYapbam", ".tmp");
-			BufferedWriter buf = new BufferedWriter(new FileWriter(file));
-			try {
+			try (BufferedWriter buf = new BufferedWriter(new FileWriter(file))) {
 				for (String string : content) {
 					buf.write(string);
 					buf.newLine();
 				}
-			} finally {
-				buf.close();
 			}
-			try {
-				FileInputStream in = new FileInputStream(file);
-				try {
-					new Serializer().read(null, in, null);
-				} finally {
-					in.close();
-				}
+			Serializer serializer = new Serializer();
+			try (FileInputStream in = new FileInputStream(file)) {
+				serializer.read(null, in, null);
 				fail("Parsing of invalid file should fail");
 			} catch (AccessControlException e) {
 				fail("Should not require password");
 			} catch (UnsupportedFormatException e) {
-				assertTrue(e.getClass().equals(expectedException));
+				assertEquals(expectedException, e.getClass());
 				// Yeah, this is the right exception 
 			} catch (IOException e) {
 				fail("Should throw a more specify IOException");
@@ -276,7 +263,7 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void pbPre0_12_0() {
+	void pbPre0_12_0() {
 		try {
 			InputStream in = getClass().getResource("bugpre0.13.3.xml").openStream();
 			try {
@@ -292,7 +279,7 @@ public class SerializerTest {
 	}
 
 	@Test
-	public void pre0_16_0() {
+	void pre0_16_0() {
 		testPwdOk("pre0.16.0.xml", null, true);
 		testPwdOk("pre0.16.0.xml", "gti", false);
 		testPre0_16_0("pre0.16.0.xml", null);
@@ -301,10 +288,10 @@ public class SerializerTest {
 		testPwdOk("pre0.16.0-gti.xml", "gti", true);
 		testPre0_16_0("pre0.16.0-gti.xml", "gti");
 		
-		testPwdOk("pre0.16.0-été.xml", null, false);
-		testPwdOk("pre0.16.0-été.xml", "gti", false);
-		testPwdOk("pre0.16.0-été.xml", "été", true);
-		testPre0_16_0("pre0.16.0-été.xml", "été");
+		testPwdOk("pre0.16.0-Ã©tÃ©.xml", null, false);
+		testPwdOk("pre0.16.0-Ã©tÃ©.xml", "gti", false);
+		testPwdOk("pre0.16.0-Ã©tÃ©.xml", "Ã©tÃ©", true);
+		testPre0_16_0("pre0.16.0-Ã©tÃ©.xml", "Ã©tÃ©");
 		
 		testPwdOk("pre0.16.0.zip", null, true);
 		testPwdOk("pre0.16.0.zip", "gti", false);
@@ -314,10 +301,10 @@ public class SerializerTest {
 		testPwdOk("pre0.16.0-gti.zip", "gti", true);
 		testPre0_16_0("pre0.16.0-gti.zip", "gti");
 		
-		testPwdOk("pre0.16.0-été.zip", null, false);
-		testPwdOk("pre0.16.0-été.zip", "gti", false);
-		testPwdOk("pre0.16.0-été.zip", "été", true);
-		testPre0_16_0("pre0.16.0-été.zip", "été");
+		testPwdOk("pre0.16.0-Ã©tÃ©.zip", null, false);
+		testPwdOk("pre0.16.0-Ã©tÃ©.zip", "gti", false);
+		testPwdOk("pre0.16.0-Ã©tÃ©.zip", "Ã©tÃ©", true);
+		testPre0_16_0("pre0.16.0-Ã©tÃ©.zip", "Ã©tÃ©");
 	}
 		
 	private void testPwdOk(String resName, String password, boolean expectedResult) {
@@ -325,11 +312,8 @@ public class SerializerTest {
 			URL resource = getClass().getResource(resName);
 			if (resource==null) fail("Unable to locate "+resName);
 			
-			InputStream in = resource.openStream();
-			try {
+			try (InputStream in = resource.openStream()) {
 				assertEquals(expectedResult, new Serializer().isPasswordOk(in, password));
-			} finally {
-				in.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -342,12 +326,9 @@ public class SerializerTest {
 			URL resource = getClass().getResource(resName);
 			if (resource==null) fail("Unable to locate "+resName);
 			
-			InputStream in = resource.openStream();
-			try {
+			try (InputStream in = resource.openStream()) {
 				GlobalData data = new Serializer().read(password, in, null);
 				assertEquals(1, data.getAccountsNumber());
-			} finally {
-				in.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -356,58 +337,59 @@ public class SerializerTest {
 	}
 	
 	@Test
-	public void pre0_16_0WrongPwd_1() {
+	void pre0_16_0WrongPwd_1() {
 		// Password is wrong, but should be ignored
 		testPre0_16_0("pre0.16.0.xml", "xxx");
 	}
-	@Test(expected = AccessControlException.class)
-	public void pre0_16_0WrongPwd_2() {
-		testPre0_16_0("pre0.16.0-gti.xml", null);
-	}
-	@Test(expected = AccessControlException.class)
-	public void pre0_16_0WrongPwd_3() {
-		testPre0_16_0("pre0.16.0-été.xml", "ete");
-	}
+	
 	@Test
-	public void pre0_16_0WrongPwd_4() {
-		// Password is wrong, but should be ignored
-		testPre0_16_0("pre0.16.0.zip", "xxx");
-	}
-	@Test(expected = AccessControlException.class)
-	public void pre0_16_0WrongPwd_5() {
-		testPre0_16_0("pre0.16.0-gti.zip", "xxx");
-	}
-	@Test(expected = AccessControlException.class)
-	public void pre0_16_0WrongPwd_6() {
-		testPre0_16_0("pre0.16.0-été.zip", null);
+	void pre0_16_0WrongPwd_2() {
+		assertThrows(WRONG_PASSWORD_EXCEPTION, () -> testPre0_16_0("pre0.16.0-gti.xml", null));
 	}
 	
 	@Test
-	public void testWithZipFile() throws IOException {
+	void pre0_16_0WrongPwd_3() {
+		assertThrows(WRONG_PASSWORD_EXCEPTION, () -> testPre0_16_0("pre0.16.0-Ã©tÃ©.xml", "ete"));
+	}
+	
+	@Test
+	void pre0_16_0WrongPwd_4() {
+		// Password is wrong, but should be ignored
+		testPre0_16_0("pre0.16.0.zip", "xxx");
+	}
+	
+	@Test
+	void pre0_16_0WrongPwd_5() {
+		assertThrows(WRONG_PASSWORD_EXCEPTION, () -> testPre0_16_0("pre0.16.0-gti.zip", "xxx"));
+	}
+	
+	@Test
+	void pre0_16_0WrongPwd_6() {
+		assertThrows(WRONG_PASSWORD_EXCEPTION, () -> testPre0_16_0("pre0.16.0-Ã©tÃ©.zip", null));
+	}
+	
+	@Test
+	void testWithZipFile() throws IOException {
 		GlobalData data = new GlobalData();
 		String pwd = "gti";
 		data.setPassword(pwd);
-		File file = File.createTempFile("yapbam", null);
+		final File file = File.createTempFile("yapbam", null);
 		file.deleteOnExit();
-		OutputStream out = new FileOutputStream(file);
-		try {
-			out = new ZipOutputStream(out);
+		try (OutputStream out = new ZipOutputStream(new FileOutputStream(file))) {
 			new Serializer().writeToZip(data, (ZipOutputStream) out, "the entry name", null);
-		} finally {
 			out.flush();
-			out.close();
 		}
 		
-		InputStream in = new FileInputStream(file);
-		try {
-			new Serializer().read(pwd, in, null);
-		} finally {
-			in.close();
-		}
+		assertDoesNotThrow(() -> {
+			try (InputStream in = new FileInputStream(file)) {
+				new Serializer().read(pwd, in, null);
+			}
+		});
 	}
 
 	@Test
-	public void testWriteDontCloseStream() throws IOException {
+	@SuppressWarnings("java:S2093")
+	void testWriteDontCloseStream() throws IOException {
 		GlobalData data = new GlobalData();
 		FakeOutputStream out = new FakeOutputStream();
 		try {

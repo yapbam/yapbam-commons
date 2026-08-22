@@ -1,15 +1,15 @@
 package net.yapbam.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import net.yapbam.util.CheckSum;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CheckSumTest {
+class CheckSumTest {
 
 	@Test
-	public void test() {
+	void test() {
 		test (new byte[] {0,127});
 		test (new byte[] {127,32});
 		test (new byte[] {-1,32});

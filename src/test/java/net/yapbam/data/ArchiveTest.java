@@ -1,6 +1,6 @@
 package net.yapbam.data;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,9 +10,9 @@ import java.util.List;
 
 import net.yapbam.date.helpers.DateStepper;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ArchiveTest {
+class ArchiveTest {
 	private static final Archiver ARCHIVER = new Archiver(){
 		@Override
 		protected boolean save(GlobalData data) {
@@ -28,7 +28,7 @@ public class ArchiveTest {
 	private static final String MODE_2 = "mode 2";
 
 	@Test
-	public void test() {
+	void test() {
 		GlobalData archiveData = buildArchiveData();
 		GlobalData data = buildData();
 		
@@ -106,8 +106,8 @@ public class ArchiveTest {
 		}
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
-	public void testNotAnArchive() {
+	@Test
+	void testNotAnArchive() {
 		GlobalData archiveData = buildArchiveData();
 		GlobalData data = buildData();
 		Transaction[] transactions = new Transaction[data.getTransactionsNumber()];
@@ -115,11 +115,11 @@ public class ArchiveTest {
 			transactions[i] = data.getTransaction(i);
 		}
 		archiveData.setArchive(false);
-		ARCHIVER.move (data, archiveData, transactions, true);
+		assertThrows(IllegalArgumentException.class, () -> ARCHIVER.move(data, archiveData, transactions, true));
 	}
 
-	@Test (expected=IllegalArgumentException.class)
-	public void testArchive() {
+	@Test
+	void testArchive() {
 		GlobalData archiveData = buildArchiveData();
 		GlobalData data = buildData();
 		data.setArchive(true);
@@ -127,7 +127,7 @@ public class ArchiveTest {
 		for (int i = 0; i < transactions.length; i++) {
 			transactions[i] = data.getTransaction(i);
 		}
-		ARCHIVER.move (data, archiveData, transactions, true);
+		assertThrows(IllegalArgumentException.class, () -> ARCHIVER.move (data, archiveData, transactions, true));
 	}
 
 	protected GlobalData buildArchiveData() {

@@ -36,7 +36,7 @@ public class Serializer extends AbstractSerializer<GlobalData> {
 
 	public void directWrite(GlobalData data, OutputStream out, ProgressReport report) throws IOException {
 		XMLSerializer xmlSerializer = new XMLSerializer(out);
-		xmlSerializer.serialize((GlobalData) data, report);
+		xmlSerializer.serialize(data, report);
 		xmlSerializer.closeDocument();
 	}
 	

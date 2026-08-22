@@ -3,7 +3,6 @@ package net.yapbam.remote;
 import java.net.*;
 import java.io.*;
 
-import net.yapbam.remote.Cache;
 import net.yapbam.util.CoolHttpConnection;
 import net.yapbam.util.StreamUtils;
 
@@ -197,8 +196,7 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 	private void refreshCacheFile() throws IOException {
 		lastTryCacheRefresh = System.currentTimeMillis();
 		getLogger().trace("Connecting to {}", getSourceURL());
-		InputStream in = getSourceStream();
-		try {
+		try (InputStream in = getSourceStream()) {
 			synchronized (cache) {
 				OutputStream out = cache.getOutputStream();
 				try {
@@ -208,8 +206,6 @@ public abstract class AbstractRemoteResource <T extends RemoteData> extends Obse
 					out.close();
 				}
 			}
-		} finally {
-			in.close();
 		}
 	}
 
