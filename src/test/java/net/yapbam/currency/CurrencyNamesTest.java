@@ -144,7 +144,7 @@ class CurrencyNamesTest {
 		return Arrays.asList(converter.getCurrencies());
 	}
 
-	private Collection<String> getResourcesLanguages() throws IOException {
+	private Collection<String> getResourcesLanguages() {
 		// List all files in RESOURCES_PATH that start with "currencyNames" and end with ".properties"
 		File resourcesDir = new File(RESOURCES_PATH);
 		File[] files = resourcesDir.listFiles((dir, name) -> name.startsWith("currencyNames") && name.endsWith(".properties"));

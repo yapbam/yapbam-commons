@@ -40,7 +40,7 @@ class FilteredDataTest {
 	}
 	
 	@Test
-	public void testEmptyFilterUpdateWhenRemoving() {
+	void testEmptyFilterUpdateWhenRemoving() {
 		TestData data = new TestData();
 
 		// Do the tests
@@ -57,7 +57,7 @@ class FilteredDataTest {
 	}
 	
 	@Test
-	public void testNotConcernedFilterUpdateWhenRemoving() {
+	void testNotConcernedFilterUpdateWhenRemoving() {
 		TestData data = new TestData();
 
 		// Do the tests
